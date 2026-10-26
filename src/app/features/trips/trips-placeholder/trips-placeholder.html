@@ -1,0 +1,9 @@
+<section class="trips">
+  <h1 class="trips__title">Tablero de viajes</h1>
+  @if (user(); as current) {
+    <p class="trips__session">
+      Sesión iniciada como <strong>{{ current.email }}</strong>, con el rol {{ roleLabel() }}.
+    </p>
+  }
+  <p class="trips__note">El listado de viajes está en construcción.</p>
+</section>
