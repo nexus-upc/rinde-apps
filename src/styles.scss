@@ -1,1 +1,52 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --color-primary: #1d4ed8;
+  --color-primary-soft: #eff6ff;
+  --color-primary-tint: #dbeafe;
+  --color-error: #b91c1c;
+  --color-text: #111827;
+  --color-text-muted: #4b5563;
+  --color-border: #e5e7eb;
+  --color-surface-muted: #f5f7fa;
+  --font-sans: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, monospace;
+}
+
+html,
+body {
+  margin: 0;
+  background: #ffffff;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.button {
+  padding: 10px 16px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &--primary {
+    background: var(--color-primary);
+    color: #ffffff;
+  }
+
+  &--ghost {
+    border-color: var(--color-border);
+    background: #ffffff;
+    color: var(--color-text);
+
+    &:hover {
+      background: var(--color-surface-muted);
+    }
+  }
+}
