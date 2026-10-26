@@ -1,6 +1,6 @@
 <div class="preview">
   <aside class="preview__sidebar">
-    <p class="preview__brand">Rinde</p>
+    <app-brand-mark class="preview__brand" [size]="16" />
     <ul class="preview__menu">
       @for (item of menu; track item; let first = $first) {
         <li class="preview__item" [class.preview__item--active]="first">{{ item }}</li>

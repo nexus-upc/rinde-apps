@@ -45,14 +45,12 @@ $screen-height: 640px;
 
 .preview__sidebar {
   padding: 24px 16px;
-  background: var(--arc-side);
+  background: var(--arc-bg);
 }
 
 .preview__brand {
+  display: inline-flex;
   margin: 0 8px 24px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 24px;
 }
 
 .preview__menu {
@@ -103,7 +101,11 @@ $screen-height: 640px;
   line-height: 20px;
 }
 
+// Tarjeta angosta a la izquierda: la cifra queda dentro del recorte del bloque.
 .preview__band {
+  justify-self: start;
+  box-sizing: border-box;
+  width: 240px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;

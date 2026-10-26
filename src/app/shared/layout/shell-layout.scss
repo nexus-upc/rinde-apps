@@ -1,4 +1,4 @@
-// Marco de la aplicación: menú lateral en --arc-side, sin línea que lo separe; la barra superior se integra con la página.
+// Marco de la aplicación: menú lateral y barra superior sobre el mismo fondo que la página, sin líneas.
 $sidebar-width: 232px;
 
 .shell {
@@ -15,15 +15,11 @@ $sidebar-width: 232px;
   box-sizing: border-box;
   width: $sidebar-width;
   padding: 24px 16px;
-  background: var(--arc-side);
+  background: var(--arc-bg);
 }
 
 .shell__brand {
   margin: 0 8px 32px;
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 24px;
-  letter-spacing: -0.01em;
 }
 
 .shell__link {
@@ -38,7 +34,7 @@ $sidebar-width: 232px;
   text-decoration: none;
 
   &:hover {
-    background: color-mix(in srgb, var(--arc-side) 94%, var(--arc-ink));
+    background: var(--arc-surface);
   }
 
   &--active {

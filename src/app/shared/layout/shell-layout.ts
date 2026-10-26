@@ -1,11 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
+import { BrandMark } from '../brand/brand-mark/brand-mark';
 
 /** Marco de las pantallas protegidas: barra lateral, barra superior y contenido. */
 @Component({
   selector: 'app-shell-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark],
   templateUrl: './shell-layout.html',
   styleUrl: './shell-layout.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
