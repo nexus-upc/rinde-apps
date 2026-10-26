@@ -13,7 +13,8 @@ export const routes: Routes = [
   },
   {
     path: 'verify-email',
-    loadComponent: () => import('./features/auth/verify-email/verify-email').then((m) => m.VerifyEmail),
+    loadComponent: () =>
+      import('./features/auth/verify-email/verify-email').then((m) => m.VerifyEmail),
   },
   {
     path: 'recover',
@@ -37,6 +38,12 @@ export const routes: Routes = [
     loadComponent: () => import('./shared/layout/shell-layout').then((m) => m.ShellLayout),
     children: [
       {
+        path: 'subscription',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/subscriptions/subscription-page').then((m) => m.SubscriptionPage),
+      },
+      {
         path: 'trips',
         loadComponent: () =>
           import('./features/trips/trips-placeholder/trips-placeholder').then(
@@ -46,7 +53,8 @@ export const routes: Routes = [
       {
         path: 'users',
         canActivate: [adminGuard],
-        loadComponent: () => import('./features/users/users-page/users-page').then((m) => m.UsersPage),
+        loadComponent: () =>
+          import('./features/users/users-page/users-page').then((m) => m.UsersPage),
       },
       { path: '', pathMatch: 'full', redirectTo: 'trips' },
     ],

@@ -6,7 +6,15 @@
         Tablero de viajes
       </a>
       @if (isAdmin()) {
-        <a class="shell__link arc-tap" routerLink="/users" routerLinkActive="shell__link--active">Usuarios</a>
+        <a class="shell__link arc-tap" routerLink="/users" routerLinkActive="shell__link--active"
+          >Usuarios</a
+        >
+        <a
+          class="shell__link arc-tap"
+          routerLink="/subscription"
+          routerLinkActive="shell__link--active"
+          >Suscripción</a
+        >
       }
     </nav>
   </aside>
@@ -24,7 +32,9 @@
           <span class="shell__role">{{ roleLabel() }}</span>
         }
       </div>
-      <button class="shell__signout text-link" type="button" (click)="signOut()">Cerrar sesión</button>
+      <button class="shell__signout text-link" type="button" (click)="signOut()">
+        Cerrar sesión
+      </button>
     </header>
 
     <main class="shell__content">

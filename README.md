@@ -2,7 +2,9 @@
 
 Aplicación web de RINDE by NEXUS para el administrador y el responsable de operaciones. Consume la API a través del gateway (`rinde-gateway`, puerto 8000). Está hecha con Angular 22, componentes standalone y SCSS.
 
-Este repositorio contiene el primer avance del Sprint 2: pantalla de ingreso (US09), marco de la aplicación con barra lateral y barra superior, y sesión con JWT. La página "Tablero de viajes" es provisional y se completa en la tarea S2-11.
+Incluye registro, verificación de correo, inicio de sesión, recuperación de contraseña e invitaciones
+(de US08 a US11), administración de usuarios y la pantalla de suscripción (de US38 a US40).
+La página "Tablero de viajes" es provisional y se completa en la tarea S2-11.
 
 ## Requisitos
 
@@ -44,7 +46,9 @@ src/
   environments/        Dirección de la API.
   app/
     core/auth/         AuthService, interceptor HTTP, guard de sesión y lectura de los claims del JWT.
-    features/auth/     Pantalla de ingreso (sign-in).
+    features/auth/     Registro, acceso, verificación, recuperación e invitaciones.
+    features/users/    Administración de usuarios.
+    features/subscriptions/  Planes, vigencia y checkout simulado.
     features/trips/    Tablero de viajes provisional (protegido).
     shared/layout/     Marco de la aplicación: barra lateral, barra superior y cierre de sesión.
     app.routes.ts      Rutas públicas y protegidas.
@@ -55,7 +59,8 @@ src/
 - Al ingresar, `POST /api/v1/auth/sign-in` devuelve `accessToken`. El token se guarda en `sessionStorage` bajo la clave `rinde.accessToken`, así que la sesión dura lo que dura la pestaña.
 - El interceptor agrega `Authorization: Bearer <token>` a las peticiones dirigidas a `apiBaseUrl`.
 - El guard lleva a `/sign-in` a quien no tenga un token vigente. Un token vencido se descarta al cargar la aplicación.
-- La interfaz lee el correo y el rol del payload del token para mostrarlos. No verifica la firma, porque esa comprobación la hacen el gateway y los servicios.
+- La interfaz lee el rol del token y consulta `/api/v1/users/me` para mostrar el nombre y la empresa.
+  La firma del token la verifican el gateway y los servicios.
 - Los errores del ingreso muestran el campo `detail` del ProblemDetails del backend, por ejemplo "El correo o la contraseña son incorrectos.".
 
 ## Estilo
@@ -63,3 +68,19 @@ src/
 Se usa el estilo Arcadia, tema claro Piedra. Los tokens están en `src/styles/_tokens.scss` con el prefijo `--arc-`, y los componentes solo los usan: ningún color hexadecimal fuera de ese archivo. La fuente es DM Sans Variable, servida desde el paquete `@fontsource-variable/dm-sans` (sin CDN). Los títulos pesan 600 y el resto, 500 como máximo.
 
 Desde 1100 px, el acceso tiene dos columnas, con una vista decorativa del Inicio que no recibe foco y no se monta en pantallas menores. El menú lateral va sobre el mismo fondo que la página (`--arc-bg`), sin línea divisoria, y el rojo `--arc-danger` se reserva para los errores.
+
+## Suscripción
+
+El administrador entra por `/subscription`. La página carga el catálogo y la suscripción actual
+desde el gateway; no guarda el identificador de la suscripción en el navegador. Permite elegir
+un plan, retomar un pago pendiente, revisar la vigencia y renovar. Los errores conservan el plan
+ya guardado para que un reintento del checkout no cree otra suscripción.
+
+Los pagos son simulados y no solicitan datos de tarjeta. El servidor decide si permite confirmar
+o rechazar desde la interfaz mediante `RINDE_BILLING_SIMULATION_ENABLED=true`, únicamente en
+el entorno de pruebas. Si no está habilitado, la página muestra el pago pendiente de confirmación.
+La clave HMAC del webhook permanece en el servidor y nunca se envía a Angular.
+
+El monolito necesita `RINDE_IAM_REMOTE_ENABLED=true` e `IAM_SERVICE_URL` para consultar la empresa
+en IAM separado. Notifications recibe los eventos en segundo plano: todavía no hay un buzón
+de avisos en la web ni un proveedor push real.
