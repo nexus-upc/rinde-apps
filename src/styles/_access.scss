@@ -1,0 +1,72 @@
+// Piezas del acceso que viven dentro de cada página proyectada en AccessLayout.
+.access-stage {
+  display: grid;
+  gap: 20px;
+}
+
+.access__header {
+  display: grid;
+  gap: 8px;
+}
+
+.access__lead {
+  overflow-wrap: anywhere;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.access__form {
+  display: grid;
+  gap: 20px;
+}
+
+.access__footer {
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.access__stack {
+  display: grid;
+  gap: 12px;
+}
+
+// Progreso del registro: segmentos que se llenan.
+.access__steps {
+  display: grid;
+  gap: 8px;
+  color: var(--arc-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.access__steps-bar {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+
+  span {
+    height: 4px;
+    border-radius: var(--arc-radius-pill);
+    background: var(--arc-surface);
+    transition: background-color var(--arc-dur-base) var(--arc-ease-out);
+
+    &.is-done {
+      background: var(--arc-fill);
+    }
+  }
+}
+
+// Pie del registro: Atrás a la izquierda y la píldora de tinta a la derecha.
+.access__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  .ui-button {
+    min-width: 144px;
+  }
+}
