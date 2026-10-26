@@ -4,7 +4,7 @@ export type UiButtonVariant = 'primary' | 'secondary' | 'ghost';
 
 /** Botón píldora de Arcadia. Mientras carga conserva su ancho y muestra un aro en lugar del texto. */
 @Component({
-  selector: 'button[uiButton]',
+  selector: 'button[uiButton], a[uiButton]',
   template: `
     <span class="ui-button__label"><ng-content /></span>
     @if (loading()) {

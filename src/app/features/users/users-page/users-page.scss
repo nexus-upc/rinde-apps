@@ -1,0 +1,292 @@
+// Lista abierta de Arcadia: filas como superficies redondeadas, 8 entre filas, sin líneas ni caja alrededor.
+.users {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: calc(100dvh - 120px);
+}
+
+.users__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 40px;
+}
+
+.users__heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.users__title {
+  font-size: var(--arc-page-title-size);
+  font-weight: 600;
+  line-height: var(--arc-page-title-line);
+  letter-spacing: -0.02em;
+}
+
+.users__count {
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+// Tarjeta que nace en el sitio para invitar, flotando sobre la página.
+.invite {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--arc-radius-card);
+  background: var(--arc-card);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--arc-shadow) 10%, transparent);
+}
+
+.invite__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.invite__lead {
+  margin: -8px 0 0;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.invite__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.invite__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.users__list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.user-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px 232px 112px;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+  padding: 12px 16px;
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-surface);
+  transition: background-color var(--arc-dur-fast) var(--arc-ease-out);
+
+  &.is-disabled .user-row__text {
+    opacity: 0.6;
+  }
+}
+
+@media (hover: hover) {
+  .user-row:not(.user-row--skeleton):hover {
+    background: color-mix(in srgb, var(--arc-surface) 95%, var(--arc-ink));
+  }
+}
+
+.user-row__who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.user-row__avatar {
+  display: grid;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--arc-fill);
+  color: var(--arc-on-fill);
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.user-row__text {
+  display: grid;
+  min-width: 0;
+}
+
+.user-row__name,
+.user-row__email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-row__name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.user-row__you {
+  color: var(--arc-muted);
+  font-weight: 400;
+}
+
+.user-row__email {
+  color: var(--arc-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.user-row__role {
+  padding: 0 12px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.user-row__select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-bg);
+  color: var(--arc-ink);
+  font-size: 14px;
+  font-weight: 500;
+
+  &:focus-visible {
+    border-color: var(--arc-accent);
+    outline: 0;
+  }
+
+  &:disabled {
+    color: var(--arc-subtle);
+    cursor: not-allowed;
+  }
+}
+
+.user-row__action {
+  justify-self: end;
+  min-height: 40px;
+  font-size: 14px;
+}
+
+.status-pill {
+  justify-self: start;
+  padding: 4px 10px;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-bg);
+  color: var(--arc-muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+
+  &[data-status='ACTIVE'] {
+    background: var(--arc-success-bg);
+    color: var(--arc-success);
+  }
+
+  &[data-status='DISABLED'] {
+    background: var(--arc-danger-bg);
+    color: var(--arc-danger);
+  }
+}
+
+// Esqueleto de carga con el mismo alto de una fila.
+.skeleton {
+  display: block;
+  height: 16px;
+  border-radius: var(--arc-radius-pill);
+  background: color-mix(in srgb, var(--arc-surface) 90%, var(--arc-ink));
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+
+  &--name {
+    width: 40%;
+  }
+
+  &--pill {
+    width: 80px;
+  }
+}
+
+@keyframes skeleton-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+// Vacío y error centrados entre la cabecera y el borde inferior, con su disco.
+.users__state {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.users__disc {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--arc-surface);
+}
+
+.users__state-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.users__state-text {
+  margin: 0 0 8px;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+@media (pointer: coarse) {
+  .user-row__select,
+  .user-row__action {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 900px) {
+  .invite__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 8px;
+  }
+
+  .user-row__select,
+  .user-row__role {
+    grid-column: 1;
+  }
+}

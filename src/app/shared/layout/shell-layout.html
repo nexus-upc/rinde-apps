@@ -5,13 +5,21 @@
       <a class="shell__link arc-tap" routerLink="/trips" routerLinkActive="shell__link--active">
         Tablero de viajes
       </a>
+      @if (isAdmin()) {
+        <a class="shell__link arc-tap" routerLink="/users" routerLinkActive="shell__link--active">Usuarios</a>
+      }
     </nav>
   </aside>
 
   <div class="shell__main">
     <header class="shell__topbar">
       <div class="shell__session">
-        <span class="shell__email">{{ user()?.email }}</span>
+        @if (profile(); as current) {
+          <span class="shell__name">{{ current.fullName }}</span>
+          <span class="shell__tenant">{{ current.tenant.tradeName }}</span>
+        } @else {
+          <span class="shell__email">{{ user()?.email }}</span>
+        }
         @if (roleLabel()) {
           <span class="shell__role">{{ roleLabel() }}</span>
         }
@@ -22,5 +30,6 @@
     <main class="shell__content">
       <router-outlet />
     </main>
+    <app-toasts />
   </div>
 </div>
