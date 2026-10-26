@@ -1,0 +1,77 @@
+<section class="users">
+  <app-page-header title="Usuarios" [count]="store.state() === 'ready' ? store.countLabel() : ''">
+    @if (!store.inviting()) {
+      <button
+        #inviteTrigger
+        uiButton
+        type="button"
+        [disabled]="store.state() !== 'ready'"
+        (click)="store.openInvite()"
+      >
+        Invitar usuario
+      </button>
+    }
+  </app-page-header>
+  @if (store.inviting()) {
+    <app-invite-user-form
+      [pending]="store.inviteAction.pending()"
+      [error]="store.inviteAction.error()"
+      (submitted)="store.invite($event)"
+      (cancelled)="closeInvite()"
+    />
+  }
+  @switch (store.state()) {
+    @case ('loading') {
+      <app-user-list [loading]="true" />
+    }
+    @case ('error') {
+      <app-state-panel
+        title="No se pudo cargar la lista"
+        [message]="store.error() ?? 'Revisa tu conexión e inténtalo otra vez.'"
+        [error]="true"
+        actionLabel="Reintentar"
+        (action)="store.load()"
+        ><svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 8v5M12 16h.01" /></svg
+      ></app-state-panel>
+    }
+    @default {
+      @if (store.users().length === 0) {
+        <app-state-panel
+          title="Todavía no hay usuarios"
+          message="Invita a tus responsables de operaciones y conductores."
+          ><svg
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.8"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="9" cy="8" r="3.5" />
+            <path d="M2.5 19a6.5 6.5 0 0 1 13 0M17 8v6M14 11h6" /></svg
+        ></app-state-panel>
+      } @else {
+        <app-user-list
+          [users]="store.users()"
+          [currentEmail]="store.currentEmail()"
+          [busyId]="store.busyId()"
+          (roleChange)="store.changeRole($event.user, $event.role)"
+          (disableRequested)="store.disable($event)"
+        />
+      }
+    }
+  }
+</section>

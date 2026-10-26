@@ -6,7 +6,12 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
   template: `
     <h1 class="rise-title" [attr.id]="titleId()" [attr.aria-label]="text()">
       @for (word of words(); track $index) {
-        <span class="arc-entrance-word" aria-hidden="true" [style.animation-delay.ms]="$index * 70">{{ word }}</span>{{ ' ' }}
+        <span
+          class="arc-entrance-word"
+          aria-hidden="true"
+          [style.animation-delay.ms]="$index * 70"
+          >{{ word }}</span
+        >{{ ' ' }}
       }
     </h1>
   `,

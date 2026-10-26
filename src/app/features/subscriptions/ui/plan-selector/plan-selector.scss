@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.subscription__plans {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.subscription__plans legend {
+  padding: 0 0 16px;
+  font-weight: 500;
+}
+.subscription__plan {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  min-height: 88px;
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-surface);
+  cursor: pointer;
+}
+.subscription__plan input {
+  margin: 0;
+  width: 20px;
+  height: 20px;
+  accent-color: var(--arc-ink);
+}
+.subscription__plan.is-selected {
+  outline: 1px solid var(--arc-muted);
+  outline-offset: -1px;
+}
+.subscription__plan:focus-within {
+  outline: 2px solid var(--arc-accent);
+  outline-offset: 2px;
+}
+.subscription__plan-info {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  color: var(--arc-muted);
+}
+.subscription__plan-name {
+  color: var(--arc-ink);
+  font-size: 16px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.subscription__price {
+  display: grid;
+  gap: 8px;
+  text-align: right;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.subscription__price > span {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--arc-muted);
+}
+@media (hover: hover) {
+  .subscription__plan:hover {
+    background: color-mix(in srgb, var(--arc-surface) 95%, var(--arc-ink));
+  }
+}
+@media (max-width: 760px) {
+  .subscription__plan {
+    padding: 16px;
+    gap: 12px;
+  }
+}

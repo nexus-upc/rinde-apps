@@ -1,85 +1,52 @@
-import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
-import { environment } from '../../../environments/environment';
+import { AuthApi } from './auth-api';
 import { AuthenticationResponse, ROLE_LABELS, SessionUser, SignInRequest } from './auth.models';
 import { readTokenClaims } from './jwt-payload';
+import { SessionStorage } from './session-storage';
 
-const TOKEN_KEY = 'rinde.accessToken';
-
-/** Inicio y cierre de sesión. El token vive en sessionStorage, así que dura lo que la pestaña. */
+/** Sesión global. El cliente lee los claims; el servidor valida su firma y sus permisos. */
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http = inject(HttpClient);
-  private readonly token = signal<string | null>(loadValidToken());
-
+  private readonly api = inject(AuthApi);
+  private readonly storage = inject(SessionStorage);
+  private readonly token = signal(this.restore());
+  readonly accessToken = this.token.asReadonly();
   readonly isAuthenticated = computed(() => this.token() !== null);
-
   readonly user = computed<SessionUser | null>(() => {
-    const token = this.token();
-    const claims = token ? readTokenClaims(token) : null;
+    const value = this.token();
+    const claims = value ? readTokenClaims(value) : null;
     return claims?.email && claims.role ? { email: claims.email, role: claims.role } : null;
   });
-
   readonly roleLabel = computed(() => {
     const role = this.user()?.role;
     return role ? (ROLE_LABELS[role] ?? role) : '';
   });
-
   signIn(credentials: SignInRequest): Observable<AuthenticationResponse> {
-    return this.http
-      .post<AuthenticationResponse>(`${environment.apiBaseUrl}/api/v1/auth/sign-in`, credentials)
-      .pipe(
-        tap((response) => {
-          writeStoredToken(response.accessToken);
-          this.token.set(response.accessToken);
-        }),
-      );
+    return this.api.signIn(credentials).pipe(
+      tap((response) => {
+        this.storage.write(response.accessToken);
+        this.token.set(response.accessToken);
+      }),
+    );
   }
-
   signOut(): void {
-    removeStoredToken();
+    this.storage.clear();
     this.token.set(null);
   }
-
   getToken(): string | null {
+    const value = this.token();
+    if (value && !this.valid(value)) this.signOut();
     return this.token();
   }
-}
-
-function loadValidToken(): string | null {
-  const token = readStoredToken();
-  if (!token) {
+  private restore(): string | null {
+    const value = this.storage.read();
+    if (!value || this.valid(value)) return value;
+    this.storage.clear();
     return null;
   }
-  const expiresAt = readTokenClaims(token)?.exp;
-  if (expiresAt === undefined || expiresAt * 1000 <= Date.now()) {
-    removeStoredToken();
-    return null;
-  }
-  return token;
-}
-
-function readStoredToken(): string | null {
-  try {
-    return sessionStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function writeStoredToken(token: string): void {
-  try {
-    sessionStorage.setItem(TOKEN_KEY, token);
-  } catch {
-    // Sin almacenamiento disponible, la sesión dura solo mientras la aplicación esté abierta.
-  }
-}
-
-function removeStoredToken(): void {
-  try {
-    sessionStorage.removeItem(TOKEN_KEY);
-  } catch {
-    // Nada que limpiar si el almacenamiento no está disponible.
+  private valid(token: string): boolean {
+    const expiration = readTokenClaims(token)?.exp;
+    return expiration !== undefined && expiration * 1000 > Date.now();
   }
 }

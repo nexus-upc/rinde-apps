@@ -1,60 +1,39 @@
 import { Routes } from '@angular/router';
-import { adminGuard } from './core/auth/admin.guard';
-import { authGuard } from './core/auth/auth.guard';
+import { adminGuard } from '@core/auth/admin.guard';
+import { authGuard } from '@core/auth/auth.guard';
 
 export const routes: Routes = [
   {
-    path: 'sign-in',
-    loadComponent: () => import('./features/auth/sign-in/sign-in').then((m) => m.SignIn),
-  },
-  {
-    path: 'register',
-    loadComponent: () => import('./features/auth/register/register').then((m) => m.Register),
-  },
-  {
-    path: 'verify-email',
-    loadComponent: () =>
-      import('./features/auth/verify-email/verify-email').then((m) => m.VerifyEmail),
-  },
-  {
-    path: 'recover',
-    loadComponent: () => import('./features/auth/recover/recover').then((m) => m.Recover),
-  },
-  {
-    path: 'reset-password',
-    data: { mode: 'reset' },
-    loadComponent: () =>
-      import('./features/auth/define-password/define-password').then((m) => m.DefinePassword),
-  },
-  {
-    path: 'accept-invitation',
-    data: { mode: 'invitation' },
-    loadComponent: () =>
-      import('./features/auth/define-password/define-password').then((m) => m.DefinePassword),
+    path: '',
+    loadChildren: () =>
+      import('./features/iam/iam.routes').then((module) => module.IAM_ACCESS_ROUTES),
   },
   {
     path: '',
     canActivate: [authGuard],
-    loadComponent: () => import('./shared/layout/shell-layout').then((m) => m.ShellLayout),
+    canActivateChild: [authGuard],
+    loadComponent: () => import('./layout/shell-layout').then((module) => module.ShellLayout),
     children: [
       {
         path: 'subscription',
         canActivate: [adminGuard],
-        loadComponent: () =>
-          import('./features/subscriptions/subscription-page').then((m) => m.SubscriptionPage),
-      },
-      {
-        path: 'trips',
-        loadComponent: () =>
-          import('./features/trips/trips-placeholder/trips-placeholder').then(
-            (m) => m.TripsPlaceholder,
+        loadChildren: () =>
+          import('./features/subscriptions/subscriptions.routes').then(
+            (module) => module.SUBSCRIPTION_ROUTES,
           ),
       },
       {
         path: 'users',
         canActivate: [adminGuard],
+        loadChildren: () =>
+          import('./features/iam/iam.routes').then((module) => module.IAM_USER_ROUTES),
+      },
+      {
+        path: 'trips',
         loadComponent: () =>
-          import('./features/users/users-page/users-page').then((m) => m.UsersPage),
+          import('./features/trips/trips-placeholder/trips-placeholder').then(
+            (module) => module.TripsPlaceholder,
+          ),
       },
       { path: '', pathMatch: 'full', redirectTo: 'trips' },
     ],

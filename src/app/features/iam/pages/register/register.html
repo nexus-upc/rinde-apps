@@ -1,0 +1,193 @@
+<app-access-layout>
+  @if (step(); as current) {
+    <div class="access-stage arc-entrance-stage">
+      @if (current === 'sent') {
+        <header class="access__header">
+          <app-rise-title text="Revisa tu correo" />
+          <p class="access__lead">
+            Enviamos un enlace a {{ form.controls.administratorEmail.value }} para confirmar la
+            empresa {{ form.controls.tradeName.value }}. Ábrelo para activar la cuenta.
+          </p>
+        </header>
+        <a uiButton block variant="secondary" routerLink="/sign-in">Volver a iniciar sesión</a>
+      } @else {
+        <div class="access__steps">
+          <span>Paso {{ stepNumber() }} de 4</span>
+          <span class="access__steps-bar" aria-hidden="true">
+            @for (index of [1, 2, 3, 4]; track index) {
+              <span [class.is-done]="index <= stepNumber()"></span>
+            }
+          </span>
+        </div>
+
+        <form class="access__form" [formGroup]="form" (ngSubmit)="next()" novalidate>
+          @switch (current) {
+            @case (1) {
+              <header class="access__header">
+                <app-rise-title text="Crea la cuenta de tu empresa" />
+                <p class="access__lead">Con ella registrarás tus viajes, tu flota y tus gastos.</p>
+              </header>
+              <div class="field">
+                <label class="field__label" for="tradeName">Nombre comercial</label>
+                <input
+                  appAutoFocus
+                  id="tradeName"
+                  class="field__input"
+                  formControlName="tradeName"
+                  autocomplete="organization"
+                  maxlength="120"
+                  placeholder="Transportes Andes SAC"
+                  [class.field__input--invalid]="isInvalid('tradeName')"
+                  [attr.aria-invalid]="isInvalid('tradeName') || null"
+                  [attr.aria-describedby]="isInvalid('tradeName') ? 'tradeName-error' : null"
+                />
+                @if (isInvalid('tradeName')) {
+                  <p id="tradeName-error" class="field__error">Ingrese el nombre de la empresa.</p>
+                }
+              </div>
+              <div class="field">
+                <label class="field__label" for="ruc">RUC</label>
+                <input
+                  id="ruc"
+                  class="field__input"
+                  formControlName="ruc"
+                  inputmode="numeric"
+                  maxlength="11"
+                  placeholder="20123456789"
+                  [class.field__input--invalid]="isInvalid('ruc')"
+                  [attr.aria-invalid]="isInvalid('ruc') || null"
+                  [attr.aria-describedby]="isInvalid('ruc') ? 'ruc-error' : null"
+                />
+                @if (isInvalid('ruc')) {
+                  <p id="ruc-error" class="field__error">El RUC debe tener 11 dígitos numéricos.</p>
+                }
+              </div>
+            }
+            @case (2) {
+              <header class="access__header">
+                <app-rise-title text="¿Cómo te llamas?" />
+                <p class="access__lead">Serás el administrador de la empresa.</p>
+              </header>
+              <div class="field">
+                <label class="field__label" for="administratorFullName">Nombre completo</label>
+                <input
+                  appAutoFocus
+                  id="administratorFullName"
+                  class="field__input"
+                  formControlName="administratorFullName"
+                  autocomplete="name"
+                  maxlength="150"
+                  [class.field__input--invalid]="isInvalid('administratorFullName')"
+                  [attr.aria-invalid]="isInvalid('administratorFullName') || null"
+                  [attr.aria-describedby]="
+                    isInvalid('administratorFullName') ? 'administratorFullName-error' : null
+                  "
+                />
+                @if (isInvalid('administratorFullName')) {
+                  <p id="administratorFullName-error" class="field__error">
+                    Ingrese su nombre completo.
+                  </p>
+                }
+              </div>
+            }
+            @case (3) {
+              <header class="access__header">
+                <app-rise-title [text]="firstName() ? 'Hola, ' + firstName() : 'Tu correo'" />
+                <p class="access__lead">
+                  Lo usarás para iniciar sesión y recibir los avisos de la empresa.
+                </p>
+              </header>
+              <div class="field">
+                <label class="field__label" for="administratorEmail">Correo electrónico</label>
+                <input
+                  appAutoFocus
+                  id="administratorEmail"
+                  class="field__input"
+                  type="email"
+                  formControlName="administratorEmail"
+                  autocomplete="email"
+                  maxlength="150"
+                  placeholder="nombre@empresa.pe"
+                  [class.field__input--invalid]="isInvalid('administratorEmail')"
+                  [attr.aria-invalid]="isInvalid('administratorEmail') || null"
+                  [attr.aria-describedby]="
+                    isInvalid('administratorEmail') ? 'administratorEmail-error' : null
+                  "
+                />
+                @if (isInvalid('administratorEmail')) {
+                  <p id="administratorEmail-error" class="field__error">
+                    Ingrese un correo electrónico válido.
+                  </p>
+                }
+              </div>
+            }
+            @case (4) {
+              <header class="access__header">
+                <app-rise-title text="Crea tu contraseña" />
+                <p class="access__lead">Al menos 8 caracteres.</p>
+              </header>
+              @if (errorMessage(); as message) {
+                <p class="form-alert" role="alert">{{ message }}</p>
+              }
+              <!-- Copia oculta del correo para que el gestor de contraseñas asocie la cuenta. -->
+              <input
+                class="visually-hidden"
+                type="email"
+                autocomplete="username"
+                [value]="form.controls.administratorEmail.value"
+                tabindex="-1"
+                aria-hidden="true"
+                readonly
+              />
+              <div class="field">
+                <label class="field__label" for="password">Contraseña</label>
+                <input
+                  appAutoFocus
+                  id="password"
+                  class="field__input"
+                  type="password"
+                  formControlName="password"
+                  autocomplete="new-password"
+                  maxlength="72"
+                  [class.field__input--invalid]="isInvalid('password')"
+                  [attr.aria-invalid]="isInvalid('password') || null"
+                  [attr.aria-describedby]="isInvalid('password') ? 'password-error' : null"
+                />
+                @if (isInvalid('password')) {
+                  <p id="password-error" class="field__error">
+                    La contraseña debe tener al menos 8 caracteres.
+                  </p>
+                }
+              </div>
+            }
+          }
+
+          <div class="access__nav">
+            @if (current !== 1) {
+              <button
+                uiButton
+                variant="ghost"
+                type="button"
+                [disabled]="loading()"
+                (click)="back()"
+              >
+                Atrás
+              </button>
+            } @else {
+              <span></span>
+            }
+            <button uiButton type="submit" [loading]="loading()" [disabled]="loading()">
+              {{ current === 4 ? (loading() ? 'Creando' : 'Crear mi cuenta') : 'Siguiente' }}
+            </button>
+          </div>
+        </form>
+
+        @if (current === 1) {
+          <p class="access__footer">
+            ¿Ya tienes cuenta? <a class="text-link" routerLink="/sign-in">Iniciar sesión</a>
+          </p>
+        }
+      }
+    </div>
+  }
+</app-access-layout>

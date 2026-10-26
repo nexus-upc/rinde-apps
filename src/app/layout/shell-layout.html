@@ -1,0 +1,45 @@
+<div class="shell">
+  <a class="shell__skip" href="#workspace-content">Saltar al contenido</a>
+  <aside class="shell__sidebar">
+    <app-brand-mark class="shell__brand" />
+    <nav class="shell__nav" aria-label="Principal">
+      <a class="shell__link arc-tap" routerLink="/trips" routerLinkActive="shell__link--active">
+        Tablero de viajes
+      </a>
+      @if (isAdmin()) {
+        <a class="shell__link arc-tap" routerLink="/users" routerLinkActive="shell__link--active"
+          >Usuarios</a
+        >
+        <a
+          class="shell__link arc-tap"
+          routerLink="/subscription"
+          routerLinkActive="shell__link--active"
+          >Suscripción</a
+        >
+      }
+    </nav>
+  </aside>
+
+  <div class="shell__main">
+    <header class="shell__topbar">
+      <div class="shell__session">
+        @if (profile(); as current) {
+          <span class="shell__name">{{ current.fullName }}</span>
+          <span class="shell__tenant">{{ current.tenant.tradeName }}</span>
+        } @else {
+          <span class="shell__email">{{ user()?.email }}</span>
+        }
+        @if (roleLabel()) {
+          <span class="shell__role">{{ roleLabel() }}</span>
+        }
+      </div>
+      <button class="shell__signout text-link" type="button" (click)="signOut()">
+        Cerrar sesión
+      </button>
+    </header>
+
+    <main id="workspace-content" class="shell__content" tabindex="-1">
+      <router-outlet />
+    </main>
+  </div>
+</div>

@@ -1,20 +1,20 @@
 /** Credenciales que se envían a POST /api/v1/auth/sign-in. */
 export interface SignInRequest {
-  email: string;
-  password: string;
+  readonly email: string;
+  readonly password: string;
 }
 
 /** Respuesta de IAM al iniciar sesión: el token y sus segundos de vigencia. */
 export interface AuthenticationResponse {
-  accessToken: string;
-  tokenType: string;
-  expiresInSeconds: number;
+  readonly accessToken: string;
+  readonly tokenType: string;
+  readonly expiresInSeconds: number;
 }
 
 /** Datos del usuario que el token lleva en sus claims. */
 export interface SessionUser {
-  email: string;
-  role: string;
+  readonly email: string;
+  readonly role: string;
 }
 
 /** Nombres visibles de los roles que devuelve IAM. */

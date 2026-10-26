@@ -15,7 +15,7 @@ La página "Tablero de viajes" es provisional y se completa en la tarea S2-11.
 ## Instalación
 
 ```
-npm install
+npm ci
 ```
 
 ## Ejecución
@@ -38,27 +38,27 @@ La dirección de la API está en `src/environments/environment.ts` (`apiBaseUrl`
 | `npm run build` o `ng build` | Compilación de producción en `dist/rinde-web`. |
 | `npm run watch` | Compilación en modo desarrollo, vigilando los cambios. |
 | `npm test` o `ng test --watch=false` | Pruebas unitarias con Vitest. No necesitan navegador. |
+| `npm run check:architecture` | Límites de dependencia, ausencia de ciclos y de HTTP en páginas o vistas. |
+| `npm run check` | Arquitectura, pruebas y build de producción. Ejecutar antes de integrar. |
 
 ## Estructura
 
-```
-src/
-  environments/        Dirección de la API.
-  app/
-    core/auth/         AuthService, interceptor HTTP, guard de sesión y lectura de los claims del JWT.
-    features/auth/     Registro, acceso, verificación, recuperación e invitaciones.
-    features/users/    Administración de usuarios.
-    features/subscriptions/  Planes, vigencia y checkout simulado.
-    features/trips/    Tablero de viajes provisional (protegido).
-    shared/layout/     Marco de la aplicación: barra lateral, barra superior y cierre de sesión.
-    app.routes.ts      Rutas públicas y protegidas.
-```
+| Área | Contenido |
+| --- | --- |
+| `core/` | Sesión, configuración HTTP, acciones asíncronas y avisos globales. |
+| `features/iam/` | Acceso y usuarios, separados en models, data-access, state, pages y ui. |
+| `features/subscriptions/` | Planes, vigencia y checkout, con las mismas capas por funcionalidad. |
+| `features/trips/` | Tablero provisional pendiente de S2-11. |
+| `layout/` | Composición del espacio de trabajo y navegación. |
+| `shared/` | Componentes de presentación, marca y directivas sin conocimiento de la sesión. |
+
+La explicación y las reglas están en [docs/frontend-architecture.md](docs/frontend-architecture.md).
 
 ## Sesión
 
 - Al ingresar, `POST /api/v1/auth/sign-in` devuelve `accessToken`. El token se guarda en `sessionStorage` bajo la clave `rinde.accessToken`, así que la sesión dura lo que dura la pestaña.
 - El interceptor agrega `Authorization: Bearer <token>` a las peticiones dirigidas a `apiBaseUrl`.
-- El guard lleva a `/sign-in` a quien no tenga un token vigente. Un token vencido se descarta al cargar la aplicación.
+- El guard lleva a `/sign-in` a quien no tenga un token vigente. La vigencia se comprueba al recuperar la sesión y antes de usar el token.
 - La interfaz lee el rol del token y consulta `/api/v1/users/me` para mostrar el nombre y la empresa.
   La firma del token la verifican el gateway y los servicios.
 - Los errores del ingreso muestran el campo `detail` del ProblemDetails del backend, por ejemplo "El correo o la contraseña son incorrectos.".

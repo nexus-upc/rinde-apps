@@ -1,0 +1,6 @@
+.users {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  min-height: calc(100dvh - 120px);
+}

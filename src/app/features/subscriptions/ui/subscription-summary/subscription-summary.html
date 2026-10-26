@@ -1,0 +1,40 @@
+<section class="subscription__current" aria-label="Tu suscripción actual">
+  <div class="subscription__current-title">
+    <h2>{{ subscription().plan.name }}</h2>
+    <span class="subscription__status" [class.is-active]="subscription().status === 'ACTIVE'">{{
+      labels[subscription().status]
+    }}</span>
+  </div>
+  <dl class="subscription__details">
+    <div>
+      <dt>Importe mensual</dt>
+      <dd>{{ money(subscription().plan.monthlyPrice) }}</dd>
+    </div>
+    <div>
+      <dt>Unidades incluidas</dt>
+      <dd>Hasta {{ subscription().plan.unitLimit }} vehículos</dd>
+    </div>
+    <div>
+      <dt>Vencimiento</dt>
+      <dd>{{ date(subscription().expiresAt) }}</dd>
+    </div>
+  </dl>
+  @if (subscription().renewalNotice) {
+    <p class="subscription__notice">
+      Tu suscripción está por vencer. Puedes renovarla para mantener el acceso.
+    </p>
+  }
+  @if (subscription().status === 'SUSPENDED' || subscription().status === 'EXPIRED') {
+    <p class="subscription__notice">
+      Renueva tu suscripción para recuperar el acceso a las operaciones.
+    </p>
+  }
+  @if (subscription().latestPaymentStatus === 'REJECTED') {
+    <p class="subscription__error" role="alert">
+      {{
+        subscription().lastPaymentFailureReason ||
+          'El último pago fue rechazado. Puedes intentarlo otra vez.'
+      }}
+    </p>
+  }
+</section>

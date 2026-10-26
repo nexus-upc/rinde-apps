@@ -1,11 +1,16 @@
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { ToastService } from '@core/feedback/toast.service';
+import { Toasts } from '@shared/ui/toasts/toasts';
 
-/** Raíz de la aplicación: solo aloja las rutas. */
+/** Composición raíz: rutas y avisos globales. */
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, Toasts],
   templateUrl: './app.html',
   styleUrl: './app.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class App {}
+export class App {
+  protected readonly toasts = inject(ToastService);
+}
