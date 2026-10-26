@@ -29,7 +29,7 @@ $sidebar-width: 232px;
 .shell__link {
   display: flex;
   align-items: center;
-  height: 40px;
+  min-height: 40px;
   padding: 0 12px;
   border-radius: var(--arc-radius-row);
   color: var(--arc-ink);
@@ -94,6 +94,14 @@ $sidebar-width: 232px;
 
 .shell__content {
   padding: 32px 40px;
+}
+
+// Con puntero táctil, los controles llegan a 44 px aunque se vean más chicos.
+@media (pointer: coarse) {
+  .shell__link,
+  .shell__signout {
+    min-height: 44px;
+  }
 }
 
 @media (max-width: 768px) {
