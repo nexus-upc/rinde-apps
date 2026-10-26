@@ -1,4 +1,6 @@
 @use 'styles/tokens';
+@use 'styles/motion';
+@use 'styles/buttons';
 
 * {
   box-sizing: border-box;
@@ -51,4 +53,14 @@ h1 {
   input:not([type='checkbox']):not([type='radio']) {
     font-size: 16px !important;
   }
+}
+
+// Oculto a la vista, pero presente para el navegador y los gestores de contraseñas.
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

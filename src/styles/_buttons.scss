@@ -1,0 +1,144 @@
+// Botones de Arcadia: píldoras sin borde y enlaces de texto. Una sola píldora de tinta por pantalla.
+.ui-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: var(--arc-radius-pill);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+
+  &.is-loading {
+    cursor: progress;
+  }
+}
+
+.ui-button--block {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+}
+
+@media (pointer: coarse) {
+  .ui-button {
+    min-height: 44px;
+  }
+}
+
+.ui-button__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity var(--arc-dur-fast) var(--arc-ease-out);
+
+  .is-loading & {
+    opacity: 0;
+  }
+}
+
+.ui-button__spinner {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: ui-button-spin 0.7s linear infinite;
+}
+
+@keyframes ui-button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ui-button--primary {
+  border-color: var(--arc-fill);
+  background: var(--arc-fill);
+  color: var(--arc-on-fill);
+
+  &:active:not(:disabled) {
+    background: var(--arc-fill-hover);
+  }
+
+  &:disabled:not(.is-loading) {
+    border-color: var(--arc-disabled-bg);
+    background: var(--arc-disabled-bg);
+    color: var(--arc-disabled-ink);
+  }
+}
+
+.ui-button--secondary {
+  background: var(--arc-surface);
+  color: var(--arc-ink);
+
+  &:active:not(:disabled) {
+    background: color-mix(in srgb, var(--arc-surface) 92%, var(--arc-ink));
+  }
+}
+
+.ui-button--ghost {
+  background: transparent;
+  color: var(--arc-ink);
+
+  &:active:not(:disabled) {
+    background: var(--arc-surface);
+  }
+}
+
+// El cambio bajo el cursor solo donde hay un puntero que flota, para que no quede pegado tras tocar.
+@media (hover: hover) {
+  .ui-button--primary:hover:not(:disabled) {
+    background: var(--arc-fill-hover);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--arc-shadow) 18%, transparent);
+  }
+
+  .ui-button--secondary:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--arc-surface) 95%, var(--arc-ink));
+  }
+
+  .ui-button--ghost:hover:not(:disabled) {
+    background: var(--arc-surface);
+  }
+}
+
+// Enlace de texto: sin subrayado, peso 500 y un gris al pasar el cursor.
+.text-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--arc-ink);
+  font-size: inherit;
+  font-weight: 500;
+  line-height: inherit;
+  text-decoration: none;
+  transition: color 0.16s ease;
+
+  &.is-muted {
+    color: var(--arc-muted);
+  }
+
+  &:disabled {
+    color: var(--arc-subtle);
+  }
+}
+
+@media (hover: hover) {
+  .text-link:hover:not(:disabled) {
+    color: var(--arc-muted);
+  }
+
+  .text-link.is-muted:hover:not(:disabled) {
+    color: var(--arc-ink);
+  }
+}
