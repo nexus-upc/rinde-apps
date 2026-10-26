@@ -1,0 +1,210 @@
+<section
+  class="subscription"
+  aria-labelledby="subscription-title"
+  [attr.aria-busy]="state() === 'loading' || busy() || null"
+>
+  <header class="subscription__header">
+    <div>
+      <h1 id="subscription-title">Suscripción</h1>
+      <p class="subscription__lead">El plan y la vigencia de tu empresa.</p>
+    </div>
+    <button
+      class="text-link subscription__link"
+      type="button"
+      (click)="load()"
+      [disabled]="state() === 'loading' || busy()"
+    >
+      Actualizar
+    </button>
+  </header>
+
+  @switch (state()) {
+    @case ('loading') {
+      <div class="subscription__loading" role="status">
+        <span class="visually-hidden">Cargando suscripción</span>
+        @for (item of [1, 2, 3]; track item) {
+          <div class="subscription__skeleton" aria-hidden="true"></div>
+        }
+      </div>
+    }
+    @case ('error') {
+      <div class="subscription__state">
+        <span class="subscription__disc" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <rect x="3" y="5" width="18" height="14" rx="3" />
+            <path d="M3 10h18M7 15h3" />
+          </svg>
+        </span>
+        <h2>No se pudo cargar la suscripción</h2>
+        <p>{{ error() }}</p>
+        <button uiButton variant="secondary" type="button" (click)="load()">Reintentar</button>
+      </div>
+    }
+    @case ('ready') {
+      @if (subscription(); as current) {
+        <section class="subscription__current" aria-label="Tu suscripción actual">
+          <div class="subscription__current-title">
+            <h2>{{ current.plan.name }}</h2>
+            <span class="subscription__status" [class.is-active]="current.status === 'ACTIVE'">{{
+              labels[current.status]
+            }}</span>
+          </div>
+          <dl class="subscription__details">
+            <div>
+              <dt>Importe mensual</dt>
+              <dd>{{ money(current.plan.monthlyPrice) }}</dd>
+            </div>
+            <div>
+              <dt>Unidades incluidas</dt>
+              <dd>Hasta {{ current.plan.unitLimit }} vehículos</dd>
+            </div>
+            <div>
+              <dt>Vencimiento</dt>
+              <dd>{{ date(current.expiresAt) }}</dd>
+            </div>
+          </dl>
+          @if (current.renewalNotice) {
+            <p class="subscription__notice">
+              Tu suscripción está por vencer. Puedes renovarla para mantener el acceso.
+            </p>
+          }
+          @if (current.status === 'SUSPENDED' || current.status === 'EXPIRED') {
+            <p class="subscription__notice">
+              Renueva tu suscripción para recuperar el acceso a las operaciones.
+            </p>
+          }
+          @if (current.latestPaymentStatus === 'REJECTED') {
+            <p class="subscription__error" role="alert">
+              {{
+                current.lastPaymentFailureReason ||
+                  'El último pago fue rechazado. Puedes intentarlo otra vez.'
+              }}
+            </p>
+          }
+        </section>
+      } @else {
+        <div class="subscription__intro">
+          <h2>Elige un plan para empezar</h2>
+          <p>
+            Selecciona la capacidad que necesita tu flota. Podrás revisar el importe antes de
+            confirmar.
+          </p>
+        </div>
+      }
+
+      @if (checkout(); as payment) {
+        <section class="subscription__checkout" aria-labelledby="checkout-title">
+          <div class="subscription__checkout-heading">
+            <div>
+              <h2 id="checkout-title">Revisa tu pago de prueba</h2>
+              <p>No se harán cobros reales ni se pedirán datos de tarjeta.</p>
+            </div>
+            <span class="subscription__amount">{{ money(payment.amount) }}</span>
+          </div>
+          <p>
+            {{ selected()?.name }}. Hasta {{ selected()?.unitLimit }} vehículos por un periodo
+            mensual.
+          </p>
+          @if (actionError()) {
+            <p class="subscription__error" role="alert">{{ actionError() }}</p>
+          }
+          <div class="subscription__actions">
+            @if (payment.confirmationEnabled) {
+              <button
+                uiButton
+                type="button"
+                (click)="simulate('CONFIRMED')"
+                [disabled]="busy()"
+                [loading]="busy()"
+              >
+                Confirmar pago de prueba
+              </button>
+              <button
+                class="text-link subscription__link"
+                type="button"
+                (click)="simulate('REJECTED')"
+                [disabled]="busy()"
+              >
+                Probar rechazo
+              </button>
+            } @else {
+              <p role="status">
+                El pago está pendiente de confirmación. Actualiza la suscripción cuando se procese.
+              </p>
+            }
+            <button
+              class="text-link subscription__link"
+              type="button"
+              (click)="closeCheckout()"
+              [disabled]="busy()"
+            >
+              Volver
+            </button>
+          </div>
+        </section>
+      } @else {
+        @if (plans().length > 0) {
+          <fieldset class="subscription__plans" [disabled]="busy() || pending()">
+            <legend>{{ pending() ? 'Plan pendiente de pago' : 'Planes disponibles' }}</legend>
+            @for (plan of plans(); track plan.planId) {
+              <label
+                class="subscription__plan"
+                [class.is-selected]="selected()?.planId === plan.planId"
+              >
+                <input
+                  type="radio"
+                  name="plan"
+                  [value]="plan.planId"
+                  [checked]="selected()?.planId === plan.planId"
+                  (change)="select(plan.planId)"
+                />
+                <span class="subscription__plan-info"
+                  ><span class="subscription__plan-name">{{ plan.name }}</span
+                  ><span>Hasta {{ plan.unitLimit }} vehículos</span></span
+                >
+                <span class="subscription__price"
+                  >{{ money(plan.monthlyPrice) }}<span>por mes</span></span
+                >
+              </label>
+            }
+          </fieldset>
+        } @else if (!subscription()) {
+          <div class="subscription__state">
+            <h2>No hay planes disponibles</h2>
+            <p>Vuelve a consultar más tarde para elegir tu suscripción.</p>
+          </div>
+        }
+        @if (selected(); as plan) {
+          <div class="subscription__footer">
+            <p>
+              {{
+                pending()
+                  ? 'La selección está guardada. Continúa con el pago pendiente.'
+                  : 'Puedes revisar el pago antes de confirmarlo.'
+              }}
+            </p>
+            @if (actionError()) {
+              <p class="subscription__error" role="alert">{{ actionError() }}</p>
+            }
+            <button
+              uiButton
+              type="button"
+              (click)="preparePayment()"
+              [disabled]="busy()"
+              [loading]="busy()"
+            >
+              {{ actionLabel() }}
+            </button>
+          </div>
+        }
+      }
+    }
+  }
+</section>
