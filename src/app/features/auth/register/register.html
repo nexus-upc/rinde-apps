@@ -92,13 +92,17 @@
             @if (current !== 1) {
               <button uiButton variant="ghost" type="button" [disabled]="loading()" (click)="back()">Atrás</button>
             } @else {
-              <a class="text-link" routerLink="/sign-in">Ya tengo cuenta</a>
+              <span></span>
             }
             <button uiButton type="submit" [loading]="loading()" [disabled]="loading()">
               {{ current === 4 ? (loading() ? 'Creando…' : 'Crear mi cuenta') : 'Siguiente' }}
             </button>
           </div>
         </form>
+
+        @if (current === 1) {
+          <p class="access__footer">¿Ya tienes cuenta? · <a class="text-link" routerLink="/sign-in">Iniciar sesión</a></p>
+        }
       }
     </div>
   }
