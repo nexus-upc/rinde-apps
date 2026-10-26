@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { BrandMark } from '../../../../shared/brand/brand-mark/brand-mark';
 
 /** Estado visual de la fila: en ruta, por liquidar o neutro. */
 type TripTone = 'ok' | 'wait' | 'neutral';
@@ -14,6 +15,7 @@ interface PreviewTrip {
 /** Vista decorativa del Inicio de Rinde con datos sintéticos. No llama a la API, no recibe foco y no se lee como contenido. */
 @Component({
   selector: 'app-entrance-preview',
+  imports: [BrandMark],
   templateUrl: './entrance-preview.html',
   styleUrl: './entrance-preview.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { BrandMark } from '../../../shared/brand/brand-mark/brand-mark';
 import { isWideScreen } from '../../../shared/layout/wide-screen';
 import { EntrancePreview } from './entrance-preview/entrance-preview';
 
@@ -12,7 +13,7 @@ const GENERIC_ERROR = 'No se pudo iniciar sesión. Intente nuevamente.';
 /** Pantalla de ingreso: correo y contraseña contra el gateway, y luego al tablero de viajes. */
 @Component({
   selector: 'app-sign-in',
-  imports: [ReactiveFormsModule, EntrancePreview],
+  imports: [ReactiveFormsModule, BrandMark, EntrancePreview],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
