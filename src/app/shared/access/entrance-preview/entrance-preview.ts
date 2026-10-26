@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { BrandMark } from '../../../../shared/brand/brand-mark/brand-mark';
+import { BrandMark } from '../../brand/brand-mark/brand-mark';
 
 /** Estado visual de la fila: en ruta, por liquidar o neutro. */
 type TripTone = 'ok' | 'wait' | 'neutral';

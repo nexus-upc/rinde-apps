@@ -1,0 +1,25 @@
+<app-access-layout>
+  <div class="access-stage arc-entrance-stage">
+    @if (validLink) {
+      <header class="access__header">
+        <app-rise-title text="Confirma tu correo" />
+        <p class="access__lead">Al confirmarlo, tu empresa quedará activa y podrás iniciar sesión.</p>
+      </header>
+      @if (errorMessage(); as message) {
+        <p class="form-alert" role="alert">{{ message }}</p>
+      }
+      <button uiButton block type="button" [loading]="loading()" [disabled]="loading()" (click)="confirm()">
+        {{ loading() ? 'Confirmando…' : 'Confirmar y activar la cuenta' }}
+      </button>
+      <p class="access__footer">
+        ¿No creaste esta cuenta? · <a class="text-link" routerLink="/sign-in">Ignorar enlace</a>
+      </p>
+    } @else {
+      <header class="access__header">
+        <app-rise-title text="El enlace no está completo" />
+        <p class="access__lead">Abre de nuevo el enlace del correo de verificación, sin cortarlo.</p>
+      </header>
+      <a uiButton block variant="secondary" routerLink="/sign-in">Volver a iniciar sesión</a>
+    }
+  </div>
+</app-access-layout>

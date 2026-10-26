@@ -1,23 +1,27 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { afterNextRender, ChangeDetectionStrategy, Component, inject, Injector, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
-import { BrandMark } from '../../../shared/brand/brand-mark/brand-mark';
-import { isWideScreen } from '../../../shared/layout/wide-screen';
+import { problemMessage } from '../../../core/http/problem-message';
+import { AccessLayout } from '../../../shared/access/access-layout/access-layout';
+import { MailIcon } from '../../../shared/ui/icons/mail-icon';
 import { RiseTitle } from '../../../shared/ui/rise-title/rise-title';
 import { UiButton } from '../../../shared/ui/ui-button/ui-button';
-import { EntrancePreview } from './entrance-preview/entrance-preview';
 
-const CONNECTION_ERROR = 'No se pudo conectar con el servidor. Intente nuevamente.';
 const GENERIC_ERROR = 'No se pudo iniciar sesión. Intente nuevamente.';
+
+/** Avisos que otras pantallas del acceso dejan al volver al ingreso. */
+const NOTICES: Readonly<Record<string, string>> = {
+  verified: 'Tu empresa quedó activa. Ya puedes iniciar sesión.',
+  password: 'Tu contraseña quedó lista. Ya puedes iniciar sesión.',
+  invitation: 'Tu cuenta quedó activa. Ya puedes iniciar sesión.',
+};
 
 /** Pantalla de ingreso por pasos, como Arcadia: elegir el método, luego el correo y la contraseña. */
 @Component({
   selector: 'app-sign-in',
-  imports: [ReactiveFormsModule, BrandMark, EntrancePreview, RiseTitle, UiButton],
+  imports: [ReactiveFormsModule, RouterLink, AccessLayout, MailIcon, RiseTitle, UiButton],
   templateUrl: './sign-in.html',
-  styleUrl: './sign-in.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignIn {
@@ -25,17 +29,17 @@ export class SignIn {
   private readonly router = inject(Router);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly injector = inject(Injector);
+  private readonly query = inject(ActivatedRoute).snapshot.queryParamMap;
 
   protected readonly form = this.fb.group({
-    email: this.fb.control('', [Validators.required, Validators.email]),
+    email: this.fb.control(this.query.get('email') ?? '', [Validators.required, Validators.email]),
     password: this.fb.control('', [Validators.required]),
   });
 
-  /** Desde 1100 px la pantalla tiene dos columnas y muestra la vista decorativa. */
-  protected readonly wide = isWideScreen();
   protected readonly step = signal<'start' | 'email' | 'password'>('start');
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+  protected readonly notice = signal<string | null>(NOTICES[this.query.get('notice') ?? ''] ?? null);
 
   protected goToEmail(): void {
     this.step.set('email');
@@ -65,11 +69,6 @@ export class SignIn {
     this.focusAfterRender('email');
   }
 
-  /** El paso se vuelve a montar, así que el foco se pone después de dibujarlo. */
-  private focusAfterRender(id: 'email' | 'password'): void {
-    afterNextRender(() => document.getElementById(id)?.focus(), { injector: this.injector });
-  }
-
   protected submit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -80,7 +79,7 @@ export class SignIn {
     this.auth.signIn(this.form.getRawValue()).subscribe({
       next: () => this.router.navigateByUrl('/trips'),
       error: (error: unknown) => {
-        this.errorMessage.set(this.messageFor(error));
+        this.errorMessage.set(problemMessage(error, GENERIC_ERROR));
         this.loading.set(false);
       },
     });
@@ -91,15 +90,8 @@ export class SignIn {
     return control.touched && control.invalid;
   }
 
-  /** Usa el detail del ProblemDetails del backend; sin él, un mensaje general. */
-  private messageFor(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return GENERIC_ERROR;
-    }
-    const detail = (error.error as { detail?: unknown } | null)?.detail;
-    if (typeof detail === 'string' && detail.trim() !== '') {
-      return detail;
-    }
-    return error.status === 0 ? CONNECTION_ERROR : GENERIC_ERROR;
+  /** El paso se vuelve a montar, así que el foco se pone después de dibujarlo. */
+  private focusAfterRender(id: 'email' | 'password'): void {
+    afterNextRender(() => document.getElementById(id)?.focus(), { injector: this.injector });
   }
 }

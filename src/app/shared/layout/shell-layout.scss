@@ -22,6 +22,11 @@ $sidebar-width: 232px;
   margin: 0 8px 32px;
 }
 
+.shell__nav {
+  display: grid;
+  gap: 4px;
+}
+
 .shell__link {
   display: flex;
   align-items: center;
@@ -71,6 +76,11 @@ $sidebar-width: 232px;
   color: var(--arc-muted);
   font-size: 14px;
   line-height: 20px;
+}
+
+.shell__name {
+  color: var(--arc-ink);
+  font-weight: 500;
 }
 
 .shell__signout {
