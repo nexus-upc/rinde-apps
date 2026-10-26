@@ -1,76 +1,208 @@
+// Desde 1100 px: columna de acceso de 600 con relleno de 64 y bloque de la derecha a 16 de los bordes.
+// Debajo, una sola columna de 360 centrada, sin montar la vista decorativa.
 .sign-in {
+  position: relative;
   box-sizing: border-box;
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   min-height: 100vh;
-  padding: 16px;
-  place-items: center;
-}
-
-.sign-in__panel {
-  width: 100%;
-  max-width: 380px;
+  min-height: 100dvh;
+  padding: 72px 16px;
+  background: var(--arc-bg);
+  color: var(--arc-ink);
 }
 
 .sign-in__brand {
-  margin: 0 0 24px;
-  font-size: 1rem;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  font-size: 16px;
   font-weight: 600;
-}
-
-.sign-in__title {
-  margin: 0 0 8px;
-  font-size: 1.75rem;
-  font-weight: 600;
+  line-height: 24px;
   letter-spacing: -0.01em;
 }
 
+.sign-in__access {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 360px;
+}
+
+.sign-in__panel {
+  display: grid;
+  gap: 20px;
+}
+
+.sign-in__header {
+  display: grid;
+  gap: 8px;
+}
+
+.sign-in__title {
+  font-size: var(--arc-entrance-title-size);
+  font-weight: 600;
+  line-height: var(--arc-entrance-title-line);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
 .sign-in__lead {
-  margin: 0 0 24px;
-  color: var(--color-text-muted);
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
 }
 
 .sign-in__form {
   display: grid;
-  gap: 16px;
-}
-
-.sign-in__error {
-  margin: 0;
-  color: var(--color-error);
-  font-size: 0.9rem;
+  gap: 20px;
 }
 
 .field {
   display: grid;
-  gap: 6px;
+  gap: 8px;
 }
 
 .field__label {
-  font-size: 0.875rem;
+  font-size: 12px;
   font-weight: 500;
+  line-height: 16px;
 }
 
 .field__input {
-  padding: 10px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: #ffffff;
-  color: var(--color-text);
-  font: inherit;
+  box-sizing: border-box;
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--arc-radius-control);
+  background: var(--arc-surface);
+  color: var(--arc-ink);
+  font-size: 14px;
 
-  &:focus {
-    border-color: var(--color-primary);
-    outline: none;
-    box-shadow: 0 0 0 3px var(--color-primary-tint);
+  &::placeholder {
+    color: var(--arc-subtle);
   }
 
-  &--invalid {
-    border-color: var(--color-error);
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--arc-ink) 4%, var(--arc-surface));
+  }
+
+  &:focus {
+    border-color: var(--arc-accent);
+    outline: 0;
+  }
+
+  &--invalid,
+  &[aria-invalid='true'] {
+    border-color: var(--arc-danger);
   }
 }
 
 .field__error {
-  margin: 0;
-  color: var(--color-error);
-  font-size: 0.8125rem;
+  color: var(--arc-danger);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.sign-in__error {
+  padding: 12px 16px;
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-danger-bg);
+  color: var(--arc-danger);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+// La única píldora de tinta de la pantalla.
+.sign-in__submit {
+  width: 100%;
+  height: 44px;
+  padding: 0 16px;
+  border: 1px solid var(--arc-fill);
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-fill);
+  color: var(--arc-on-fill);
+  font-size: 14px;
+  font-weight: 500;
+
+  &:hover:not(:disabled) {
+    background: var(--arc-fill-hover);
+  }
+
+  &:disabled {
+    border-color: var(--arc-disabled-bg);
+    background: var(--arc-disabled-bg);
+    color: var(--arc-disabled-ink);
+  }
+}
+
+.sign-in__copyright {
+  position: absolute;
+  bottom: 24px;
+  left: 16px;
+  color: var(--arc-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.sign-in__showcase {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  left: 600px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 44px 48px 0;
+  border-radius: var(--arc-radius-block);
+  background: var(--arc-surface);
+}
+
+.sign-in__slogan {
+  position: relative;
+  font-size: var(--arc-showcase-title-size);
+  font-weight: 600;
+  line-height: var(--arc-showcase-title-line);
+  letter-spacing: -0.02em;
+
+  span {
+    display: block;
+    margin-top: 8px;
+    color: var(--arc-muted);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .sign-in {
+    display: block;
+    padding: 0;
+  }
+
+  .sign-in__brand {
+    top: 24px;
+    left: 64px;
+  }
+
+  .sign-in__access {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    max-width: none;
+    min-height: 100dvh;
+    padding: 72px 64px;
+  }
+
+  .sign-in__panel {
+    width: 360px;
+  }
+
+  .sign-in__copyright {
+    bottom: 24px;
+    left: 64px;
+  }
 }

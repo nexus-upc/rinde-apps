@@ -3,6 +3,8 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/auth/auth.service';
+import { isWideScreen } from '../../../shared/layout/wide-screen';
+import { EntrancePreview } from './entrance-preview/entrance-preview';
 
 const CONNECTION_ERROR = 'No se pudo conectar con el servidor. Intente nuevamente.';
 const GENERIC_ERROR = 'No se pudo iniciar sesión. Intente nuevamente.';
@@ -10,7 +12,7 @@ const GENERIC_ERROR = 'No se pudo iniciar sesión. Intente nuevamente.';
 /** Pantalla de ingreso: correo y contraseña contra el gateway, y luego al tablero de viajes. */
 @Component({
   selector: 'app-sign-in',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, EntrancePreview],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,6 +27,8 @@ export class SignIn {
     password: this.fb.control('', [Validators.required]),
   });
 
+  /** Desde 1100 px la pantalla tiene dos columnas y muestra la vista decorativa. */
+  protected readonly wide = isWideScreen();
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
 
