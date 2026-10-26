@@ -1,0 +1,40 @@
+<div class="preview">
+  <aside class="preview__sidebar">
+    <app-brand-mark class="preview__brand" [size]="16" />
+    <ul class="preview__menu">
+      @for (item of menu; track item; let first = $first) {
+        <li class="preview__item" [class.preview__item--active]="first">{{ item }}</li>
+      }
+    </ul>
+  </aside>
+
+  <div class="preview__main">
+    <header class="preview__head">
+      <p class="preview__title">Viajes</p>
+      <p class="preview__date">{{ date }}</p>
+    </header>
+
+    <div class="preview__band">
+      <span>En ruta</span>
+      <strong>{{ onRoad }}</strong>
+    </div>
+
+    <ul class="preview__rows">
+      @for (trip of trips; track trip.code) {
+        <li class="preview__row">
+          <span class="preview__code">{{ trip.code }}</span>
+          <span class="preview__trip">
+            <span class="preview__route">{{ trip.route }}</span>
+            <span class="preview__driver">{{ trip.driver }}</span>
+          </span>
+          <span
+            class="preview__status"
+            [class.preview__status--ok]="trip.tone === 'ok'"
+            [class.preview__status--wait]="trip.tone === 'wait'"
+            >{{ trip.status }}</span
+          >
+        </li>
+      }
+    </ul>
+  </div>
+</div>

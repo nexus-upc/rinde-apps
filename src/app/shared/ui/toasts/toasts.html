@@ -1,0 +1,12 @@
+<div class="toasts">
+  @for (message of messages(); track message.id) {
+    <p
+      class="toast"
+      [attr.role]="message.tone === 'danger' ? 'alert' : 'status'"
+      aria-atomic="true"
+      [class.toast--danger]="message.tone === 'danger'"
+    >
+      {{ message.text }}
+    </p>
+  }
+</div>

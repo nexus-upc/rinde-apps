@@ -1,0 +1,19 @@
+<fieldset class="subscription__plans" [disabled]="busy() || pending()">
+  <legend>{{ pending() ? 'Plan pendiente de pago' : 'Planes disponibles' }}</legend>
+  @for (plan of plans(); track plan.planId) {
+    <label class="subscription__plan" [class.is-selected]="selectedId() === plan.planId">
+      <input
+        type="radio"
+        name="plan"
+        [value]="plan.planId"
+        [checked]="selectedId() === plan.planId"
+        (change)="planSelected.emit(plan.planId)"
+      />
+      <span class="subscription__plan-info"
+        ><span class="subscription__plan-name">{{ plan.name }}</span
+        ><span>Hasta {{ plan.unitLimit }} vehículos</span></span
+      >
+      <span class="subscription__price">{{ money(plan.monthlyPrice) }}<span>por mes</span></span>
+    </label>
+  }
+</fieldset>

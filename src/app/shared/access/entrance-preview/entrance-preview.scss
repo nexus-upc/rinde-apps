@@ -1,0 +1,195 @@
+// Dimensiones de la pantalla decorativa: 960 de ancho, recortada por el bloque de la derecha.
+$screen-width: 960px;
+$screen-height: 640px;
+
+:host {
+  position: absolute;
+  top: 200px;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.preview {
+  position: absolute;
+  top: 0;
+  left: 56px;
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  width: $screen-width;
+  height: $screen-height;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--arc-bg);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--arc-shadow) 6%, transparent),
+    0 60px 120px -40px color-mix(in srgb, var(--arc-shadow) 30%, transparent);
+  transform: perspective(2400px) rotateX(14deg) rotateZ(-4deg);
+  transform-origin: 0 0;
+  animation: preview-in 800ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+
+@keyframes preview-in {
+  from {
+    opacity: 0;
+    transform: perspective(2400px) translate(24px, 48px) rotateX(16deg) rotateZ(-4deg);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(2400px) rotateX(14deg) rotateZ(-4deg);
+  }
+}
+
+.preview__sidebar {
+  padding: 24px 16px;
+  background: var(--arc-bg);
+}
+
+.preview__brand {
+  display: inline-flex;
+  margin: 0 8px 24px;
+}
+
+.preview__menu {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preview__item {
+  height: 40px;
+  padding: 10px 12px;
+  border-radius: var(--arc-radius-row);
+  color: var(--arc-ink);
+  font-size: 14px;
+  line-height: 20px;
+
+  &--active {
+    background: var(--arc-surface);
+    font-weight: 500;
+  }
+}
+
+.preview__main {
+  display: grid;
+  align-content: start;
+  gap: 24px;
+  padding: 32px 40px;
+  min-width: 0;
+}
+
+.preview__head {
+  display: grid;
+  gap: 4px;
+}
+
+.preview__title {
+  font-size: var(--arc-page-title-size);
+  font-weight: 600;
+  line-height: var(--arc-page-title-line);
+  letter-spacing: -0.02em;
+}
+
+.preview__date {
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+// Tarjeta angosta a la izquierda: la cifra queda dentro del recorte del bloque.
+.preview__band {
+  justify-self: start;
+  box-sizing: border-box;
+  width: 240px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 24px;
+  border-radius: var(--arc-radius-card);
+  background: var(--arc-band);
+  color: var(--arc-on-band);
+  font-size: 14px;
+
+  strong {
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 36px;
+  }
+}
+
+.preview__rows {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.preview__row {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 56px;
+  padding: 0 16px;
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-surface);
+}
+
+.preview__code {
+  color: var(--arc-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview__trip {
+  display: grid;
+  min-width: 0;
+}
+
+.preview__route {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preview__driver {
+  color: var(--arc-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.preview__status {
+  display: inline-flex;
+  height: 24px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-bg);
+  color: var(--arc-muted);
+  font-size: 12px;
+  white-space: nowrap;
+
+  &--ok {
+    background: var(--arc-success-bg);
+    color: var(--arc-success);
+  }
+
+  &--wait {
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .preview {
+    animation: none;
+  }
+}

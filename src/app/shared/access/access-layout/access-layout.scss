@@ -1,0 +1,102 @@
+// Desde 1100 px: columna de acceso de 600 con relleno de 64 y bloque de la derecha a 16 de los bordes.
+// Debajo, una sola columna de 360 centrada, sin montar la vista decorativa.
+.access {
+  position: relative;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 72px 16px;
+  background: var(--arc-bg);
+  color: var(--arc-ink);
+}
+
+.access__brand {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+.access__column {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 360px;
+}
+
+.access__panel {
+  display: grid;
+  gap: 20px;
+}
+
+.access__copyright {
+  position: absolute;
+  bottom: 24px;
+  left: 16px;
+  color: var(--arc-muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.access__showcase {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  bottom: 16px;
+  left: 600px;
+  box-sizing: border-box;
+  overflow: hidden;
+  padding: 44px 48px 0;
+  border-radius: var(--arc-radius-block);
+  background: var(--arc-surface);
+}
+
+.access__slogan {
+  position: relative;
+  font-size: var(--arc-showcase-title-size);
+  font-weight: 600;
+  line-height: var(--arc-showcase-title-line);
+  letter-spacing: -0.02em;
+
+  span {
+    display: block;
+    margin-top: 8px;
+    color: var(--arc-muted);
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0;
+  }
+}
+
+@media (min-width: 1100px) {
+  .access {
+    display: block;
+    padding: 0;
+  }
+
+  .access__brand {
+    top: 24px;
+    left: 64px;
+  }
+
+  .access__column {
+    display: flex;
+    align-items: center;
+    width: 600px;
+    max-width: none;
+    min-height: 100dvh;
+    padding: 72px 64px;
+  }
+
+  .access__panel {
+    width: 360px;
+  }
+
+  .access__copyright {
+    bottom: 24px;
+    left: 64px;
+  }
+}

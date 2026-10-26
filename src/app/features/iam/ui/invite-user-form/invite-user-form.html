@@ -1,0 +1,77 @@
+<form
+  class="invite arc-entrance-stage"
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  novalidate
+  aria-labelledby="invite-title"
+>
+  <h2 id="invite-title" class="invite__title">Invitar usuario</h2>
+  <p class="invite__lead">
+    Recibirá un enlace para crear su contraseña. El enlace vence en 48 horas.
+  </p>
+
+  @if (error(); as message) {
+    <p class="form-alert" role="alert">{{ message }}</p>
+  }
+
+  <div class="invite__grid">
+    <div class="field">
+      <label class="field__label" for="invite-name">Nombre completo</label>
+      <input
+        appAutoFocus
+        id="invite-name"
+        class="field__input"
+        formControlName="fullName"
+        maxlength="150"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('fullName')"
+        [attr.aria-invalid]="isInvalid('fullName') || null"
+        [attr.aria-describedby]="isInvalid('fullName') ? 'invite-name-error' : null"
+      />
+      @if (isInvalid('fullName')) {
+        <p id="invite-name-error" class="field__error">Ingrese el nombre completo.</p>
+      }
+    </div>
+    <div class="field">
+      <label class="field__label" for="invite-email">Correo electrónico</label>
+      <input
+        id="invite-email"
+        class="field__input"
+        type="email"
+        formControlName="email"
+        maxlength="150"
+        autocomplete="off"
+        placeholder="nombre@empresa.pe"
+        [class.field__input--invalid]="isInvalid('email')"
+        [attr.aria-invalid]="isInvalid('email') || null"
+        [attr.aria-describedby]="isInvalid('email') ? 'invite-email-error' : null"
+      />
+      @if (isInvalid('email')) {
+        <p id="invite-email-error" class="field__error">Ingrese un correo electrónico válido.</p>
+      }
+    </div>
+    <div class="field">
+      <label class="field__label" for="invite-role">Rol</label>
+      <select id="invite-role" class="field__select" formControlName="role">
+        @for (role of roles; track role) {
+          <option [value]="role">{{ roleLabels[role] }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="invite__actions">
+    <button
+      uiButton
+      variant="ghost"
+      type="button"
+      [disabled]="pending()"
+      (click)="cancelled.emit()"
+    >
+      Cancelar
+    </button>
+    <button uiButton type="submit" [loading]="pending()" [disabled]="pending()">
+      {{ pending() ? 'Enviando' : 'Enviar invitación' }}
+    </button>
+  </div>
+</form>

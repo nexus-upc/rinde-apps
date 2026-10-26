@@ -1,0 +1,69 @@
+@if (loading()) {
+  <ul class="users__list" aria-busy="true" aria-label="Cargando usuarios">
+    @for (index of [1, 2, 3]; track index) {
+      <li class="user-row user-row--skeleton" aria-hidden="true">
+        <span class="skeleton skeleton--name"></span>
+        <span class="skeleton skeleton--pill"></span>
+      </li>
+    }
+  </ul>
+} @else {
+  <ul class="users__list">
+    @for (user of users(); track user.id) {
+      <li
+        class="user-row"
+        [class.is-disabled]="user.status === 'DISABLED'"
+        [attr.aria-busy]="busyId() === user.id || null"
+      >
+        <div class="user-row__who">
+          <span class="user-row__avatar" aria-hidden="true">{{ user.fullName.charAt(0) }}</span>
+          <span class="user-row__text">
+            <span class="user-row__name"
+              >{{ user.fullName }}
+              @if (isSelf(user)) {
+                <span class="user-row__you">(tú)</span>
+              }
+            </span>
+            <span class="user-row__email">{{ user.email }}</span>
+          </span>
+        </div>
+
+        <span class="status-pill" [attr.data-status]="user.status">{{
+          statusLabels[user.status] ?? user.status
+        }}</span>
+
+        @if (isSelf(user)) {
+          <span class="user-row__role">{{ roleLabels[user.role] ?? user.role }}</span>
+          <span class="user-row__action"></span>
+        } @else {
+          <label class="visually-hidden" [attr.for]="'role-' + user.id"
+            >Rol de {{ user.fullName }}</label
+          >
+          <select
+            class="user-row__select"
+            [id]="'role-' + user.id"
+            [value]="user.role"
+            [disabled]="busyId() !== null || user.status === 'DISABLED'"
+            (change)="changeRole(user, $event)"
+          >
+            @for (role of roles; track role) {
+              <option [value]="role" [selected]="role === user.role">{{ roleLabels[role] }}</option>
+            }
+          </select>
+          @if (user.status !== 'DISABLED') {
+            <button
+              class="text-link user-row__action"
+              type="button"
+              [disabled]="busyId() !== null"
+              (click)="disableRequested.emit(user)"
+            >
+              Deshabilitar
+            </button>
+          } @else {
+            <span class="user-row__action"></span>
+          }
+        }
+      </li>
+    }
+  </ul>
+}
