@@ -1,52 +1,54 @@
-:root {
-  --color-primary: #1d4ed8;
-  --color-primary-soft: #eff6ff;
-  --color-primary-tint: #dbeafe;
-  --color-error: #b91c1c;
-  --color-text: #111827;
-  --color-text-muted: #4b5563;
-  --color-border: #e5e7eb;
-  --color-surface-muted: #f5f7fa;
-  --font-sans: 'Geist', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', ui-monospace, monospace;
+@use 'styles/tokens';
+
+* {
+  box-sizing: border-box;
 }
 
 html,
 body {
   margin: 0;
-  background: #ffffff;
-  color: var(--color-text);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.5;
+  background: var(--arc-bg);
+  color: var(--arc-ink);
+  font-family: var(--arc-font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-.button {
-  padding: 10px 16px;
-  border: 1px solid transparent;
-  border-radius: 6px;
+button,
+input {
   font: inherit;
-  font-weight: 500;
+}
+
+button {
   cursor: pointer;
 
   &:disabled {
     cursor: not-allowed;
-    opacity: 0.6;
   }
+}
 
-  &--primary {
-    background: var(--color-primary);
-    color: #ffffff;
-  }
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--arc-accent);
+  outline-offset: 2px;
+}
 
-  &--ghost {
-    border-color: var(--color-border);
-    background: #ffffff;
-    color: var(--color-text);
+h1,
+p {
+  margin: 0;
+}
 
-    &:hover {
-      background: var(--color-surface-muted);
-    }
+// Los títulos pesan 600; todo lo demás, como mucho 500.
+h1 {
+  font-weight: 600;
+}
+
+// En un teléfono el navegador amplía los campos con letra menor de 16 px: en táctil todos van a 16.
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']) {
+    font-size: 16px !important;
   }
 }
