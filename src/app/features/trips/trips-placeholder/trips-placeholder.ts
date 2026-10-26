@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthService } from '../../../core/auth/auth.service';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 /** Página protegida provisional del tablero de viajes; el listado llega en la tarea S2-11. */
 @Component({
@@ -8,9 +7,4 @@ import { AuthService } from '../../../core/auth/auth.service';
   styleUrl: './trips-placeholder.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TripsPlaceholder {
-  private readonly auth = inject(AuthService);
-
-  protected readonly user = this.auth.user;
-  protected readonly roleLabel = this.auth.roleLabel;
-}
+export class TripsPlaceholder {}
