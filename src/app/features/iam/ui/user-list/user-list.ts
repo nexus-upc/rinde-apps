@@ -15,7 +15,7 @@ export class UserList {
   readonly busyId = input<string | null>(null);
   readonly loading = input(false);
   readonly roleChange = output<{ user: User; role: UserRole }>();
-  readonly statusToggle = output<User>();
+  readonly disableRequested = output<User>();
   protected readonly roles = ASSIGNABLE_ROLES;
   protected readonly roleLabels = ROLE_LABELS;
   protected readonly statusLabels = USER_STATUS_LABELS;

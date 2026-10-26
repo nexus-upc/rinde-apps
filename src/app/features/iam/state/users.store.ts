@@ -62,15 +62,9 @@ export class UsersStore {
     if (role !== user.role)
       this.update(user, { role }, `${user.fullName} ahora es ${ROLE_LABELS[role] ?? role}.`);
   }
-  toggleStatus(user: User): void {
-    const disabling = user.status !== 'DISABLED';
-    this.update(
-      user,
-      { status: disabling ? 'DISABLED' : 'ACTIVE' },
-      disabling
-        ? `${user.fullName} ya no puede iniciar sesión.`
-        : `${user.fullName} puede iniciar sesión de nuevo.`,
-    );
+  disable(user: User): void {
+    if (user.status === 'DISABLED') return;
+    this.update(user, { status: 'DISABLED' }, `${user.fullName} ya no puede iniciar sesión.`);
   }
   private update(user: User, change: UpdateUserRequest, message: string): void {
     if (this.updateAction.pending()) return;

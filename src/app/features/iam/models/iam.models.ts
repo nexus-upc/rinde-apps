@@ -38,7 +38,7 @@ export interface InviteUserRequest {
 
 export interface UpdateUserRequest {
   readonly role?: UserRole;
-  readonly status?: UserStatus;
+  readonly status?: 'DISABLED';
 }
 
 export const USER_STATUS_LABELS: Readonly<Record<string, string>> = {

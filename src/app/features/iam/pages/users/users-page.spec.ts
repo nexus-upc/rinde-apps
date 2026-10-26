@@ -127,7 +127,9 @@ describe('UsersPage', () => {
     request.flush({ ...USERS[1], status: 'DISABLED' });
     fixture.detectChanges();
 
-    expect(button('Habilitar')).toBeDefined();
+    expect(root().textContent).toContain('Deshabilitado');
+    expect(root().textContent).not.toContain('Habilitar');
+    expect(root().querySelectorAll('button.user-row__action').length).toBe(0);
     expect(toasts.messages()[0]?.text).toBe('Luis Ticona ya no puede iniciar sesión.');
   });
 
@@ -157,8 +159,10 @@ describe('UsersPage', () => {
   it('returns keyboard focus to the invitation trigger when cancelling', async () => {
     http.expectOne(USERS_URL).flush(USERS);
     fixture.detectChanges();
-    button('Invitar usuario').click(); fixture.detectChanges();
-    button('Cancelar').click(); fixture.detectChanges();
+    button('Invitar usuario').click();
+    fixture.detectChanges();
+    button('Cancelar').click();
+    fixture.detectChanges();
     await fixture.whenStable();
     expect(document.activeElement).toBe(button('Invitar usuario'));
   });

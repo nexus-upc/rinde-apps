@@ -50,14 +50,18 @@
               <option [value]="role" [selected]="role === user.role">{{ roleLabels[role] }}</option>
             }
           </select>
-          <button
-            class="text-link user-row__action"
-            type="button"
-            [disabled]="busyId() !== null"
-            (click)="statusToggle.emit(user)"
-          >
-            {{ user.status === 'DISABLED' ? 'Habilitar' : 'Deshabilitar' }}
-          </button>
+          @if (user.status !== 'DISABLED') {
+            <button
+              class="text-link user-row__action"
+              type="button"
+              [disabled]="busyId() !== null"
+              (click)="disableRequested.emit(user)"
+            >
+              Deshabilitar
+            </button>
+          } @else {
+            <span class="user-row__action"></span>
+          }
         }
       </li>
     }

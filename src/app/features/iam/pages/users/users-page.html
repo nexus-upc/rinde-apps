@@ -69,7 +69,7 @@
           [currentEmail]="store.currentEmail()"
           [busyId]="store.busyId()"
           (roleChange)="store.changeRole($event.user, $event.role)"
-          (statusToggle)="store.toggleStatus($event)"
+          (disableRequested)="store.disable($event)"
         />
       }
     }
