@@ -86,28 +86,59 @@ describe('SignIn', () => {
     fixture.detectChanges();
   }
 
-  it('shows the required-field messages in Spanish and sends nothing when the form is empty', () => {
+  function continueTo(email: string): void {
+    type('email', email);
+    submit();
+  }
+
+  it('asks for the email first and shows the required message in Spanish', () => {
     createFixture();
     submit();
 
     expect(text()).toContain('Ingrese su correo electrónico.');
-    expect(text()).toContain('Ingrese su contraseña.');
+    expect(field('password')).toBeNull();
     http.expectNone(SIGN_IN_URL);
   });
 
-  it('rejects an email with an invalid format', () => {
+  it('rejects an email with an invalid format and stays on the first step', () => {
     createFixture();
-    type('email', 'ana.rojas');
-    type('password', 'clave-de-prueba');
-    submit();
+    continueTo('ana.rojas');
 
     expect(text()).toContain('Ingrese un correo electrónico válido.');
+    expect(field('password')).toBeNull();
+    http.expectNone(SIGN_IN_URL);
+  });
+
+  it('moves to the password step showing the email, and can go back to change it', () => {
+    createFixture();
+    continueTo('admin@rinde.test');
+
+    expect(fixture.nativeElement.querySelector('h1').getAttribute('aria-label')).toBe('Hola de nuevo');
+    expect(text()).toContain('admin@rinde.test');
+    expect(field('password')).not.toBeNull();
+
+    const change = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
+      (button) => (button as HTMLButtonElement).textContent?.trim() === 'Cambiar',
+    ) as HTMLButtonElement;
+    change.click();
+    fixture.detectChanges();
+
+    expect(field('email').value).toBe('admin@rinde.test');
+    expect(field('password')).toBeNull();
+  });
+
+  it('requires the password before sending', () => {
+    createFixture();
+    continueTo('admin@rinde.test');
+    submit();
+
+    expect(text()).toContain('Ingrese su contraseña.');
     http.expectNone(SIGN_IN_URL);
   });
 
   it('shows the backend detail when the credentials are wrong', () => {
     createFixture();
-    type('email', 'admin@rinde.test');
+    continueTo('admin@rinde.test');
     type('password', 'incorrecta');
     submit();
 
@@ -129,14 +160,16 @@ describe('SignIn', () => {
     expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
-  it('disables the button while the request is pending and goes to the trips page on success', () => {
+  it('shows the spinner while the request is pending and goes to the trips page on success', () => {
     createFixture();
     const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
-    type('email', 'admin@rinde.test');
+    continueTo('admin@rinde.test');
     type('password', 'clave-de-prueba');
     submit();
 
     expect(submitButton().disabled).toBe(true);
+    expect(submitButton().getAttribute('aria-busy')).toBe('true');
+    expect(submitButton().querySelector('.ui-button__spinner')).not.toBeNull();
 
     http
       .expectOne(SIGN_IN_URL)
@@ -144,6 +177,14 @@ describe('SignIn', () => {
 
     expect(sessionStorage.getItem(STORAGE_KEY)).toBe(TOKEN);
     expect(navigate).toHaveBeenCalledWith('/trips');
+  });
+
+  it('announces the title once and animates its words separately', () => {
+    createFixture();
+    const title = fixture.nativeElement.querySelector('h1') as HTMLElement;
+
+    expect(title.getAttribute('aria-label')).toBe('Inicia sesión en Rinde');
+    expect(title.querySelectorAll('.arc-entrance-word[aria-hidden="true"]').length).toBe(4);
   });
 
   it('does not mount the entrance preview below 1100 px', () => {

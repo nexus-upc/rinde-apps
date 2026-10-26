@@ -75,17 +75,8 @@ $sidebar-width: 232px;
 
 .shell__signout {
   min-height: 40px;
-  padding: 0;
-  border: 0;
-  background: none;
-  color: var(--arc-ink);
   font-size: 14px;
-  font-weight: 500;
   line-height: 20px;
-
-  &:hover {
-    color: var(--arc-muted);
-  }
 }
 
 .shell__content {
