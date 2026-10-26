@@ -12,7 +12,7 @@ import { EntrancePreview } from './entrance-preview/entrance-preview';
 const CONNECTION_ERROR = 'No se pudo conectar con el servidor. Intente nuevamente.';
 const GENERIC_ERROR = 'No se pudo iniciar sesión. Intente nuevamente.';
 
-/** Pantalla de ingreso en dos pasos, como Arcadia: primero el correo y luego la contraseña. */
+/** Pantalla de ingreso por pasos, como Arcadia: elegir el método, luego el correo y la contraseña. */
 @Component({
   selector: 'app-sign-in',
   imports: [ReactiveFormsModule, BrandMark, EntrancePreview, RiseTitle, UiButton],
@@ -33,9 +33,19 @@ export class SignIn {
 
   /** Desde 1100 px la pantalla tiene dos columnas y muestra la vista decorativa. */
   protected readonly wide = isWideScreen();
-  protected readonly step = signal<'email' | 'password'>('email');
+  protected readonly step = signal<'start' | 'email' | 'password'>('start');
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
+
+  protected goToEmail(): void {
+    this.step.set('email');
+    this.focusAfterRender('email');
+  }
+
+  protected backToStart(): void {
+    this.form.controls.email.markAsUntouched();
+    this.step.set('start');
+  }
 
   protected continueWithEmail(): void {
     const email = this.form.controls.email;

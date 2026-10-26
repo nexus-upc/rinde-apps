@@ -86,13 +86,40 @@ describe('SignIn', () => {
     fixture.detectChanges();
   }
 
+  function button(label: string): HTMLButtonElement {
+    return Array.from(fixture.nativeElement.querySelectorAll('button')).find(
+      (candidate) => (candidate as HTMLButtonElement).textContent?.trim() === label,
+    ) as HTMLButtonElement;
+  }
+
+  function startWithEmail(): void {
+    button('Continuar con correo').click();
+    fixture.detectChanges();
+  }
+
   function continueTo(email: string): void {
+    startWithEmail();
     type('email', email);
     submit();
   }
 
-  it('asks for the email first and shows the required message in Spanish', () => {
+  it('starts by choosing the email method, without asking for the email yet', () => {
     createFixture();
+
+    expect(field('email')).toBeNull();
+    startWithEmail();
+
+    expect(fixture.nativeElement.querySelector('h1').getAttribute('aria-label')).toBe('Tu correo');
+    expect(field('email')).not.toBeNull();
+
+    button('Otra forma de entrar').click();
+    fixture.detectChanges();
+    expect(field('email')).toBeNull();
+  });
+
+  it('asks for the email and shows the required message in Spanish', () => {
+    createFixture();
+    startWithEmail();
     submit();
 
     expect(text()).toContain('Ingrese su correo electrónico.');
@@ -117,10 +144,7 @@ describe('SignIn', () => {
     expect(text()).toContain('admin@rinde.test');
     expect(field('password')).not.toBeNull();
 
-    const change = Array.from(fixture.nativeElement.querySelectorAll('button')).find(
-      (button) => (button as HTMLButtonElement).textContent?.trim() === 'Cambiar',
-    ) as HTMLButtonElement;
-    change.click();
+    button('Cambiar').click();
     fixture.detectChanges();
 
     expect(field('email').value).toBe('admin@rinde.test');
