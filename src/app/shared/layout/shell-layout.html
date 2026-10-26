@@ -2,7 +2,7 @@
   <aside class="shell__sidebar">
     <app-brand-mark class="shell__brand" />
     <nav class="shell__nav" aria-label="Principal">
-      <a class="shell__link" routerLink="/trips" routerLinkActive="shell__link--active">
+      <a class="shell__link arc-tap" routerLink="/trips" routerLinkActive="shell__link--active">
         Tablero de viajes
       </a>
     </nav>
@@ -16,7 +16,7 @@
           <span class="shell__role">{{ roleLabel() }}</span>
         }
       </div>
-      <button class="shell__signout" type="button" (click)="signOut()">Cerrar sesión</button>
+      <button class="shell__signout text-link" type="button" (click)="signOut()">Cerrar sesión</button>
     </header>
 
     <main class="shell__content">
