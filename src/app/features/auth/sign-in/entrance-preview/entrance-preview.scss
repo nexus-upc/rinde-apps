@@ -101,7 +101,11 @@ $screen-height: 640px;
   line-height: 20px;
 }
 
+// Tarjeta angosta a la izquierda: la cifra queda dentro del recorte del bloque.
 .preview__band {
+  justify-self: start;
+  box-sizing: border-box;
+  width: 240px;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
