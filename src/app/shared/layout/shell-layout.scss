@@ -1,7 +1,10 @@
-$sidebar-width: 240px;
+// Marco de la aplicación: menú lateral en --arc-side, sin línea que lo separe; la barra superior se integra con la página.
+$sidebar-width: 232px;
 
 .shell {
   min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--arc-bg);
 }
 
 .shell__sidebar {
@@ -12,37 +15,41 @@ $sidebar-width: 240px;
   box-sizing: border-box;
   width: $sidebar-width;
   padding: 24px 16px;
-  border-right: 1px solid var(--color-border);
-  background: var(--color-surface-muted);
+  background: var(--arc-side);
 }
 
 .shell__brand {
   margin: 0 8px 32px;
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 600;
+  line-height: 24px;
+  letter-spacing: -0.01em;
 }
 
 .shell__link {
-  display: block;
-  padding: 8px 12px;
-  border-radius: 6px;
-  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: var(--arc-radius-row);
+  color: var(--arc-ink);
+  font-size: 14px;
+  line-height: 20px;
   text-decoration: none;
 
   &:hover {
-    background: #e8ecf3;
+    background: color-mix(in srgb, var(--arc-side) 94%, var(--arc-ink));
   }
 
   &--active {
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
+    background: var(--arc-surface);
     font-weight: 500;
   }
 }
 
 .shell__main {
-  margin-left: $sidebar-width;
   min-width: 0;
+  margin-left: $sidebar-width;
 }
 
 .shell__topbar {
@@ -53,10 +60,9 @@ $sidebar-width: 240px;
   align-items: center;
   justify-content: flex-end;
   gap: 16px;
-  padding: 12px 24px;
-  border-bottom: 1px solid var(--color-border);
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(8px);
+  height: 56px;
+  padding: 0 40px;
+  background: var(--arc-bg);
 }
 
 .shell__session {
@@ -64,31 +70,52 @@ $sidebar-width: 240px;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 8px;
+  min-width: 0;
   margin-right: auto;
-  font-size: 0.875rem;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
 }
 
-.shell__email {
+.shell__signout {
+  min-height: 40px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--arc-ink);
+  font-size: 14px;
   font-weight: 500;
-}
+  line-height: 20px;
 
-.shell__role {
-  color: var(--color-text-muted);
+  &:hover {
+    color: var(--arc-muted);
+  }
 }
 
 .shell__content {
-  padding: 24px;
+  padding: 32px 40px;
 }
 
 @media (max-width: 768px) {
   .shell__sidebar {
     position: static;
     width: auto;
-    border-right: 0;
-    border-bottom: 1px solid var(--color-border);
+    padding: 16px;
+  }
+
+  .shell__brand {
+    margin: 0 8px 16px;
   }
 
   .shell__main {
     margin-left: 0;
+  }
+
+  .shell__topbar {
+    padding: 0 16px;
+  }
+
+  .shell__content {
+    padding: 24px 16px;
   }
 }

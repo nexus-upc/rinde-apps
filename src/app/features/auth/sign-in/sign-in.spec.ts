@@ -13,27 +13,54 @@ const TOKEN = [
   'firma-de-prueba',
 ].join('.');
 
+/** Ventana simulada: jsdom no trae matchMedia, así que el ancho se decide aquí antes de crear la pantalla. */
+let wideScreen = false;
+
+function stubMatchMedia(): void {
+  Object.defineProperty(window, 'matchMedia', {
+    configurable: true,
+    writable: true,
+    value: (query: string): MediaQueryList =>
+      ({
+        matches: wideScreen && query === '(min-width: 1100px)',
+        media: query,
+        onchange: null,
+        addEventListener: () => undefined,
+        removeEventListener: () => undefined,
+        addListener: () => undefined,
+        removeListener: () => undefined,
+        dispatchEvent: () => false,
+      }) as MediaQueryList,
+  });
+}
+
 describe('SignIn', () => {
   let fixture: ComponentFixture<SignIn>;
   let http: HttpTestingController;
   let router: Router;
 
+  function createFixture(): void {
+    fixture = TestBed.createComponent(SignIn);
+    fixture.detectChanges();
+  }
+
   beforeEach(async () => {
     sessionStorage.clear();
+    wideScreen = false;
+    stubMatchMedia();
     await TestBed.configureTestingModule({
       imports: [SignIn],
       providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(SignIn);
     http = TestBed.inject(HttpTestingController);
     router = TestBed.inject(Router);
-    fixture.detectChanges();
   });
 
   afterEach(() => {
     http.verify();
     sessionStorage.clear();
+    delete (window as { matchMedia?: unknown }).matchMedia;
   });
 
   function field(id: 'email' | 'password'): HTMLInputElement {
@@ -60,6 +87,7 @@ describe('SignIn', () => {
   }
 
   it('shows the required-field messages in Spanish and sends nothing when the form is empty', () => {
+    createFixture();
     submit();
 
     expect(text()).toContain('Ingrese su correo electrónico.');
@@ -68,6 +96,7 @@ describe('SignIn', () => {
   });
 
   it('rejects an email with an invalid format', () => {
+    createFixture();
     type('email', 'ana.rojas');
     type('password', 'clave-de-prueba');
     submit();
@@ -77,6 +106,7 @@ describe('SignIn', () => {
   });
 
   it('shows the backend detail when the credentials are wrong', () => {
+    createFixture();
     type('email', 'admin@rinde.test');
     type('password', 'incorrecta');
     submit();
@@ -100,6 +130,7 @@ describe('SignIn', () => {
   });
 
   it('disables the button while the request is pending and goes to the trips page on success', () => {
+    createFixture();
     const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     type('email', 'admin@rinde.test');
     type('password', 'clave-de-prueba');
@@ -113,5 +144,23 @@ describe('SignIn', () => {
 
     expect(sessionStorage.getItem(STORAGE_KEY)).toBe(TOKEN);
     expect(navigate).toHaveBeenCalledWith('/trips');
+  });
+
+  it('does not mount the entrance preview below 1100 px', () => {
+    wideScreen = false;
+    createFixture();
+
+    expect(fixture.nativeElement.querySelector('app-entrance-preview')).toBeNull();
+  });
+
+  it('mounts the entrance preview at 1100 px, hidden from assistive technology and inert', () => {
+    wideScreen = true;
+    createFixture();
+
+    const preview = fixture.nativeElement.querySelector('app-entrance-preview') as HTMLElement;
+    expect(preview).not.toBeNull();
+    expect(preview.getAttribute('aria-hidden')).toBe('true');
+    expect(preview.hasAttribute('inert')).toBe(true);
+    expect(preview.querySelector('button, a, input, select, textarea, [tabindex]')).toBeNull();
   });
 });
