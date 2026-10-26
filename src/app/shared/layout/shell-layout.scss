@@ -1,0 +1,94 @@
+$sidebar-width: 240px;
+
+.shell {
+  min-height: 100vh;
+}
+
+.shell__sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: $sidebar-width;
+  padding: 24px 16px;
+  border-right: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+}
+
+.shell__brand {
+  margin: 0 8px 32px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.shell__link {
+  display: block;
+  padding: 8px 12px;
+  border-radius: 6px;
+  color: var(--color-text);
+  text-decoration: none;
+
+  &:hover {
+    background: #e8ecf3;
+  }
+
+  &--active {
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-weight: 500;
+  }
+}
+
+.shell__main {
+  margin-left: $sidebar-width;
+  min-width: 0;
+}
+
+.shell__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+}
+
+.shell__session {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-right: auto;
+  font-size: 0.875rem;
+}
+
+.shell__email {
+  font-weight: 500;
+}
+
+.shell__role {
+  color: var(--color-text-muted);
+}
+
+.shell__content {
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .shell__sidebar {
+    position: static;
+    width: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .shell__main {
+    margin-left: 0;
+  }
+}

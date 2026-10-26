@@ -1,0 +1,26 @@
+<div class="shell">
+  <aside class="shell__sidebar">
+    <p class="shell__brand">Rinde</p>
+    <nav class="shell__nav" aria-label="Principal">
+      <a class="shell__link" routerLink="/trips" routerLinkActive="shell__link--active">
+        Tablero de viajes
+      </a>
+    </nav>
+  </aside>
+
+  <div class="shell__main">
+    <header class="shell__topbar">
+      <div class="shell__session">
+        <span class="shell__email">{{ user()?.email }}</span>
+        @if (roleLabel()) {
+          <span class="shell__role">{{ roleLabel() }}</span>
+        }
+      </div>
+      <button class="button button--ghost" type="button" (click)="signOut()">Cerrar sesión</button>
+    </header>
+
+    <main class="shell__content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

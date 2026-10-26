@@ -1,0 +1,76 @@
+.sign-in {
+  box-sizing: border-box;
+  display: grid;
+  min-height: 100vh;
+  padding: 16px;
+  place-items: center;
+}
+
+.sign-in__panel {
+  width: 100%;
+  max-width: 380px;
+}
+
+.sign-in__brand {
+  margin: 0 0 24px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.sign-in__title {
+  margin: 0 0 8px;
+  font-size: 1.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sign-in__lead {
+  margin: 0 0 24px;
+  color: var(--color-text-muted);
+}
+
+.sign-in__form {
+  display: grid;
+  gap: 16px;
+}
+
+.sign-in__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.9rem;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.field__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.field__input {
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--color-text);
+  font: inherit;
+
+  &:focus {
+    border-color: var(--color-primary);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--color-primary-tint);
+  }
+
+  &--invalid {
+    border-color: var(--color-error);
+  }
+}
+
+.field__error {
+  margin: 0;
+  color: var(--color-error);
+  font-size: 0.8125rem;
+}
