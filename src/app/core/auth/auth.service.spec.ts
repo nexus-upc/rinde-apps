@@ -30,6 +30,7 @@ describe('AuthService', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     http.verify();
     sessionStorage.clear();
   });
@@ -55,12 +56,13 @@ describe('AuthService', () => {
       error: () => undefined,
     });
 
-    http
-      .expectOne(SIGN_IN_URL)
-      .flush({ detail: 'El correo o la contraseña son incorrectos.' }, {
+    http.expectOne(SIGN_IN_URL).flush(
+      { detail: 'El correo o la contraseña son incorrectos.' },
+      {
         status: 401,
         statusText: 'Unauthorized',
-      });
+      },
+    );
 
     expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
     expect(service.isAuthenticated()).toBe(false);
@@ -110,5 +112,17 @@ describe('AuthService', () => {
     expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
     expect(service.isAuthenticated()).toBe(false);
     expect(service.user()).toBeNull();
+  });
+
+  it('discards a token that expires while the application remains open', () => {
+    const token = buildToken({ email: 'admin@rinde.test', role: 'ADMINISTRATOR', exp: futureExp });
+    service.signIn({ email: 'admin@rinde.test', password: 'clave-de-prueba' }).subscribe();
+    http
+      .expectOne(SIGN_IN_URL)
+      .flush({ accessToken: token, tokenType: 'Bearer', expiresInSeconds: 3600 });
+    vi.spyOn(Date, 'now').mockReturnValue((futureExp + 1) * 1000);
+    expect(service.getToken()).toBeNull();
+    expect(service.isAuthenticated()).toBe(false);
+    expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 });

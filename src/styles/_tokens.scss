@@ -3,7 +3,8 @@
 :root {
   // Solo para el nombre de la marca, que acompaña al símbolo.
   --arc-font-brand: 'Sora', var(--arc-font-sans);
-  --arc-font-sans: "DM Sans Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --arc-font-sans:
+    'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
   // Tamaños de título: acceso (26/34), página (32/40) y mensaje de marca del acceso (28/36).
   --arc-entrance-title-size: 26px;

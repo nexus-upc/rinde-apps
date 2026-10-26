@@ -1,0 +1,46 @@
+<section class="subscription__checkout" aria-labelledby="checkout-title">
+  <div class="subscription__checkout-heading">
+    <div>
+      <h2 id="checkout-title">Revisa tu pago de prueba</h2>
+      <p>No se harán cobros reales ni se pedirán datos de tarjeta.</p>
+    </div>
+    <span class="subscription__amount">{{ money(payment().amount) }}</span>
+  </div>
+  <p>{{ plan().name }}. Hasta {{ plan().unitLimit }} vehículos por un periodo mensual.</p>
+  @if (error()) {
+    <p class="subscription__error" role="alert">{{ error() }}</p>
+  }
+  <div class="subscription__actions">
+    @if (payment().confirmationEnabled) {
+      <button
+        uiButton
+        type="button"
+        (click)="decision.emit('CONFIRMED')"
+        [disabled]="busy()"
+        [loading]="busy()"
+      >
+        Confirmar pago de prueba
+      </button>
+      <button
+        class="text-link subscription__link"
+        type="button"
+        (click)="decision.emit('REJECTED')"
+        [disabled]="busy()"
+      >
+        Probar rechazo
+      </button>
+    } @else {
+      <p role="status">
+        El pago está pendiente de confirmación. Actualiza la suscripción cuando se procese.
+      </p>
+    }
+    <button
+      class="text-link subscription__link"
+      type="button"
+      (click)="back.emit()"
+      [disabled]="busy()"
+    >
+      Volver
+    </button>
+  </div>
+</section>

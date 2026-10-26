@@ -1,13 +1,21 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, Router, RouterStateSnapshot, UrlTree, provideRouter } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  Router,
+  RouterStateSnapshot,
+  UrlTree,
+  provideRouter,
+} from '@angular/router';
 import { authGuard } from './auth.guard';
 
 const STORAGE_KEY = 'rinde.accessToken';
 const FUTURE_TOKEN = [
   btoa('{"alg":"HS256"}'),
-  btoa(`{"email":"admin@rinde.test","role":"ADMINISTRATOR","exp":${Math.floor(Date.now() / 1000) + 3600}}`),
+  btoa(
+    `{"email":"admin@rinde.test","role":"ADMINISTRATOR","exp":${Math.floor(Date.now() / 1000) + 3600}}`,
+  ),
   'firma-de-prueba',
 ].join('.');
 

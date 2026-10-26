@@ -1,0 +1,39 @@
+.subscription {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 960px;
+  min-height: calc(100dvh - 120px);
+}
+h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+}
+
+.subscription__link {
+  min-height: 44px;
+}
+.subscription__intro,
+.subscription__loading {
+  display: grid;
+  gap: 16px;
+}
+.subscription__intro p,
+.subscription__footer > p {
+  color: var(--arc-muted);
+}
+.subscription__error {
+  color: var(--arc-danger) !important;
+}
+.subscription__footer {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+}
+.subscription__skeleton {
+  height: 88px;
+  background: var(--arc-surface);
+  border-radius: var(--arc-radius-row);
+}

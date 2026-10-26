@@ -1,0 +1,112 @@
+<section
+  class="subscription"
+  aria-labelledby="subscription-title"
+  [attr.aria-busy]="store.state() === 'loading' || store.busy() || null"
+>
+  <app-page-header
+    title="Suscripción"
+    titleId="subscription-title"
+    description="El plan y la vigencia de tu empresa."
+  >
+    <button
+      class="text-link subscription__link"
+      type="button"
+      (click)="store.load()"
+      [disabled]="store.state() === 'loading' || store.busy()"
+    >
+      Actualizar
+    </button>
+  </app-page-header>
+  @switch (store.state()) {
+    @case ('loading') {
+      <div class="subscription__loading" role="status">
+        <span class="visually-hidden">Cargando suscripción</span>
+        @for (item of [1, 2, 3]; track item) {
+          <div class="subscription__skeleton" aria-hidden="true"></div>
+        }
+      </div>
+    }
+    @case ('error') {
+      <app-state-panel
+        title="No se pudo cargar la suscripción"
+        [message]="store.error()"
+        [error]="true"
+        actionLabel="Reintentar"
+        (action)="store.load()"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <rect x="3" y="5" width="18" height="14" rx="3" />
+          <path d="M3 10h18M7 15h3" />
+        </svg>
+      </app-state-panel>
+    }
+    @case ('ready') {
+      @if (store.subscription(); as current) {
+        <app-subscription-summary [subscription]="current" />
+      } @else {
+        <div class="subscription__intro">
+          <h2>Elige un plan para empezar</h2>
+          <p>
+            Selecciona la capacidad que necesita tu flota. Podrás revisar el importe antes de
+            confirmar.
+          </p>
+        </div>
+      }
+      @if (store.review(); as review) {
+        <app-checkout-review
+          [payment]="review.payment"
+          [plan]="review.plan"
+          [busy]="store.busy()"
+          [error]="store.actionError()"
+          (decision)="store.simulate($event)"
+          (back)="store.closeCheckout()"
+        />
+      } @else {
+        @if (store.plans().length > 0) {
+          <app-plan-selector
+            [plans]="store.plans()"
+            [selectedId]="store.selected()?.planId ?? null"
+            [busy]="store.busy()"
+            [pending]="store.pending()"
+            (planSelected)="store.select($event)"
+          />
+        } @else if (!store.subscription()) {
+          <app-state-panel
+            title="No hay planes disponibles"
+            message="Vuelve a consultar más tarde para elegir tu suscripción."
+          />
+        }
+        @if (store.selected()) {
+          <div class="subscription__footer">
+            <p>
+              {{
+                store.pending()
+                  ? 'La selección está guardada. Continúa con el pago pendiente.'
+                  : 'Puedes revisar el pago antes de confirmarlo.'
+              }}
+            </p>
+            @if (store.actionError()) {
+              <p class="subscription__error" role="alert">{{ store.actionError() }}</p>
+            }
+            <button
+              uiButton
+              type="button"
+              (click)="store.preparePayment()"
+              [disabled]="store.busy()"
+              [loading]="store.busy()"
+            >
+              {{ store.actionLabel() }}
+            </button>
+          </div>
+        }
+      }
+    }
+  }
+</section>

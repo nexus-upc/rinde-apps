@@ -1,0 +1,41 @@
+// Tarjeta que nace en el sitio para invitar, flotando sobre la página.
+.invite {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--arc-radius-card);
+  background: var(--arc-card);
+  box-shadow: 0 8px 32px color-mix(in srgb, var(--arc-shadow) 10%, transparent);
+}
+
+.invite__title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+}
+
+.invite__lead {
+  margin: -8px 0 0;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.invite__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.invite__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 900px) {
+  .invite__grid {
+    grid-template-columns: 1fr;
+  }
+}

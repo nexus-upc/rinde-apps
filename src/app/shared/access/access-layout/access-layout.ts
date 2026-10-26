@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { BrandMark } from '../../brand/brand-mark/brand-mark';
-import { isWideScreen } from '../../layout/wide-screen';
+import { isWideScreen } from '../../browser/wide-screen';
 import { EntrancePreview } from '../entrance-preview/entrance-preview';
 
 /** Marco común del acceso: marca, columna del formulario, bloque decorativo y pie. */
