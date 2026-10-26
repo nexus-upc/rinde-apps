@@ -1,59 +1,63 @@
-# RindeWeb
+# rinde-web
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.0.7.
+Aplicación web de RINDE by NEXUS para el administrador y el responsable de operaciones. Consume la API a través del gateway (`rinde-gateway`, puerto 8000). Está hecha con Angular 22, componentes standalone y SCSS.
 
-## Development server
+Este repositorio contiene el primer avance del Sprint 2: pantalla de ingreso (US09), marco de la aplicación con barra lateral y barra superior, y sesión con JWT. La página "Tablero de viajes" es provisional y se completa en la tarea S2-11.
 
-To start a local development server, run:
+## Requisitos
 
-```bash
+- Node.js 22.22.3 o superior de la rama 22, 24.15.0 o superior de la rama 24, o 26 o superior (lo que exige Angular 22). El desarrollo se hizo con Node.js 26.12.1 y npm 11.
+- Angular CLI 22. Puede instalarse de forma global con `npm install -g @angular/cli@22` o usarse con `npx ng`.
+- El gateway en `http://localhost:8000` para que el ingreso funcione. El gateway necesita `rinde-iam-service` en el puerto 8081.
+
+## Instalación
+
+```
+npm install
+```
+
+## Ejecución
+
+Con el gateway en marcha, levantar la aplicación:
+
+```
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+La aplicación queda en `http://localhost:4200`. El gateway debe permitir ese origen en `CORS_ALLOWED_ORIGINS`, que por defecto ya lo hace.
 
-## Code scaffolding
+La dirección de la API está en `src/environments/environment.ts` (`apiBaseUrl`, por defecto `http://localhost:8000`).
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Scripts
 
-```bash
-ng generate component component-name
+| Comando | Descripción |
+| --- | --- |
+| `npm start` o `ng serve` | Servidor de desarrollo en el puerto 4200. |
+| `npm run build` o `ng build` | Compilación de producción en `dist/rinde-web`. |
+| `npm run watch` | Compilación en modo desarrollo, vigilando los cambios. |
+| `npm test` o `ng test --watch=false` | Pruebas unitarias con Vitest. No necesitan navegador. |
+
+## Estructura
+
+```
+src/
+  environments/        Dirección de la API.
+  app/
+    core/auth/         AuthService, interceptor HTTP, guard de sesión y lectura de los claims del JWT.
+    features/auth/     Pantalla de ingreso (sign-in).
+    features/trips/    Tablero de viajes provisional (protegido).
+    shared/layout/     Marco de la aplicación: barra lateral, barra superior y cierre de sesión.
+    app.routes.ts      Rutas públicas y protegidas.
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Sesión
 
-```bash
-ng generate --help
-```
+- Al ingresar, `POST /api/v1/auth/sign-in` devuelve `accessToken`. El token se guarda en `sessionStorage` bajo la clave `rinde.accessToken`, así que la sesión dura lo que dura la pestaña.
+- El interceptor agrega `Authorization: Bearer <token>` a las peticiones dirigidas a `apiBaseUrl`.
+- El guard lleva a `/sign-in` a quien no tenga un token vigente. Un token vencido se descarta al cargar la aplicación.
+- La interfaz lee el correo y el rol del payload del token para mostrarlos. No verifica la firma, porque esa comprobación la hacen el gateway y los servicios.
+- Los errores del ingreso muestran el campo `detail` del ProblemDetails del backend, por ejemplo "El correo o la contraseña son incorrectos.".
 
-## Building
+## Estilo
 
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Fondo blanco, sin tarjetas grises. Tipografía Geist y Geist Mono, cargadas desde Google Fonts. El azul de marca es `#1D4ED8` con sus tonos claros, y el rojo `#B91C1C` solo para errores. Las variables de color están en `src/styles.scss`.
