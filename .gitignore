@@ -49,3 +49,11 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Salidas y dependencias de las aplicaciones del monorepo
+node_modules/
+dist/
+.angular/
+build/
+.gradle/
+local.properties
