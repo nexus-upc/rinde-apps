@@ -11,6 +11,7 @@
     "check:architecture": "npm run check:architecture --workspace=rinde-web",
     "check": "npm run check --workspace=rinde-web",
     "test": "npm run test --workspace=rinde-web --",
-    "test:platform": "npm run test:platform --workspace=rinde-web"
+    "test:platform": "npm run test:platform --workspace=rinde-web",
+    "test:mailbox": "npm run test:mailbox --workspace=rinde-web"
   }
 }

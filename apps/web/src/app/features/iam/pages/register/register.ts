@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DemoModeService } from '@core/config/demo-mode.service';
+import { DemoMailNotice } from '@shared/ui/demo-mail-notice/demo-mail-notice';
 import { AccessLayout } from '@shared/access/access-layout/access-layout';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { RiseTitle } from '@shared/ui/rise-title/rise-title';
@@ -22,11 +24,20 @@ const STEP_FIELDS = {
 @Component({
   selector: 'app-register',
   providers: [AccessStore],
-  imports: [AutoFocus, ReactiveFormsModule, RouterLink, AccessLayout, RiseTitle, UiButton],
+  imports: [
+    DemoMailNotice,
+    AutoFocus,
+    ReactiveFormsModule,
+    RouterLink,
+    AccessLayout,
+    RiseTitle,
+    UiButton,
+  ],
   templateUrl: './register.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
+  protected readonly demoMode = inject(DemoModeService);
   private readonly store = inject(AccessStore);
   private readonly fb = inject(NonNullableFormBuilder);
 

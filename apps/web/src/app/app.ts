@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { DemoModeService } from '@core/config/demo-mode.service';
 import { ToastService } from '@core/feedback/toast.service';
 import { Toasts } from '@shared/ui/toasts/toasts';
 
@@ -12,5 +13,8 @@ import { Toasts } from '@shared/ui/toasts/toasts';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App {
+  constructor() {
+    inject(DemoModeService).load();
+  }
   protected readonly toasts = inject(ToastService);
 }
