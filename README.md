@@ -32,25 +32,25 @@ La dirección de la API está en `src/environments/environment.ts` (`apiBaseUrl`
 
 ## Scripts
 
-| Comando | Descripción |
-| --- | --- |
-| `npm start` o `ng serve` | Servidor de desarrollo en el puerto 4200. |
-| `npm run build` o `ng build` | Compilación de producción en `dist/rinde-web`. |
-| `npm run watch` | Compilación en modo desarrollo, vigilando los cambios. |
-| `npm test` o `ng test --watch=false` | Pruebas unitarias con Vitest. No necesitan navegador. |
-| `npm run check:architecture` | Límites de dependencia, ausencia de ciclos y de HTTP en páginas o vistas. |
-| `npm run check` | Arquitectura, pruebas y build de producción. Ejecutar antes de integrar. |
+| Comando                              | Descripción                                                               |
+| ------------------------------------ | ------------------------------------------------------------------------- |
+| `npm start` o `ng serve`             | Servidor de desarrollo en el puerto 4200.                                 |
+| `npm run build` o `ng build`         | Compilación de producción en `dist/rinde-web`.                            |
+| `npm run watch`                      | Compilación en modo desarrollo, vigilando los cambios.                    |
+| `npm test` o `ng test --watch=false` | Pruebas unitarias con Vitest. No necesitan navegador.                     |
+| `npm run check:architecture`         | Límites de dependencia, ausencia de ciclos y de HTTP en páginas o vistas. |
+| `npm run check`                      | Arquitectura, pruebas y build de producción. Ejecutar antes de integrar.  |
 
 ## Estructura
 
-| Área | Contenido |
-| --- | --- |
-| `core/` | Sesión, configuración HTTP, acciones asíncronas y avisos globales. |
-| `features/iam/` | Acceso y usuarios, separados en models, data-access, state, pages y ui. |
-| `features/subscriptions/` | Planes, vigencia y checkout, con las mismas capas por funcionalidad. |
-| `features/trips/` | Tablero provisional pendiente de S2-11. |
-| `layout/` | Composición del espacio de trabajo y navegación. |
-| `shared/` | Componentes de presentación, marca y directivas sin conocimiento de la sesión. |
+| Área                      | Contenido                                                                      |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `core/`                   | Sesión, configuración HTTP, acciones asíncronas y avisos globales.             |
+| `features/iam/`           | Acceso y usuarios, separados en models, data-access, state, pages y ui.        |
+| `features/subscriptions/` | Planes, vigencia y checkout, con las mismas capas por funcionalidad.           |
+| `features/trips/`         | Tablero provisional pendiente de S2-11.                                        |
+| `layout/`                 | Composición del espacio de trabajo y navegación.                               |
+| `shared/`                 | Componentes de presentación, marca y directivas sin conocimiento de la sesión. |
 
 La explicación y las reglas están en [docs/frontend-architecture.md](docs/frontend-architecture.md).
 
@@ -84,3 +84,19 @@ La clave HMAC del webhook permanece en el servidor y nunca se envía a Angular.
 El monolito necesita `RINDE_IAM_REMOTE_ENABLED=true` e `IAM_SERVICE_URL` para consultar la empresa
 en IAM separado. Notifications recibe los eventos en segundo plano: todavía no hay un buzón
 de avisos en la web ni un proveedor push real.
+
+## Administración de plataforma
+
+El dueño ingresa por /platform/sign-in. Tiene un espacio propio para empresas, planes, suscripciones, pagos de prueba y auditoría. Las credenciales de plataforma no sirven para entrar en las rutas de una empresa, y un administrador de empresa no puede asignar ese acceso mediante invitaciones. Los guards solo ordenan la navegación; el gateway y los servicios comprueban los permisos.
+
+Las acciones de acceso y catálogo piden un motivo. Suspender una empresa impide usar también los tokens que ya tenía abiertos. Restablecer su acceso conserva las restricciones comerciales de la suscripción. Los precios de un plan existente no se editan: se crea otro plan y se retira el anterior, para conservar las condiciones de quienes ya lo contrataron. Los pagos están identificados como simulados.
+
+La funcionalidad platform conserva models, data-access, state, pages y ui. El marco y la navegación de plataforma están separados del marco de empresa. La sesión identifica el ámbito y evita consultar /users/me con una identidad de plataforma. DESIGN.md describe los tokens y patrones Arcadia existentes y su extensión.
+
+## Comprobación del panel en navegador
+
+npm run test:platform usa playwright-core y requiere un backend de comprobación y esta web en ejecución. En Windows usa Edge; puede elegirse otro canal con RINDE_BROWSER_CHANNEL. En otros entornos debe estar instalado Chromium para Playwright. No ejecutar esta prueba contra datos de producción: crea registros de demostración.
+
+El backend debe estar levantado con Docker Compose en un proyecto cuyo nombre empiece por rinde-platform-, con el alta inicial del dueño y el pago simulado habilitados. RINDE_TEST_ENV indica la ruta del archivo privado de Compose; RINDE_TEST_PROJECT indica el proyecto. Por defecto se usa la carpeta local de este workspace, ../rinde-backend/.env.platform y el proyecto rinde-platform-review. Las direcciones pueden cambiarse con RINDE_WEB_BASE y RINDE_API_BASE.
+
+La prueba lee las credenciales de ese entorno privado sin mostrarlas, crea una empresa de demostración y prepara solo el hash de su token de verificación en la base de prueba. Después ejecuta acceso del dueño, búsqueda, suspensión y restablecimiento, alta de un plan, contratación y pago simulado desde la web de empresa, consulta de registros, auditoría, recuperación de un error inyectado y navegación sin cruce de permisos. Comprueba desbordamiento, controles táctiles y retorno de foco. Los resultados y capturas van a .impeccable/review, ignorado por Git. Las fixtures quedan en ese entorno de revisión.

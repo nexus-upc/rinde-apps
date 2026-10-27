@@ -16,7 +16,13 @@ export class AuthService {
   readonly user = computed<SessionUser | null>(() => {
     const value = this.token();
     const claims = value ? readTokenClaims(value) : null;
-    return claims?.email && claims.role ? { email: claims.email, role: claims.role } : null;
+    return claims?.email && claims.role
+      ? {
+          email: claims.email,
+          role: claims.role,
+          scope: claims.scope === 'PLATFORM' ? 'PLATFORM' : 'TENANT',
+        }
+      : null;
   });
   readonly roleLabel = computed(() => {
     const role = this.user()?.role;
@@ -25,10 +31,22 @@ export class AuthService {
   signIn(credentials: SignInRequest): Observable<AuthenticationResponse> {
     return this.api.signIn(credentials).pipe(
       tap((response) => {
-        this.storage.write(response.accessToken);
-        this.token.set(response.accessToken);
+        this.establish(response, 'TENANT');
       }),
     );
+  }
+  establish(response: AuthenticationResponse, expected: 'TENANT' | 'PLATFORM'): void {
+    const claims = readTokenClaims(response.accessToken);
+    const scope = claims?.scope === 'PLATFORM' ? 'PLATFORM' : 'TENANT';
+    if (
+      !this.valid(response.accessToken) ||
+      scope !== expected ||
+      (scope === 'PLATFORM' && (claims?.role !== 'PLATFORM_OWNER' || claims.tenantId))
+    ) {
+      throw new Error('La respuesta de acceso no pertenece al ámbito solicitado.');
+    }
+    this.storage.write(response.accessToken);
+    this.token.set(response.accessToken);
   }
   signOut(): void {
     this.storage.clear();

@@ -1,0 +1,124 @@
+.platform-page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  max-width: 1120px;
+  min-height: calc(100dvh - 152px);
+  min-width: 0;
+}
+.platform-search {
+  display: grid;
+  gap: 8px;
+  max-width: 640px;
+}
+.platform-search > div {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.platform-search input {
+  min-width: 0;
+  flex: 1;
+}
+.platform-notice,
+.platform-loading {
+  color: var(--arc-muted);
+  max-width: 75ch;
+}
+.platform-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.platform-tabs button {
+  min-height: 44px;
+  border: 0;
+  background: var(--arc-surface);
+  border-radius: var(--arc-radius-pill);
+  padding: 0 16px;
+  color: var(--arc-muted);
+}
+.platform-tabs button[aria-pressed='true'] {
+  background: var(--arc-fill);
+  color: var(--arc-on-fill);
+}
+.platform-overview {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 40px 48px;
+}
+.platform-overview > section {
+  display: grid;
+  gap: 24px;
+  align-content: start;
+}
+.platform-overview h2 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+.platform-overview p {
+  color: var(--arc-muted);
+}
+.platform-overview dl {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+.platform-overview dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 16px 0;
+}
+.platform-overview dt {
+  color: var(--arc-muted);
+}
+.platform-overview dd {
+  margin: 0;
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.platform-overview .text-link {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.platform-overview__payments {
+  grid-column: 1/-1;
+  max-width: 640px;
+}
+.platform-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  color: var(--arc-muted);
+}
+@media (max-width: 640px) {
+  .platform-overview {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 40px;
+  }
+  .platform-overview__payments {
+    grid-column: auto;
+  }
+  .platform-search > div {
+    gap: 8px;
+  }
+  .platform-pagination span {
+    order: 3;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+button[uiButton] {
+  min-height: 44px;
+}

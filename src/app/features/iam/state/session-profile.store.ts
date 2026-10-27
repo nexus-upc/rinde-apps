@@ -15,7 +15,7 @@ export class SessionProfileStore {
     effect((onCleanup) => {
       const token = this.auth.accessToken();
       this.profileState.set(null);
-      if (!token) return;
+      if (!token || this.auth.user()?.scope === 'PLATFORM') return;
       const request = this.iam.currentUser().subscribe({
         next: (profile) => this.profileState.set(profile),
         error: () => this.profileState.set(null),
