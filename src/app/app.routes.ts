@@ -1,8 +1,22 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from '@core/auth/admin.guard';
 import { authGuard } from '@core/auth/auth.guard';
+import { platformGuard } from '@core/auth/platform.guard';
 
 export const routes: Routes = [
+  {
+    path: 'platform/sign-in',
+    loadComponent: () =>
+      import('./features/platform/pages/platform-sign-in').then((m) => m.PlatformSignIn),
+  },
+  {
+    path: 'platform',
+    canActivate: [platformGuard],
+    canActivateChild: [platformGuard],
+    loadComponent: () => import('./layout/platform-shell').then((m) => m.PlatformShell),
+    loadChildren: () =>
+      import('./features/platform/platform.routes').then((m) => m.PLATFORM_ROUTES),
+  },
   {
     path: '',
     loadChildren: () =>

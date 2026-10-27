@@ -1,5 +1,7 @@
 /** Claims del payload del JWT que usa la interfaz. */
 export interface TokenClaims {
+  scope?: string;
+  tenantId?: string;
   email?: string;
   role?: string;
   exp?: number;

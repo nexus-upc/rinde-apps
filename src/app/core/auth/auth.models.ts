@@ -13,12 +13,14 @@ export interface AuthenticationResponse {
 
 /** Datos del usuario que el token lleva en sus claims. */
 export interface SessionUser {
+  readonly scope: 'TENANT' | 'PLATFORM';
   readonly email: string;
   readonly role: string;
 }
 
 /** Nombres visibles de los roles que devuelve IAM. */
 export const ROLE_LABELS: Readonly<Record<string, string>> = {
+  PLATFORM_OWNER: 'Dueño de Rinde',
   ADMINISTRATOR: 'Administrador',
   OPERATIONS_MANAGER: 'Responsable de operaciones',
   DRIVER: 'Conductor',

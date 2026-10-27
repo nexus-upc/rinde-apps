@@ -1,0 +1,224 @@
+<section
+  class="platform-page"
+  [attr.aria-busy]="store.request.pending() || store.mutation.pending() || null"
+>
+  <app-page-header
+    [title]="title"
+    [description]="
+      section === 'overview' ? 'Empresas, catálogo y facturación de la plataforma.' : ''
+    "
+  >
+    @if (section === 'plans' && !creating() && !selectedPlan()) {
+      <button
+        #createTrigger
+        uiButton
+        type="button"
+        (click)="beginCreate($event)"
+        [disabled]="store.request.pending()"
+      >
+        Nuevo plan
+      </button>
+    }
+  </app-page-header>
+  @if (section === 'companies') {
+    <form class="platform-search" (ngSubmit)="search()">
+      <label for="company-search">Buscar por empresa o RUC</label>
+      <div>
+        <input
+          id="company-search"
+          class="field__input"
+          type="search"
+          name="search"
+          maxlength="100"
+          [(ngModel)]="searchText"
+        />
+        <button uiButton variant="secondary" type="submit" [disabled]="store.request.pending()">
+          Buscar
+        </button>
+      </div>
+    </form>
+  }
+  @if (section === 'payments') {
+    <p class="platform-notice">
+      Los pagos de este entorno son simulados. No representan cobros bancarios.
+    </p>
+  }
+  @if (section === 'plans') {
+    <p class="platform-notice">
+      Retirar un plan impide nuevas contrataciones. Las suscripciones existentes conservan su precio
+      y límite.
+    </p>
+  }
+  @if (section === 'audit') {
+    <div class="platform-tabs" role="group" aria-label="Origen de auditoría">
+      <button
+        type="button"
+        [attr.aria-pressed]="auditSource() === 'identity'"
+        [disabled]="store.request.pending()"
+        (click)="changeAudit('identity')"
+      >
+        Empresas
+      </button>
+      <button
+        type="button"
+        [attr.aria-pressed]="auditSource() === 'billing'"
+        [disabled]="store.request.pending()"
+        (click)="changeAudit('billing')"
+      >
+        Planes
+      </button>
+    </div>
+  }
+  @if (creating()) {
+    <app-platform-plan-form
+      [pending]="store.mutation.pending()"
+      [error]="store.mutation.error()"
+      (create)="createPlan($event)"
+      (cancel)="close()"
+    />
+  }
+  @if (selectedCompany(); as company) {
+    <app-platform-reason
+      [title]="
+        (company.accessSuspended ? 'Restablecer acceso: ' : 'Suspender acceso: ') +
+        company.tradeName
+      "
+      [description]="
+        company.accessSuspended
+          ? 'Se levantará la suspensión administrativa. Las restricciones de su suscripción se conservarán.'
+          : 'Los usuarios de esta empresa perderán el acceso. La suscripción y los pagos se conservarán.'
+      "
+      [confirmLabel]="company.accessSuspended ? 'Restablecer acceso' : 'Suspender acceso'"
+      [pending]="store.mutation.pending()"
+      [error]="store.mutation.error()"
+      (confirm)="decide($event)"
+      (cancel)="close()"
+    />
+  }
+  @if (selectedPlan(); as plan) {
+    <app-platform-reason
+      [title]="(plan.active ? 'Retirar plan: ' : 'Publicar plan: ') + plan.name"
+      [description]="
+        plan.active
+          ? 'Dejará de ofrecerse a nuevas suscripciones. No se cambian los contratos existentes.'
+          : 'El plan volverá a aparecer en el catálogo de las empresas.'
+      "
+      [confirmLabel]="plan.active ? 'Retirar plan' : 'Publicar plan'"
+      [pending]="store.mutation.pending()"
+      [error]="store.mutation.error()"
+      (confirm)="decide($event)"
+      (cancel)="close()"
+    />
+  }
+  @if (store.request.pending()) {
+    <p class="platform-loading" role="status">Cargando {{ title.toLowerCase() }}...</p>
+  }
+  @if (store.request.error(); as error) {
+    <app-state-panel
+      title="No se pudo cargar la información"
+      [message]="error"
+      [error]="true"
+      actionLabel="Reintentar"
+      (action)="store.load()"
+    />
+  } @else if (section === 'overview') {
+    @if (store.overview(); as overview) {
+      <div class="platform-overview">
+        <section>
+          <h2>Empresas</h2>
+          <dl>
+            <div>
+              <dt>Registradas</dt>
+              <dd>{{ overview.identity.companies }}</dd>
+            </div>
+            <div>
+              <dt>Acceso suspendido</dt>
+              <dd>{{ overview.identity.suspendedCompanies }}</dd>
+            </div>
+            <div>
+              <dt>Usuarios de empresa</dt>
+              <dd>{{ overview.identity.companyUsers }}</dd>
+            </div>
+          </dl>
+          <a class="text-link" routerLink="/platform/companies">Gestionar empresas</a>
+        </section>
+        <section>
+          <h2>Suscripciones</h2>
+          <dl>
+            <div>
+              <dt>Registradas</dt>
+              <dd>{{ overview.billing.subscriptions }}</dd>
+            </div>
+            <div>
+              <dt>Pendientes de pago</dt>
+              <dd>{{ overview.billing.pendingSubscriptions }}</dd>
+            </div>
+            <div>
+              <dt>Planes disponibles</dt>
+              <dd>{{ overview.billing.activePlans }}</dd>
+            </div>
+          </dl>
+          <a class="text-link" routerLink="/platform/subscriptions">Ver suscripciones</a>
+        </section>
+        <section class="platform-overview__payments">
+          <h2>Pagos de prueba</h2>
+          <p>Actividad del entorno simulado, sin cobros bancarios.</p>
+          <dl>
+            <div>
+              <dt>Confirmados</dt>
+              <dd>{{ overview.billing.confirmedPayments }}</dd>
+            </div>
+            <div>
+              <dt>Total confirmado de prueba</dt>
+              <dd>{{ money(overview.billing.confirmedAmount) }}</dd>
+            </div>
+          </dl>
+          <a class="text-link" routerLink="/platform/payments">Revisar pagos de prueba</a>
+        </section>
+      </div>
+    }
+  } @else if (store.ready()) {
+    @if (rows().length) {
+      <app-platform-rows
+        [rows]="rows()"
+        [disabled]="
+          store.mutation.pending() || !!selectedCompany() || !!selectedPlan() || creating()
+        "
+        (choose)="choose($event)"
+      />
+      <nav class="platform-pagination" aria-label="Paginación">
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          [disabled]="store.request.pending() || store.pagination().page === 0"
+          (click)="store.load(store.pagination().page - 1)"
+        >
+          Anterior
+        </button>
+        <span
+          >{{ store.pagination().page * store.pagination().size + 1 }} a
+          {{ store.pagination().page * store.pagination().size + rows().length }} de
+          {{ store.pagination().total }}</span
+        >
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          [disabled]="
+            store.request.pending() ||
+            (store.pagination().page + 1) * store.pagination().size >= store.pagination().total
+          "
+          (click)="store.load(store.pagination().page + 1)"
+        >
+          Siguiente
+        </button>
+      </nav>
+    } @else {
+      <app-state-panel
+        title="Todavía no hay registros"
+        message="Los registros aparecerán aquí cuando se genere actividad."
+      />
+    }
+  }
+</section>

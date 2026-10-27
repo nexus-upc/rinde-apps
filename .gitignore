@@ -42,3 +42,10 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Evidencias locales y secretos de comprobación
+.impeccable/review/
+.impeccable/build/
+.env
+.env.*
+!.env.example

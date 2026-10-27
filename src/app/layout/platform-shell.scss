@@ -1,0 +1,23 @@
+@use './shell-layout';
+.platform-mobile {
+  display: none;
+}
+@media (max-width: 768px) {
+  .shell__signout {
+    min-height: 44px;
+  }
+  .platform-nav {
+    display: none;
+  }
+  .platform-mobile {
+    display: grid;
+    gap: 8px;
+    color: var(--arc-muted);
+    font-size: 12px;
+  }
+  .platform-mobile select {
+    min-height: 44px;
+    color: var(--arc-ink);
+    font-size: 16px;
+  }
+}

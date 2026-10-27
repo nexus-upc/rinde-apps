@@ -47,7 +47,11 @@ describe('AuthService', () => {
 
     expect(sessionStorage.getItem(STORAGE_KEY)).toBe(token);
     expect(service.isAuthenticated()).toBe(true);
-    expect(service.user()).toEqual({ email: 'admin@rinde.test', role: 'ADMINISTRATOR' });
+    expect(service.user()).toEqual({
+      email: 'admin@rinde.test',
+      role: 'ADMINISTRATOR',
+      scope: 'TENANT',
+    });
     expect(service.roleLabel()).toBe('Administrador');
   });
 

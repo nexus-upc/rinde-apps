@@ -12,8 +12,10 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   const baseUrl = inject(API_BASE_URL);
   const token = auth.getToken();
   if (!token || !isApiUrl(request.url, baseUrl)) return next(request);
-  const signIn =
-    new URL(request.url).pathname === new URL(baseUrl + '/api/v1/auth/sign-in').pathname;
+  const path = new URL(request.url).pathname;
+  const signIn = path === '/api/v1/auth/sign-in' || path === '/api/v1/platform/auth/sign-in';
+  const loginRoute = auth.user()?.scope === 'PLATFORM' ? '/platform/sign-in' : '/sign-in';
+  if (signIn) return next(request);
   return next(request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })).pipe(
     catchError((error: unknown) => {
       if (
@@ -23,7 +25,7 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
         auth.getToken() === token
       ) {
         auth.signOut();
-        void router.navigateByUrl('/sign-in');
+        void router.navigateByUrl(loginRoute);
       }
       return throwError(() => error);
     }),
