@@ -7,7 +7,7 @@ const { execFileSync } = require('node:child_process');
 
 const root = path.resolve(__dirname, '../..');
 const privateFile = path.resolve(
-  process.env.RINDE_TEST_ENV || path.join(root, '../rinde-backend/.env.platform'),
+  process.env.RINDE_TEST_ENV || path.resolve(root, '../../../rinde-backend/.env.platform'),
 );
 const config = Object.fromEntries(
   fs

@@ -1,0 +1,16 @@
+{
+  "name": "rinde-apps",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@11.19.0",
+  "workspaces": ["apps/web"],
+  "scripts": {
+    "start": "npm run start --workspace=rinde-web --",
+    "build": "npm run build --workspace=rinde-web",
+    "build:web": "npm run build --workspace=rinde-web",
+    "check:architecture": "npm run check:architecture --workspace=rinde-web",
+    "check": "npm run check --workspace=rinde-web",
+    "test": "npm run test --workspace=rinde-web --",
+    "test:platform": "npm run test:platform --workspace=rinde-web"
+  }
+}
