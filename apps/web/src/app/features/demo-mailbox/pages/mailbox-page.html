@@ -1,0 +1,155 @@
+<section
+  class="mailbox-page"
+  [class.is-open]="store.selected()"
+  [attr.aria-busy]="store.request.pending() || store.opening.pending() || null"
+>
+  <app-page-header
+    title="Buzón de demostración"
+    description="Verificación, invitaciones y recuperación de acceso."
+  >
+    @if (mode.mailboxEnabled()) {
+      <button
+        uiButton
+        variant="secondary"
+        type="button"
+        [disabled]="store.request.pending() || store.opening.pending()"
+        (click)="store.load()"
+      >
+        Actualizar
+      </button>
+    }
+  </app-page-header>
+  @if (!mode.ready() || mode.request.pending()) {
+    <p role="status" class="mailbox-status">Comprobando el buzón...</p>
+  } @else if (!mode.mailboxEnabled()) {
+    <app-state-panel
+      title="Buzón no habilitado"
+      [message]="
+        mode.request.error() ??
+        'La captura de correos de demostración está desactivada en este entorno.'
+      "
+      actionLabel="Volver a comprobar"
+      (action)="mode.load()"
+    />
+  } @else {
+    <p class="mailbox-notice">
+      Solo el operador de Rinde puede leer estos mensajes. Los enlaces del destinatario se abren en
+      otra pestaña, sin cambiar tu sesión.
+    </p>
+    <form class="mailbox-filters" (ngSubmit)="filter()">
+      <div class="field">
+        <label class="field__label" for="mail-search">Destinatario o empresa</label
+        ><input
+          class="field__input"
+          id="mail-search"
+          name="search"
+          type="search"
+          maxlength="150"
+          [(ngModel)]="searchText"
+        />
+      </div>
+      <div class="field">
+        <label class="field__label" for="mail-purpose">Tipo de correo</label
+        ><select class="field__input" id="mail-purpose" name="purpose" [(ngModel)]="purpose">
+          <option value="">Todos</option>
+          <option value="EMAIL_VERIFICATION">Verificación</option>
+          <option value="INVITATION">Invitación</option>
+          <option value="PASSWORD_RESET">Recuperación</option>
+        </select>
+      </div>
+      <button
+        uiButton
+        variant="secondary"
+        type="submit"
+        [disabled]="store.request.pending() || store.opening.pending()"
+      >
+        Filtrar
+      </button>
+    </form>
+    @if (store.request.pending()) {
+      <p role="status" class="mailbox-status">Cargando mensajes...</p>
+    }
+    @if (store.request.error(); as error) {
+      <app-state-panel
+        title="No se pudieron cargar los mensajes"
+        [message]="error"
+        [error]="true"
+        actionLabel="Reintentar"
+        (action)="store.load()"
+      />
+    } @else if (store.ready()) {
+      @if (store.messages().length) {
+        <div class="mailbox-layout" [class.is-open]="store.selected()">
+          <div class="mailbox-list">
+            <app-demo-mail-list
+              [messages]="store.messages()"
+              [selected]="store.selected()"
+              [disabled]="store.opening.pending() || store.request.pending()"
+              (choose)="open($event)"
+            />
+            <nav class="mailbox-pagination" aria-label="Paginación del buzón">
+              <button
+                class="text-link"
+                type="button"
+                [disabled]="
+                  store.request.pending() ||
+                  store.opening.pending() ||
+                  store.pagination().page === 0
+                "
+                (click)="store.load(store.pagination().page - 1)"
+              >
+                Anterior
+              </button>
+              <span
+                >{{ store.pagination().page * store.pagination().size + 1 }} a
+                {{ store.pagination().page * store.pagination().size + store.messages().length }} de
+                {{ store.pagination().total }}</span
+              >
+              <button
+                class="text-link"
+                type="button"
+                [disabled]="
+                  store.request.pending() ||
+                  store.opening.pending() ||
+                  (store.pagination().page + 1) * store.pagination().size >=
+                    store.pagination().total
+                "
+                (click)="store.load(store.pagination().page + 1)"
+              >
+                Siguiente
+              </button>
+            </nav>
+          </div>
+          <div class="mailbox-detail">
+            @if (store.opening.pending()) {
+              <p role="status" class="mailbox-status">Abriendo mensaje...</p>
+            } @else if (store.opening.error(); as error) {
+              <app-state-panel
+                title="No se pudo abrir el mensaje"
+                [message]="error"
+                [error]="true"
+                actionLabel="Reintentar"
+                (action)="store.open(store.selected()!)"
+              />
+              <button type="button" class="text-link mailbox-return" (click)="close()">
+                Volver a los mensajes
+              </button>
+            } @else if (store.detail(); as mail) {
+              <app-demo-mail-detail [mail]="mail" (close)="close()" />
+            } @else {
+              <app-state-panel
+                title="Abre un mensaje"
+                message="Selecciona un correo para ver su contenido y el enlace disponible."
+              />
+            }
+          </div>
+        </div>
+      } @else {
+        <app-state-panel
+          title="No hay mensajes"
+          message="Los nuevos correos de verificación, invitación y recuperación aparecerán aquí cuando se soliciten en modo demostración."
+        />
+      }
+    }
+  }
+</section>

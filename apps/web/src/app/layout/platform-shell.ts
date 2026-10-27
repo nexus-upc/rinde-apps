@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { filter, map } from 'rxjs';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { DemoModeService } from '@core/config/demo-mode.service';
 import { AuthService } from '@core/auth/auth.service';
 import { BrandMark } from '@shared/brand/brand-mark/brand-mark';
 import { PlatformProfileStore } from '../features/platform/state/platform-profile.store';
@@ -15,7 +16,7 @@ import { PlatformProfileStore } from '../features/platform/state/platform-profil
     <aside class="shell__sidebar">
       <app-brand-mark class="shell__brand" />
       <nav class="shell__nav platform-nav" aria-label="Administración de Rinde">
-        @for (item of links; track item.path) {
+        @for (item of links(); track item.path) {
           <a
             class="shell__link arc-tap"
             [routerLink]="item.path"
@@ -34,7 +35,7 @@ import { PlatformProfileStore } from '../features/platform/state/platform-profil
           [ngModel]="currentPath()"
           (ngModelChange)="navigate($event)"
         >
-          @for (item of links; track item.path) {
+          @for (item of links(); track item.path) {
             <option [value]="item.path">{{ item.label }}</option>
           }
         </select>
@@ -67,14 +68,18 @@ export class PlatformShell {
     { initialValue: this.router.url.split('?')[0] ?? '/platform' },
   );
   protected readonly profile = inject(PlatformProfileStore);
-  protected readonly links = [
+  protected readonly mode = inject(DemoModeService);
+  protected readonly links = computed(() => [
     { path: '/platform', label: 'Resumen' },
     { path: '/platform/companies', label: 'Empresas' },
     { path: '/platform/plans', label: 'Planes' },
     { path: '/platform/subscriptions', label: 'Suscripciones' },
     { path: '/platform/payments', label: 'Pagos de prueba' },
     { path: '/platform/audit', label: 'Auditoría' },
-  ];
+    ...(this.mode.mailboxEnabled()
+      ? [{ path: '/platform/mailbox', label: 'Buzón de demostración' }]
+      : []),
+  ]);
   constructor() {
     this.profile.load();
   }

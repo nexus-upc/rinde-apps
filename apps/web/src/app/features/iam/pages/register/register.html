@@ -5,10 +5,11 @@
         <header class="access__header">
           <app-rise-title text="Revisa tu correo" />
           <p class="access__lead">
-            Enviamos un enlace a {{ form.controls.administratorEmail.value }} para confirmar la
+            Preparamos un enlace para {{ form.controls.administratorEmail.value }} para confirmar la
             empresa {{ form.controls.tradeName.value }}. Ábrelo para activar la cuenta.
           </p>
         </header>
+        <app-demo-mail-notice [enabled]="demoMode.mailboxEnabled()" />
         <a uiButton block variant="secondary" routerLink="/sign-in">Volver a iniciar sesión</a>
       } @else {
         <div class="access__steps">

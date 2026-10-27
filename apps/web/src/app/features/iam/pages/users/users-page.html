@@ -12,6 +12,7 @@
       </button>
     }
   </app-page-header>
+  <app-demo-mail-notice [enabled]="demoMode.mailboxEnabled()" />
   @if (store.inviting()) {
     <app-invite-user-form
       [pending]="store.inviteAction.pending()"

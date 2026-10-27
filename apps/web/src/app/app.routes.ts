@@ -14,8 +14,18 @@ export const routes: Routes = [
     canActivate: [platformGuard],
     canActivateChild: [platformGuard],
     loadComponent: () => import('./layout/platform-shell').then((m) => m.PlatformShell),
-    loadChildren: () =>
-      import('./features/platform/platform.routes').then((m) => m.PLATFORM_ROUTES),
+    children: [
+      {
+        path: 'mailbox',
+        loadComponent: () =>
+          import('./features/demo-mailbox/pages/mailbox-page').then((m) => m.MailboxPage),
+      },
+      {
+        path: '',
+        loadChildren: () =>
+          import('./features/platform/platform.routes').then((m) => m.PLATFORM_ROUTES),
+      },
+    ],
   },
   {
     path: '',
