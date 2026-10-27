@@ -42,3 +42,18 @@ __screenshots__/
 # System files
 .DS_Store
 Thumbs.db
+
+# Evidencias locales y secretos de comprobación
+.impeccable/review/
+.impeccable/build/
+.env
+.env.*
+!.env.example
+
+# Salidas y dependencias de las aplicaciones del monorepo
+node_modules/
+dist/
+.angular/
+build/
+.gradle/
+local.properties

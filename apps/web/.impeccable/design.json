@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T20:08:04.089Z",
+  "title": "Sistema de diseño: Rinde",
+  "extensions": {
+    "colorMeta": {
+      "arc-fill": {
+        "role": "primary",
+        "displayName": "Tinta de acción"
+      },
+      "arc-accent": {
+        "role": "primary",
+        "displayName": "Terracota de foco"
+      },
+      "arc-bg": {
+        "role": "neutral",
+        "displayName": "Blanco de página"
+      },
+      "arc-surface": {
+        "role": "neutral",
+        "displayName": "Piedra de superficie"
+      },
+      "arc-ink": {
+        "role": "neutral",
+        "displayName": "Tinta de texto"
+      },
+      "arc-muted": {
+        "role": "neutral",
+        "displayName": "Piedra de texto secundario"
+      },
+      "arc-danger": {
+        "role": "semantic",
+        "displayName": "Peligro"
+      },
+      "arc-success": {
+        "role": "semantic",
+        "displayName": "Confirmación"
+      },
+      "arc-wait": {
+        "role": "semantic",
+        "displayName": "Espera"
+      }
+    },
+    "typographyMeta": {
+      "page-title": {
+        "displayName": "Título de página",
+        "purpose": "Encabezado principal de las pantallas de operación."
+      },
+      "entrance-title": {
+        "displayName": "Título de acceso",
+        "purpose": "Encabezado de los formularios de entrada."
+      },
+      "showcase-title": {
+        "displayName": "Mensaje del acceso",
+        "purpose": "Mensaje del bloque decorativo de escritorio."
+      },
+      "section-title": {
+        "displayName": "Título de sección",
+        "purpose": "Subsecciones, formularios y estados."
+      },
+      "row-title": {
+        "displayName": "Título de fila",
+        "purpose": "Identificación del registro en las listas de plataforma."
+      },
+      "body": {
+        "displayName": "Cuerpo",
+        "purpose": "Texto y valores de la interfaz."
+      },
+      "label": {
+        "displayName": "Etiqueta",
+        "purpose": "Etiquetas de campos con peso medio."
+      }
+    },
+    "shadows": [
+      {
+        "name": "primary-hover",
+        "value": "0 4px 12px color-mix(in srgb, var(--arc-shadow) 18%, transparent)",
+        "purpose": "Respuesta del botón principal al pasar un puntero que permite flotación."
+      },
+      {
+        "name": "toast",
+        "value": "0 8px 24px color-mix(in srgb, var(--arc-shadow) 18%, transparent)",
+        "purpose": "Separación del aviso flotante respecto del contenido."
+      },
+      {
+        "name": "entrance-preview",
+        "value": "0 0 0 1px color-mix(in srgb, var(--arc-shadow) 6%, transparent), 0 60px 120px -40px color-mix(in srgb, var(--arc-shadow) 30%, transparent)",
+        "purpose": "Profundidad de la vista previa inclinada del acceso."
+      }
+    ],
+    "motion": [
+      {
+        "name": "arc-dur-instant",
+        "value": "0.12s",
+        "purpose": "Respuesta al presionar un control."
+      },
+      {
+        "name": "arc-dur-fast",
+        "value": "0.18s",
+        "purpose": "Respuesta de colores, bordes, sombras y escala de controles."
+      },
+      {
+        "name": "arc-dur-base",
+        "value": "0.26s",
+        "purpose": "Avisos y cambio de progreso del acceso."
+      },
+      {
+        "name": "arc-dur-slow",
+        "value": "0.4s",
+        "purpose": "Duración compartida disponible en la base vigente."
+      },
+      {
+        "name": "arc-ease-out",
+        "value": "cubic-bezier(0.215, 0.61, 0.355, 1)",
+        "purpose": "Salida de transiciones de controles."
+      },
+      {
+        "name": "arc-ease-emphasis",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Entrada del aviso flotante."
+      },
+      {
+        "name": "arc-ease-entrance",
+        "value": "cubic-bezier(0.2, 0.8, 0.2, 1)",
+        "purpose": "Entrada de pasos y palabras del título."
+      },
+      {
+        "name": "arc-press-scale",
+        "value": "0.97",
+        "purpose": "Escala al presionar; vuelve a 1 con movimiento reducido."
+      },
+      {
+        "name": "entrance-stage",
+        "value": "620ms",
+        "purpose": "Entrada de etapa con desplazamiento inicial de 16px y desenfoque de 8px."
+      },
+      {
+        "name": "entrance-word",
+        "value": "600ms",
+        "purpose": "Entrada de palabra con desplazamiento inicial de 12px y desenfoque de 6px."
+      },
+      {
+        "name": "preview-in",
+        "value": "800ms",
+        "purpose": "Entrada de la vista previa del acceso; se anula con movimiento reducido."
+      },
+      {
+        "name": "button-spinner",
+        "value": "0.7s linear infinite",
+        "purpose": "Rotación del indicador de carga existente."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "platform-single-column",
+        "value": "640px"
+      },
+      {
+        "name": "shell-mobile",
+        "value": "768px"
+      },
+      {
+        "name": "access-two-columns",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botón principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal de tinta; el panel establece una altura mínima de 44px.",
+      "html": "<button class=\"ds-button ds-primary\" type=\"button\">Guardar</button>",
+      "css": ".ds-button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border:1px solid transparent;border-radius:var(--arc-radius-pill,999px);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:14px;font-weight:500;line-height:1;white-space:nowrap;text-decoration:none;cursor:pointer;transition:background-color var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1)),box-shadow var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1)),transform var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1))}.ds-button:active:not(:disabled){transform:scale(var(--arc-press-scale,.97));transition-duration:var(--arc-dur-instant,.12s)}.ds-button:focus-visible{outline:2px solid var(--arc-accent,#c15f3c);outline-offset:2px}.ds-button:disabled{cursor:not-allowed}@media(pointer:coarse){.ds-button{min-height:44px}}@media(prefers-reduced-motion:reduce){.ds-button:active:not(:disabled){transform:none}}.ds-primary{background:var(--arc-fill,#1c1917);color:var(--arc-on-fill,#ffffff);border-color:var(--arc-fill,#1c1917)}.ds-primary:active:not(:disabled){background:var(--arc-fill-hover,#292524)}.ds-primary:disabled{background:var(--arc-disabled-bg,#e7e5e4);border-color:var(--arc-disabled-bg,#e7e5e4);color:var(--arc-disabled-ink,#8a837e)}@media(hover:hover){.ds-primary:hover:not(:disabled){background:var(--arc-fill-hover,#292524);box-shadow:0 4px 12px color-mix(in srgb,var(--arc-shadow,#1c1917) 18%,transparent)}}"
+    },
+    {
+      "name": "Botón secundario",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Acciones de apoyo y paginación sobre superficie piedra.",
+      "html": "<button class=\"ds-button ds-secondary\" type=\"button\">Siguiente</button>",
+      "css": ".ds-button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border:1px solid transparent;border-radius:var(--arc-radius-pill,999px);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:14px;font-weight:500;line-height:1;white-space:nowrap;text-decoration:none;cursor:pointer;transition:background-color var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1)),box-shadow var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1)),transform var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1))}.ds-button:active:not(:disabled){transform:scale(var(--arc-press-scale,.97));transition-duration:var(--arc-dur-instant,.12s)}.ds-button:focus-visible{outline:2px solid var(--arc-accent,#c15f3c);outline-offset:2px}.ds-button:disabled{cursor:not-allowed}@media(pointer:coarse){.ds-button{min-height:44px}}@media(prefers-reduced-motion:reduce){.ds-button:active:not(:disabled){transform:none}}.ds-secondary{background:var(--arc-surface,#f5f5f4);color:var(--arc-ink,#1c1917)}.ds-secondary:active:not(:disabled){background:color-mix(in srgb,var(--arc-surface,#f5f5f4) 92%,var(--arc-ink,#1c1917))}@media(hover:hover){.ds-secondary:hover:not(:disabled){background:color-mix(in srgb,var(--arc-surface,#f5f5f4) 95%,var(--arc-ink,#1c1917))}}"
+    },
+    {
+      "name": "Botón discreto",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Acción de bajo énfasis con fondo transparente en reposo.",
+      "html": "<button class=\"ds-button ds-ghost\" type=\"button\">Volver</button>",
+      "css": ".ds-button{position:relative;display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 16px;border:1px solid transparent;border-radius:var(--arc-radius-pill,999px);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:14px;font-weight:500;line-height:1;white-space:nowrap;text-decoration:none;cursor:pointer;transition:background-color var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1)),box-shadow var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1)),transform var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1))}.ds-button:active:not(:disabled){transform:scale(var(--arc-press-scale,.97));transition-duration:var(--arc-dur-instant,.12s)}.ds-button:focus-visible{outline:2px solid var(--arc-accent,#c15f3c);outline-offset:2px}.ds-button:disabled{cursor:not-allowed}@media(pointer:coarse){.ds-button{min-height:44px}}@media(prefers-reduced-motion:reduce){.ds-button:active:not(:disabled){transform:none}}.ds-ghost{background:transparent;color:var(--arc-ink,#1c1917)}.ds-ghost:active:not(:disabled){background:var(--arc-surface,#f5f5f4)}@media(hover:hover){.ds-ghost:hover:not(:disabled){background:var(--arc-surface,#f5f5f4)}}"
+    },
+    {
+      "name": "Campo con etiqueta",
+      "kind": "input",
+      "refersTo": "field-input",
+      "description": "Campo compartido sobre superficie piedra, con foco terracota.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-label\">Nombre</span><input class=\"ds-input\" type=\"text\" /></label>",
+      "css": ".ds-field{display:grid;gap:8px;font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);color:var(--arc-ink,#1c1917)}.ds-label{font-size:12px;font-weight:500;line-height:16px}.ds-input{box-sizing:border-box;width:100%;height:44px;padding:0 12px;border:1px solid transparent;border-radius:var(--arc-radius-control,9px);background:var(--arc-surface,#f5f5f4);color:var(--arc-ink,#1c1917);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:14px;transition:background-color var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1)),border-color var(--arc-dur-fast,.18s) var(--arc-ease-out,cubic-bezier(.215,.61,.355,1))}.ds-input:hover:not(:disabled){background:color-mix(in srgb,var(--arc-ink,#1c1917) 4%,var(--arc-surface,#f5f5f4))}.ds-input:focus{border-color:var(--arc-accent,#c15f3c);outline:0}.ds-input::placeholder{color:var(--arc-subtle,#78716c)}@media(pointer:coarse){.ds-input{font-size:16px}}"
+    },
+    {
+      "name": "Navegación lateral",
+      "kind": "nav",
+      "refersTo": "navigation-item",
+      "description": "Enlaces del marco con selección tonal; el panel móvil usa un selector.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Administración\"><a class=\"ds-nav-link\" href=\"#resumen\" aria-current=\"page\">Resumen</a><a class=\"ds-nav-link\" href=\"#empresas\">Empresas</a></nav>",
+      "css": ".ds-nav{display:grid;gap:4px;font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif)}.ds-nav-link{display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--arc-radius-row,16px);color:var(--arc-ink,#1c1917);font-size:14px;line-height:20px;text-decoration:none}.ds-nav-link:hover,.ds-nav-link[aria-current=page]{background:var(--arc-surface,#f5f5f4)}.ds-nav-link[aria-current=page]{font-weight:500}.ds-nav-link:focus-visible{outline:2px solid var(--arc-accent,#c15f3c);outline-offset:2px}.ds-nav-link:active{transform:scale(var(--arc-press-scale,.97))}@media(pointer:coarse){.ds-nav-link{min-height:44px}}@media(prefers-reduced-motion:reduce){.ds-nav-link:active{transform:none}}"
+    },
+    {
+      "name": "Etiqueta de estado",
+      "kind": "chip",
+      "refersTo": "status-chip",
+      "description": "Estado neutro de la vista previa de acceso, sin interacción propia.",
+      "html": "<span class=\"ds-status\">Pendiente</span>",
+      "css": ".ds-status{display:inline-flex;height:24px;align-items:center;padding:0 10px;border-radius:var(--arc-radius-pill,999px);background:var(--arc-bg,#ffffff);color:var(--arc-muted,#57534e);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:12px;white-space:nowrap}"
+    },
+    {
+      "name": "Fila de plataforma",
+      "kind": "card",
+      "refersTo": "platform-row",
+      "description": "Registro con título, estado, datos y acción de texto; datos sintéticos de muestra.",
+      "html": "<article class=\"ds-row\"><header class=\"ds-row-heading\"><h2 class=\"ds-row-title\">Empresa de demostración</h2><span class=\"ds-row-status\">Activa</span></header><dl class=\"ds-facts\"><div><dt>Acceso</dt><dd>Habilitado</dd></div><div><dt>Estado comercial</dt><dd>Activa</dd></div></dl><button class=\"ds-text-link\" type=\"button\">Gestionar acceso</button></article>",
+      "css": ".ds-row{min-width:0;padding:24px;border-radius:var(--arc-radius-row,16px);background:var(--arc-surface,#f5f5f4);display:grid;gap:16px;font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:14px;line-height:20px;color:var(--arc-ink,#1c1917)}.ds-row-heading{display:flex;justify-content:space-between;align-items:start;gap:16px}.ds-row-title{font-size:16px;line-height:24px;font-weight:500;margin:0;overflow-wrap:anywhere}.ds-row-status{font-size:12px;flex-shrink:0;color:var(--arc-muted,#57534e)}.ds-facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 24px;margin:0}.ds-facts dt{color:var(--arc-muted,#57534e);font-size:12px;line-height:16px;margin-bottom:8px}.ds-facts dd{margin:0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.ds-text-link{justify-self:start;min-height:44px;text-align:left;padding:0;border:0;background:none;color:var(--arc-ink,#1c1917);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:inherit;font-weight:500;line-height:inherit;cursor:pointer;transition:color .16s ease}.ds-text-link:focus-visible{outline:2px solid var(--arc-accent,#c15f3c);outline-offset:2px}@media(hover:hover){.ds-text-link:hover{color:var(--arc-muted,#57534e)}}@media(max-width:640px){.ds-row{padding:16px}.ds-facts{grid-template-columns:minmax(0,1fr);gap:16px}.ds-row-heading{flex-wrap:wrap}}"
+    },
+    {
+      "name": "Contenedor de formulario de plataforma",
+      "kind": "card",
+      "refersTo": "platform-form",
+      "description": "Superficie de alta o decisión dentro de la página, con campos blancos.",
+      "html": "<section class=\"ds-form\"><h2 class=\"ds-form-title\">Nuevo plan</h2><p class=\"ds-form-copy\">El precio y el límite quedan asociados a este plan.</p><label class=\"ds-form-field\"><span>Nombre</span><input type=\"text\" /></label></section>",
+      "css": ".ds-form{display:grid;gap:24px;padding:24px;background:var(--arc-surface,#f5f5f4);border-radius:var(--arc-radius-card,24px);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:14px;line-height:20px;color:var(--arc-ink,#1c1917)}.ds-form-title{margin:0;font-size:18px;line-height:24px;font-weight:600}.ds-form-copy{margin:0;color:var(--arc-muted,#57534e);max-width:65ch}.ds-form-field{display:grid;gap:8px;font-size:12px;font-weight:500;line-height:16px}.ds-form-field input{box-sizing:border-box;width:100%;height:44px;padding:0 12px;border:1px solid transparent;border-radius:var(--arc-radius-control,9px);background:var(--arc-bg,#ffffff);color:var(--arc-ink,#1c1917);font-family:var(--arc-font-sans, 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif);font-size:14px}.ds-form-field input:hover:not(:disabled){background:color-mix(in srgb,var(--arc-ink,#1c1917) 4%,var(--arc-surface,#f5f5f4))}.ds-form-field input:focus{border-color:var(--arc-accent,#c15f3c);outline:0}@media(pointer:coarse){.ds-form-field input{font-size:16px}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Arcadia, tema claro Piedra",
+    "overview": "Rinde conserva el sistema Arcadia aprobado: páginas blancas, tipografía local, texto de tinta y superficies piedra. El espacio y la jerarquía tipográfica organizan la información. La navegación, la barra de sesión y el contenido comparten el fondo de página sin líneas divisorias.\n\nLa administración de plataforma prolonga ese sistema con los mismos controles, marca y composición adaptable. Sus filas de datos y formularios usan superficies existentes. El acceso separado conserva el marco de entrada y su vista previa inclinada. Los valores documentados proceden de la implementación; las distribuciones propias del panel no constituyen un rediseño general.",
+    "keyCharacteristics": [
+      "Fondo blanco continuo y separación mediante espacio o superficie piedra.",
+      "Una acción principal de tinta, acompañada por acciones secundarias y enlaces de texto.",
+      "DM Sans para la interfaz y Sora exclusivamente para el nombre de marca.",
+      "Controles redondeados, foco terracota y adaptación del contenido a una columna."
+    ],
+    "rules": [
+      {
+        "name": "Regla del fondo continuo",
+        "body": "La barra lateral y la barra de sesión conservan el fondo blanco de la página; las superficies piedra agrupan contenido sin introducir líneas de separación.",
+        "section": "colors"
+      },
+      {
+        "name": "Regla de los pesos",
+        "body": "Los títulos se distinguen con peso (600); las etiquetas y acciones usan como máximo (500). El nombre de marca conserva su excepción propia.",
+        "section": "typography"
+      },
+      {
+        "name": "Regla de profundidad por función",
+        "body": "Las filas y los formularios del panel no heredan las sombras o la inclinación de la vista previa decorativa.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Conservar las variables `--arc-*`, las fuentes locales y los componentes compartidos como base de las nuevas pantallas.",
+      "Distinguir título, texto secundario, acción y estado mediante la jerarquía existente.",
+      "Mantener el foco visible y los controles táctiles de al menos 44px en las extensiones de plataforma.",
+      "Reorganizar los datos a una columna cuando el ancho disponible lo requiera y permitir el salto de referencias extensas.",
+      "Reservar la vista previa inclinada al marco de acceso que ya la implementa."
+    ],
+    "donts": [
+      "No sustituir Arcadia por la guía anterior de Geist y azul de los prototipos del informe.",
+      "No añadir líneas divisorias a la barra lateral o a la barra de sesión que actualmente comparten el fondo blanco.",
+      "No extender Sora a los títulos o al cuerpo de la interfaz.",
+      "No convertir las dimensiones o distribuciones propias del panel en reglas obligatorias para todos los módulos."
+    ]
+  }
+}
