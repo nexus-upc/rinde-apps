@@ -1,6 +1,6 @@
 // Marco de la empresa: menú lateral blanco y sin líneas, sin barra superior.
 // La cuenta queda abajo y su menú se despliega hacia arriba y luego a la derecha.
-$sidebar-width: 264px;
+$sidebar-width: 232px;
 
 .shell__skip {
   position: fixed;
@@ -257,7 +257,7 @@ $sidebar-width: 264px;
   box-sizing: border-box;
   display: grid;
   gap: 2px;
-  width: 300px;
+  width: 272px;
   padding: 8px 8px 64px;
   border-radius: 16px;
   background: var(--arc-surface);
@@ -361,10 +361,10 @@ $sidebar-width: 264px;
 
 @keyframes shell-unfold {
   0% {
-    clip-path: inset(calc(100% - 56px) calc(100% - 232px) 0 0 round 16px);
+    clip-path: inset(calc(100% - 56px) calc(100% - 204px) 0 0 round 16px);
   }
   55% {
-    clip-path: inset(0 calc(100% - 232px) 0 0 round 16px);
+    clip-path: inset(0 calc(100% - 204px) 0 0 round 16px);
   }
   100% {
     clip-path: inset(0 0 0 0 round 16px);
