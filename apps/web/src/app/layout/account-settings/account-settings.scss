@@ -1,0 +1,399 @@
+// Ajustes como en Arcadia: 960 de ancho y hasta 610 de alto, riel claro de 264 con quién eres y las
+// secciones, y la sección elegida a la derecha con su título en 24 y botones redondos.
+// La ventana crece desde el botón que la abrió (AccountSettings.morph) y vuelve a él al cerrar.
+.settings {
+  box-sizing: border-box;
+  width: min(960px, calc(100vw - 32px));
+  max-width: none;
+  height: min(610px, calc(100dvh - 66px));
+  max-height: none;
+  padding: 0;
+  border: 0;
+  border-radius: var(--arc-radius-block);
+  background: var(--arc-bg);
+  color: var(--arc-ink);
+  box-shadow: 0 32px 80px -24px color-mix(in srgb, var(--arc-ink) 45%, transparent);
+  overflow: hidden;
+
+  &::backdrop {
+    background: color-mix(in srgb, var(--arc-ink) 32%, transparent);
+    animation: settings-fade 240ms ease backwards;
+  }
+}
+
+.settings__panel {
+  display: flex;
+  height: 100%;
+}
+
+.settings__rail {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  width: 264px;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+
+.settings__who {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding: 0 8px;
+}
+
+.settings__disc,
+.settings__photo {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--arc-on-fill);
+  font-weight: 600;
+}
+
+.settings__disc {
+  width: 40px;
+  height: 40px;
+  background: var(--arc-fill);
+  font-size: 14px;
+}
+
+.settings__stack {
+  display: grid;
+  flex: 1;
+  gap: 1px;
+  min-width: 0;
+
+  strong,
+  small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  strong {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  small {
+    color: var(--arc-subtle);
+    font-size: 12px;
+  }
+}
+
+// El gris de la sección elegida es una sola píldora que se desliza; los botones van encima.
+.settings__nav {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings__thumb {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-surface);
+  pointer-events: none;
+
+  &.is-moving {
+    transition:
+      transform 320ms var(--arc-ease-entrance),
+      height 320ms var(--arc-ease-entrance);
+  }
+}
+
+.settings__group-label {
+  padding: 12px 12px 4px;
+  color: var(--arc-subtle);
+  font-size: 12px;
+}
+
+.settings__tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--arc-radius-pill);
+  background: transparent;
+  color: var(--arc-ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--arc-dur-fast) ease;
+
+  svg {
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (hover: hover) {
+    &:hover:not(.is-current) {
+      background: color-mix(in srgb, var(--arc-surface) 70%, var(--arc-bg));
+    }
+  }
+
+  &.is-current {
+    font-weight: 500;
+  }
+
+  &--danger {
+    color: var(--arc-danger);
+  }
+}
+
+.settings__label {
+  flex: 1;
+}
+
+.settings__tag {
+  color: var(--arc-faint);
+  font-size: 11px;
+}
+
+.settings__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.settings__head {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 64px;
+  padding: 24px 24px 0 32px;
+
+  h2 {
+    flex: 1;
+    margin: 0;
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}
+
+.settings__round {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--arc-surface);
+  cursor: pointer;
+  transition: background-color var(--arc-dur-fast) ease;
+
+  &:hover {
+    background: var(--arc-border);
+  }
+
+  &--quiet {
+    background: transparent;
+
+    &:hover,
+    &[aria-pressed='true'] {
+      background: var(--arc-surface);
+    }
+  }
+
+  svg {
+    fill: none;
+    stroke: var(--arc-muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+.settings__pane {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  padding: 8px 24px 24px 32px;
+  overflow-y: auto;
+
+  > * {
+    animation: settings-enter 220ms var(--arc-ease-entrance) backwards;
+  }
+
+  @for $index from 2 through 4 {
+    > :nth-child(#{$index}) {
+      animation-delay: #{($index - 1) * 40}ms;
+    }
+  }
+}
+
+.settings__profile {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.settings__photo {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--arc-brand-start), var(--arc-brand-end));
+  font-size: 24px;
+}
+
+.settings__stack .settings__name {
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.settings__profile small {
+  font-size: 14px;
+}
+
+.settings__pill {
+  flex: none;
+  height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-surface);
+  color: var(--arc-faint);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.settings__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+
+  div {
+    display: grid;
+    gap: 4px;
+    padding: 16px 18px;
+    border-radius: 16px;
+    background: var(--arc-surface-soft);
+  }
+
+  dt {
+    color: var(--arc-subtle);
+    font-size: 12px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 500;
+    overflow-wrap: anywhere;
+  }
+}
+
+.settings__note {
+  margin: 0;
+  color: var(--arc-subtle);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.settings__soon {
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+
+  strong {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  p {
+    max-width: 360px;
+    margin: 0;
+    color: var(--arc-subtle);
+    font-size: 14px;
+    line-height: 21px;
+  }
+}
+
+.settings__soon-disc {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--arc-fill-soft);
+
+  svg {
+    fill: none;
+    stroke: var(--arc-fill);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
+
+@keyframes settings-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes settings-enter {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings::backdrop,
+  .settings__pane > * {
+    animation: none;
+  }
+}
+
+// En pantallas chicas el riel pasa arriba y el contenido debajo.
+@media (max-width: 768px) {
+  .settings__panel {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+
+  .settings__rail {
+    width: auto;
+    overflow: visible;
+  }
+
+  .settings__profile {
+    flex-wrap: wrap;
+  }
+
+  .settings__facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -9,6 +9,7 @@ import { RiseTitle } from '@shared/ui/rise-title/rise-title';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { PASSWORD_VALIDATORS } from '../../forms/password-validators';
 import { AccessStore } from '../../state/access.store';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 
 type RegisterStep = 1 | 2 | 3 | 4 | 'sent';
 
@@ -72,7 +73,7 @@ export class Register {
     const fields = STEP_FIELDS[step];
     const invalid = fields.filter((name) => this.form.controls[name].invalid);
     if (invalid.length > 0) {
-      fields.forEach((name) => this.form.controls[name].markAsTouched());
+      fields.forEach((name) => revealErrors(this.form.controls[name]));
       return;
     }
     if (step === 2) {
@@ -97,7 +98,7 @@ export class Register {
 
   protected isInvalid(name: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[name];
-    return control.touched && control.invalid;
+    return showError(control);
   }
 
   private submit(): void {

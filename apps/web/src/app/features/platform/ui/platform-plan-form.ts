@@ -3,6 +3,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { CreatePlan } from '../models/platform.models';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 @Component({
   selector: 'app-platform-plan-form',
   imports: [ReactiveFormsModule, UiButton, AutoFocus],
@@ -157,7 +158,7 @@ export class PlatformPlanForm {
   });
   protected invalid = false;
   protected bad(name: 'name' | 'monthlyPrice' | 'unitLimit' | 'reason') {
-    return this.form.controls[name].touched && this.form.controls[name].invalid;
+    return showError(this.form.controls[name]);
   }
   protected submit() {
     const value = this.form.getRawValue();
@@ -165,7 +166,7 @@ export class PlatformPlanForm {
     this.form.controls.reason.setValue(value.reason.trim());
     if (this.form.invalid || !Number.isInteger(value.unitLimit)) {
       this.invalid = true;
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     this.invalid = false;

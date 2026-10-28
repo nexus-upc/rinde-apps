@@ -7,6 +7,7 @@ import { RiseTitle } from '@shared/ui/rise-title/rise-title';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { matchingPasswords, PASSWORD_VALIDATORS } from '../../forms/password-validators';
 import { AccessStore } from '../../state/access.store';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 
 export type DefinePasswordMode = 'reset' | 'invitation';
 
@@ -57,7 +58,7 @@ export class DefinePassword {
 
   protected submit(): void {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     if (!this.token) return;
@@ -68,11 +69,11 @@ export class DefinePassword {
 
   protected passwordInvalid(): boolean {
     const control = this.form.controls.password;
-    return control.touched && control.invalid;
+    return showError(control);
   }
 
   protected confirmationInvalid(): boolean {
     const control = this.form.controls.confirmation;
-    return control.touched && (control.invalid || this.form.hasError('mismatch'));
+    return control.touched && control.dirty && (control.invalid || this.form.hasError('mismatch'));
   }
 }

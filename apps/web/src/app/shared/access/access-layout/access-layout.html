@@ -1,21 +1,11 @@
 <main class="access">
   <app-brand-mark class="access__brand" />
 
-  <section class="access__column">
+  <section class="access__column" appGlideOnResize>
     <div class="access__panel">
       <ng-content />
     </div>
   </section>
-
-  @if (wide()) {
-    <div class="access__showcase">
-      <p class="access__slogan">
-        Tus viajes, gastos y liquidaciones, en un solo lugar.
-        <span>Programación, asignación y control de la flota.</span>
-      </p>
-      <app-entrance-preview />
-    </div>
-  }
 
   <p class="access__copyright">© 2026 NEXUS</p>
 </main>

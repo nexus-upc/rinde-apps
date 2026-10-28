@@ -23,25 +23,26 @@
   width: 100%;
   height: 44px;
   padding: 0 12px;
-  border: 1px solid transparent;
+  border: 1px solid var(--arc-border-strong);
   border-radius: var(--arc-radius-control);
-  background: var(--arc-surface);
+  background: var(--arc-bg);
   color: var(--arc-ink);
-  font-size: 14px;
+  font-size: 15px;
   transition:
-    background-color var(--arc-dur-fast) var(--arc-ease-out),
-    border-color var(--arc-dur-fast) var(--arc-ease-out);
+    border-color var(--arc-dur-fast) var(--arc-ease-out),
+    box-shadow var(--arc-dur-fast) var(--arc-ease-out);
 
   &::placeholder {
     color: var(--arc-subtle);
   }
 
   &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--arc-ink) 4%, var(--arc-surface));
+    border-color: var(--arc-faint);
   }
 
   &:focus {
     border-color: var(--arc-accent);
+    box-shadow: 0 0 0 3px var(--arc-focus-ring);
     outline: 0;
   }
 

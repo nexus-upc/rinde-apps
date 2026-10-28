@@ -2,44 +2,134 @@
   <a class="shell__skip" href="#workspace-content">Saltar al contenido</a>
   <aside class="shell__sidebar">
     <app-brand-mark class="shell__brand" />
+
+    <div class="shell__company">
+      <span class="shell__company-disc" aria-hidden="true"></span>
+      <span class="shell__stack">
+        <span class="shell__strong">{{ profile()?.tenant?.tradeName ?? 'Tu empresa' }}</span>
+        <span class="shell__soft">{{ roleLabel() }}</span>
+      </span>
+    </div>
+
     <nav class="shell__nav" aria-label="Principal">
-      <a class="shell__link arc-tap" routerLink="/trips" routerLinkActive="shell__link--active">
-        Tablero de viajes
-      </a>
-      @if (isAdmin()) {
-        <a class="shell__link arc-tap" routerLink="/users" routerLinkActive="shell__link--active"
-          >Usuarios</a
-        >
-        <a
-          class="shell__link arc-tap"
-          routerLink="/subscription"
-          routerLinkActive="shell__link--active"
-          >Suscripción</a
-        >
+      @for (group of groups(); track group.label) {
+        <div class="shell__group">
+          <span class="shell__group-label">{{ group.label }}</span>
+          @for (item of group.items; track item.label) {
+            @if (item.path) {
+              <a
+                class="shell__link"
+                [routerLink]="item.path"
+                routerLinkActive="shell__link--active"
+                ariaCurrentWhenActive="page"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons[item.icon]" />
+                </svg>
+                <span class="shell__label">{{ item.label }}</span>
+              </a>
+            } @else {
+              <span class="shell__link shell__link--soon" aria-disabled="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons[item.icon]" />
+                </svg>
+                <span class="shell__label">{{ item.label }}</span>
+                <span class="shell__tag">Pronto</span>
+              </span>
+            }
+          }
+        </div>
       }
     </nav>
+
+    <div class="shell__footer">
+      <span class="shell__link shell__link--soon" aria-disabled="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+          <path [attr.d]="icons.bell" />
+        </svg>
+        <span class="shell__label">Avisos</span>
+        <span class="shell__tag">Pronto</span>
+      </span>
+
+      <div class="shell__account">
+        @if (menuOpen()) {
+          <button
+            class="shell__scrim"
+            type="button"
+            tabindex="-1"
+            aria-label="Cerrar menú"
+            (click)="closeMenu()"
+          ></button>
+          <div class="shell__menu" role="menu" aria-label="Cuenta">
+            <span class="shell__group-label">Cuenta</span>
+            <button
+              class="shell__option"
+              type="button"
+              role="menuitem"
+              (click)="openSettings($event)"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path [attr.d]="icons.settings" />
+              </svg>
+              <span class="shell__label">Ajustes</span>
+              <kbd>Ctrl ,</kbd>
+            </button>
+            <span class="shell__option shell__option--soon" role="menuitem" aria-disabled="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path [attr.d]="icons.help" />
+              </svg>
+              <span class="shell__label">Ayuda</span>
+              <span class="shell__tag">Pronto</span>
+            </span>
+            <span class="shell__rule" role="separator"></span>
+            <button
+              class="shell__option shell__option--danger"
+              type="button"
+              role="menuitem"
+              (click)="signOut()"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path [attr.d]="icons.signOut" />
+              </svg>
+              Cerrar sesión
+            </button>
+          </div>
+        }
+        <button
+          #accountButton
+          class="shell__user"
+          [class.is-open]="menuOpen()"
+          type="button"
+          aria-haspopup="menu"
+          [attr.aria-expanded]="menuOpen()"
+          (click)="toggleMenu()"
+        >
+          <span class="shell__avatar" aria-hidden="true">{{ initials() }}</span>
+          <span class="shell__stack">
+            <span class="shell__strong">{{ profile()?.fullName ?? user()?.email }}</span>
+            <span class="shell__soft">{{ user()?.email }}</span>
+          </span>
+          <svg class="shell__chevron" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="menuOpen() ? icons.chevronUp : icons.chevronsUpDown" />
+          </svg>
+        </button>
+      </div>
+    </div>
   </aside>
 
-  <div class="shell__main">
-    <header class="shell__topbar">
-      <div class="shell__session">
-        @if (profile(); as current) {
-          <span class="shell__name">{{ current.fullName }}</span>
-          <span class="shell__tenant">{{ current.tenant.tradeName }}</span>
-        } @else {
-          <span class="shell__email">{{ user()?.email }}</span>
-        }
-        @if (roleLabel()) {
-          <span class="shell__role">{{ roleLabel() }}</span>
-        }
-      </div>
-      <button class="shell__signout text-link" type="button" (click)="signOut()">
-        Cerrar sesión
-      </button>
-    </header>
+  <main id="workspace-content" class="shell__content" tabindex="-1">
+    <router-outlet />
+  </main>
 
-    <main id="workspace-content" class="shell__content" tabindex="-1">
-      <router-outlet />
-    </main>
-  </div>
+  @if (settingsOpen()) {
+    <app-account-settings
+      [profile]="profile()"
+      [email]="user()?.email ?? ''"
+      [roleLabel]="roleLabel()"
+      [openFrom]="settingsFrom()"
+      [closeTo]="accountElement"
+      (closed)="closeSettings()"
+      (signOut)="signOut()"
+    />
+  }
 </div>

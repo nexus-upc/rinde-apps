@@ -4,6 +4,7 @@ import { ROLE_LABELS } from '@core/auth/auth.models';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { ASSIGNABLE_ROLES, InviteUserRequest, UserRole } from '../../models/iam.models';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 
 /** Formulario de invitación sin consultas HTTP ni estado global. */
 @Component({
@@ -29,7 +30,7 @@ export class InviteUserForm {
   protected submit(): void {
     if (this.pending()) return;
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     const value = this.form.getRawValue();
@@ -37,6 +38,6 @@ export class InviteUserForm {
   }
   protected isInvalid(name: 'fullName' | 'email'): boolean {
     const control = this.form.controls[name];
-    return control.touched && control.invalid;
+    return showError(control);
   }
 }

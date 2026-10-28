@@ -8,6 +8,7 @@ import { AutoFocus } from '@shared/forms/autofocus';
 import { RiseTitle } from '@shared/ui/rise-title/rise-title';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { AccessStore } from '../../state/access.store';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 
 /** Pedido del enlace de recuperación (US10). La respuesta no revela si el correo existe. */
 @Component({
@@ -43,7 +44,7 @@ export class Recover {
 
   protected submit(): void {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     this.store.recover(this.form.controls.email.value.trim(), () => this.sent.set(true));
@@ -51,6 +52,6 @@ export class Recover {
 
   protected isInvalid(): boolean {
     const control = this.form.controls.email;
-    return control.touched && control.invalid;
+    return showError(control);
   }
 }
