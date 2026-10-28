@@ -27,6 +27,8 @@ export const routes: Routes = [
       },
     ],
   },
+  // La raíz va al tablero; el guard decide entre el ingreso, el panel del dueño o la empresa.
+  { path: '', pathMatch: 'full', redirectTo: 'trips' },
   {
     path: '',
     loadChildren: () =>
