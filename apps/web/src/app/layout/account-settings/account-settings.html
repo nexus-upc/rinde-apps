@@ -3,6 +3,7 @@
   class="settings"
   aria-labelledby="settings-title"
   (close)="closed.emit()"
+  (cancel)="onCancel($event)"
   (click)="onBackdrop($event)"
 >
   <div class="settings__panel">
@@ -15,59 +16,71 @@
         </span>
       </div>
 
-      <nav aria-label="Secciones de ajustes">
+      <nav #rail class="settings__nav" aria-label="Secciones de ajustes">
+        <span #thumb class="settings__thumb" aria-hidden="true"></span>
         @for (group of groups; track group.label) {
-          <div class="settings__group">
-            <span class="settings__group-label">{{ group.label }}</span>
-            @for (id of group.items; track id) {
-              <button
-                class="settings__tab"
-                type="button"
-                [class.is-current]="current() === id"
-                [attr.aria-current]="current() === id ? 'page' : null"
-                (click)="pick(id)"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                  <path [attr.d]="icons[sections[id].icon]" />
-                </svg>
-                <span class="settings__label">{{ sections[id].label }}</span>
-                @if (sections[id].soon) {
-                  <span class="settings__tag">Pronto</span>
-                }
-              </button>
-            }
-          </div>
+          <span class="settings__group-label">{{ group.label }}</span>
+          @for (id of group.items; track id) {
+            <button
+              class="settings__tab"
+              type="button"
+              [class.is-current]="current() === id"
+              [attr.aria-current]="current() === id ? 'page' : null"
+              (click)="pick(id)"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                <path [attr.d]="icons[sections[id].icon]" />
+              </svg>
+              <span class="settings__label">{{ sections[id].label }}</span>
+              @if (sections[id].soon) {
+                <span class="settings__tag">Pronto</span>
+              }
+            </button>
+          }
         }
       </nav>
 
-      <div class="settings__foot">
-        <span class="settings__tab settings__tab--plain">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-            <path [attr.d]="icons.info" />
-          </svg>
-          <span class="settings__label">Acerca de Rinde</span>
-          <span class="settings__tag">Pronto</span>
-        </span>
-        <button class="settings__tab settings__tab--danger" type="button" (click)="signOut.emit()">
-          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-            <path [attr.d]="icons.signOut" />
-          </svg>
-          Cerrar sesión
-        </button>
-      </div>
+      <button class="settings__tab settings__tab--danger" type="button" (click)="signOut.emit()">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+          <path [attr.d]="icons.signOut" />
+        </svg>
+        <span class="settings__label">Cerrar sesión</span>
+      </button>
     </div>
 
     <div class="settings__body">
       <header class="settings__head">
         <h2 id="settings-title">{{ section().label }}</h2>
-        <button class="settings__close" type="button" aria-label="Cerrar" (click)="dialog.close()">
+        <button
+          class="settings__round settings__round--quiet"
+          type="button"
+          aria-label="Acerca de Rinde"
+          [attr.aria-pressed]="current() === 'about'"
+          (click)="pick('about')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="icons.info" />
+          </svg>
+        </button>
+        <button class="settings__round" type="button" aria-label="Cerrar ajustes" (click)="close()">
           <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
             <path [attr.d]="icons.close" />
           </svg>
         </button>
       </header>
 
-      @if (section().soon; as soon) {
+      @if (current() === 'about') {
+        <div class="settings__pane settings__soon">
+          <span class="settings__soon-disc" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path [attr.d]="icons.info" /></svg>
+          </span>
+          <strong>Rinde by NEXUS</strong>
+          <p>
+            Gestión operativa para pymes de transporte de carga: viajes, flota, gastos y
+            liquidaciones en un solo lugar.
+          </p>
+        </div>
+      } @else if (section().soon; as soon) {
         <div class="settings__pane settings__soon">
           <span class="settings__soon-disc" aria-hidden="true">
             <svg width="24" height="24" viewBox="0 0 24 24">

@@ -57,6 +57,9 @@ export class ShellLayout {
   protected readonly profile = inject(SessionProfileStore).profile;
   protected readonly menuOpen = signal(false);
   protected readonly settingsOpen = signal(false);
+  /** Ajustes crece desde la opción pulsada y vuelve al botón de cuenta al cerrar. */
+  protected readonly settingsFrom = signal<DOMRect | null>(null);
+  protected readonly accountElement = () => this.accountButton()?.nativeElement ?? null;
   protected readonly initials = computed(() =>
     initialsOf(this.profile()?.fullName, this.user()?.email),
   );
@@ -92,7 +95,13 @@ export class ShellLayout {
     if (returnFocus) this.accountButton()?.nativeElement.focus();
   }
 
-  protected openSettings(): void {
+  protected openSettings(event?: Event): void {
+    const pressed = event?.currentTarget as HTMLElement | undefined;
+    this.settingsFrom.set(
+      pressed?.getBoundingClientRect() ??
+        this.accountButton()?.nativeElement.getBoundingClientRect() ??
+        null,
+    );
     this.menuOpen.set(false);
     this.settingsOpen.set(true);
   }

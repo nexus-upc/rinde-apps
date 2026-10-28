@@ -62,7 +62,12 @@
           ></button>
           <div class="shell__menu" role="menu" aria-label="Cuenta">
             <span class="shell__group-label">Cuenta</span>
-            <button class="shell__option" type="button" role="menuitem" (click)="openSettings()">
+            <button
+              class="shell__option"
+              type="button"
+              role="menuitem"
+              (click)="openSettings($event)"
+            >
               <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                 <path [attr.d]="icons.settings" />
               </svg>
@@ -121,6 +126,8 @@
       [profile]="profile()"
       [email]="user()?.email ?? ''"
       [roleLabel]="roleLabel()"
+      [openFrom]="settingsFrom()"
+      [closeTo]="accountElement"
       (closed)="closeSettings()"
       (signOut)="signOut()"
     />
