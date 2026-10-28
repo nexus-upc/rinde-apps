@@ -1,0 +1,109 @@
+.expense-review-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.trip-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border: 1px solid var(--arc-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--arc-card-bg, #ffffff);
+}
+
+.search-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+  white-space: nowrap;
+}
+
+.search-input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  max-width: 600px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--arc-border, #cbd5e1);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: var(--arc-font-mono, monospace);
+  outline: none;
+
+  &:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  }
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.metric-card {
+  padding: 16px;
+  border: 1px solid var(--arc-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--arc-card-bg, #ffffff);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .metric-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--arc-muted, #64748b);
+    letter-spacing: 0.04em;
+  }
+
+  .metric-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--arc-foreground, #0f172a);
+  }
+
+  &--pending .metric-value {
+    color: #d97706;
+  }
+
+  &--approved .metric-value {
+    color: #16a34a;
+  }
+
+  &--observed .metric-value {
+    color: #dc2626;
+  }
+
+  &--total .metric-value {
+    color: #0284c7;
+  }
+}
+
+.table-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.idle-placeholder {
+  padding: 60px 20px;
+  text-align: center;
+  border: 2px dashed var(--arc-border, #cbd5e1);
+  border-radius: 8px;
+  color: var(--arc-muted, #64748b);
+  font-size: 15px;
+
+  p {
+    margin: 0;
+  }
+}

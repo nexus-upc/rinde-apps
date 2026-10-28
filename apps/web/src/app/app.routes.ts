@@ -66,6 +66,13 @@ export const routes: Routes = [
             (module) => module.TRIPS_ROUTES,
           ),
       },
+      {
+        path: 'expenses',
+        loadChildren: () =>
+          import('./features/expenses/expenses.routes').then(
+            (module) => module.EXPENSES_ROUTES,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },
