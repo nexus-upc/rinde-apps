@@ -22,7 +22,8 @@ describe('BrandMark', () => {
 
     expect(host.textContent?.trim()).toBe('Rinde');
     expect(host.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
-    expect(host.querySelector('path')?.getAttribute('fill')).toBe('currentColor');
+    expect(host.querySelectorAll('path')[1]?.getAttribute('fill')).toBe('currentColor');
+    expect(host.querySelector('path')?.getAttribute('fill')).toMatch(/^url\(#rinde-logo-gradient-/);
   });
 
   it('draws the horizontal logo 24 px high by default, keeping its proportion', () => {

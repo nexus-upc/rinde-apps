@@ -27,10 +27,13 @@ describe('WorkspaceTransition', () => {
     const done = transition.enter('/trips');
 
     expect(transition.visible()).toBe(true);
+    expect(transition.step()).toBe('screens');
     expect(preloaded).toEqual(['/trips']);
     expect(navigate).not.toHaveBeenCalled();
 
     release();
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalled());
+    expect(transition.step()).toBe('opening');
     await done;
 
     expect(navigate).toHaveBeenCalledWith('/trips');

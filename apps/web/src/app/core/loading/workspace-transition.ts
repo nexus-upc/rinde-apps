@@ -17,6 +17,10 @@ const LEAVE_MS = 160;
  * Pantalla de carga entre el acceso y el espacio de trabajo. Dura lo que tarda la preparación
  * real y la primera pintura, sin un mínimo decorativo.
  */
+/** Pasos reales de la preparación, en el orden en que ocurren. */
+export type WorkspaceStep = 'screens' | 'fonts' | 'opening';
+export const WORKSPACE_STEPS: readonly WorkspaceStep[] = ['screens', 'fonts', 'opening'];
+
 @Injectable({ providedIn: 'root' })
 export class WorkspaceTransition {
   private readonly router = inject(Router);
@@ -26,14 +30,18 @@ export class WorkspaceTransition {
   private readonly leavingState = signal(false);
   readonly visible = this.visibleState.asReadonly();
   readonly leaving = this.leavingState.asReadonly();
+  private readonly stepState = signal<WorkspaceStep>('screens');
+  readonly step = this.stepState.asReadonly();
 
   async enter(url: string): Promise<void> {
     this.leavingState.set(false);
+    this.stepState.set('screens');
     this.visibleState.set(true);
-    await Promise.race([
-      Promise.all([this.preload(url).catch(() => undefined), fontsReady()]),
-      wait(WORKSPACE_PRELOAD_LIMIT_MS),
-    ]);
+    const limit = wait(WORKSPACE_PRELOAD_LIMIT_MS);
+    await Promise.race([this.preload(url).catch(() => undefined), limit]);
+    this.stepState.set('fonts');
+    await Promise.race([fontsReady(), limit]);
+    this.stepState.set('opening');
     const navigated = await this.router.navigateByUrl(url);
     if (!navigated) {
       this.visibleState.set(false);

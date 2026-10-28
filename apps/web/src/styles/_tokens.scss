@@ -1,51 +1,60 @@
-// Tokens del estilo Arcadia, tema claro Piedra. Valores tomados de 01-foundation.css del proyecto de referencia.
-// Los componentes solo usan estas variables: ningún color hexadecimal fuera de este archivo.
+// Tokens de Rinde: valores del archivo de Figma (grises slate, azul de marca y Geist), con la
+// estructura y el movimiento de Arcadia. Los componentes solo usan estas variables.
 :root {
-  // Solo para el nombre de la marca, que acompaña al símbolo.
-  --arc-font-brand: 'Sora', var(--arc-font-sans);
+  --arc-font-brand: var(--arc-font-sans);
   --arc-font-sans:
-    'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --arc-font-mono: 'Geist Mono Variable', ui-monospace, 'Cascadia Mono', monospace;
 
-  // Tamaños de título: acceso (26/34), página (32/40) y mensaje de marca del acceso (28/36).
-  --arc-entrance-title-size: 26px;
+  // Tamaños de título: acceso (28/34), página (34/38) y mensaje de marca del acceso (34/38).
+  --arc-entrance-title-size: 28px;
   --arc-entrance-title-line: 34px;
-  --arc-page-title-size: 32px;
-  --arc-page-title-line: 40px;
-  --arc-showcase-title-size: 28px;
-  --arc-showcase-title-line: 36px;
+  --arc-page-title-size: 34px;
+  --arc-page-title-line: 38px;
+  --arc-showcase-title-size: 34px;
+  --arc-showcase-title-line: 38px;
 
-  // Superficies y texto.
+  // Superficies y texto (gris/50 a gris/900).
   --arc-bg: #ffffff;
   --arc-card: #ffffff;
-  --arc-surface: #f5f5f4;
-  --arc-border: #e7e5e4;
-  --arc-ink: #1c1917;
-  --arc-muted: #57534e;
-  --arc-subtle: #78716c;
-  --arc-shadow: #1c1917;
+  --arc-surface: #f1f5f9;
+  --arc-surface-soft: #f8fafc;
+  --arc-border: #e2e8f0;
+  --arc-border-strong: #cbd5e1;
+  --arc-ink: #0f172a;
+  --arc-muted: #475569;
+  --arc-subtle: #64748b;
+  --arc-faint: #94a3b8;
+  --arc-shadow: #0f172a;
 
-  // Relleno de la píldora de tinta y gran superficie de tinta.
-  --arc-fill: #1c1917;
-  --arc-fill-hover: #292524;
+  // Azul de marca (azul/700 y azul/600) y su degradado (indigo/600, azul/700 y celeste/500).
+  --arc-fill: #1d4ed8;
+  --arc-fill-hover: #2563eb;
   --arc-on-fill: #ffffff;
-  --arc-band: #1c1917;
+  --arc-fill-soft: #eff6ff;
+  --arc-band: #1d4ed8;
   --arc-on-band: #ffffff;
-  --arc-disabled-bg: #e7e5e4;
-  --arc-disabled-ink: #8a837e;
+  --arc-on-band-muted: #dbeafe;
+  --arc-brand-start: #4f46e5;
+  --arc-brand-end: #0ea5e9;
+  --arc-brand-gradient: linear-gradient(120deg, #4f46e5, #1d4ed8 45%, #0ea5e9 90%);
+  --arc-disabled-bg: #e2e8f0;
+  --arc-disabled-ink: #94a3b8;
 
   // Foco y estados.
-  --arc-accent: #c15f3c;
-  --arc-danger: #b42318;
-  --arc-danger-bg: #fef3f2;
-  --arc-success: #067647;
-  --arc-success-bg: #ecfdf3;
-  --arc-wait: #8a5a12;
-  --arc-wait-bg: #fbf0dc;
+  --arc-accent: #2563eb;
+  --arc-focus-ring: #dbeafe;
+  --arc-danger: #b91c1c;
+  --arc-danger-bg: #fef2f2;
+  --arc-success: #15803d;
+  --arc-success-bg: #f0fdf4;
+  --arc-wait: #1d4ed8;
+  --arc-wait-bg: #eff6ff;
 
-  // Radios: campos, filas, tarjetas, bloque del acceso y píldoras.
-  --arc-radius-control: 9px;
-  --arc-radius-row: 16px;
-  --arc-radius-card: 24px;
-  --arc-radius-block: 32px;
+  // Radios: campos y botones, filas, tarjetas, bloque del acceso y píldoras.
+  --arc-radius-control: 8px;
+  --arc-radius-row: 12px;
+  --arc-radius-card: 20px;
+  --arc-radius-block: 24px;
   --arc-radius-pill: 999px;
 }

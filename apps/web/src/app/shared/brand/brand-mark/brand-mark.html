@@ -7,7 +7,17 @@
     aria-hidden="true"
     focusable="false"
   >
-    <path fill="currentColor" fill-rule="evenodd" [attr.d]="logo.d" />
+    @if (tone() === 'brand') {
+      <defs>
+        <linearGradient [attr.id]="gradientId" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" class="brand-mark__stop-start" />
+          <stop offset="0.55" class="brand-mark__stop-middle" />
+          <stop offset="1" class="brand-mark__stop-end" />
+        </linearGradient>
+      </defs>
+    }
+    <path [attr.fill]="symbolFill()" fill-rule="evenodd" [attr.d]="logo.symbol" />
+    <path fill="currentColor" fill-rule="evenodd" [attr.d]="logo.name" />
   </svg>
   <span class="visually-hidden">Rinde</span>
 </span>

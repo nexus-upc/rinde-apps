@@ -15,19 +15,27 @@
 }
 
 .route-scene__dot {
-  fill: var(--arc-border);
+  fill: color-mix(in srgb, var(--arc-on-band) 14%, transparent);
 }
 
 .route-scene__road {
   fill: none;
-  stroke: var(--arc-border);
-  stroke-width: 10;
+  stroke: color-mix(in srgb, var(--arc-on-band) 18%, transparent);
+  stroke-width: 12;
   stroke-linecap: round;
+}
+
+.route-scene__lanes {
+  fill: none;
+  stroke: color-mix(in srgb, var(--arc-on-band) 30%, transparent);
+  stroke-width: 2;
+  stroke-dasharray: 10 8;
+  animation: route-scene-lanes 900ms linear infinite;
 }
 
 .route-scene__line {
   fill: none;
-  stroke: var(--arc-ink);
+  stroke: var(--arc-on-band);
   stroke-width: 3;
   stroke-linecap: round;
   stroke-dasharray: 1400;
@@ -35,24 +43,24 @@
 }
 
 .route-scene__stop {
-  fill: var(--arc-bg);
-  stroke: var(--arc-ink);
+  fill: var(--arc-fill);
+  stroke: var(--arc-on-band);
   stroke-width: 3;
 }
 
 .route-scene__end {
-  fill: var(--arc-ink);
+  fill: var(--arc-on-band);
 }
 
 .route-scene__pulse {
-  fill: var(--arc-ink);
+  fill: var(--arc-on-band);
   transform-box: fill-box;
   transform-origin: center;
   animation: route-scene-pulse 1800ms var(--arc-ease-out) infinite;
 }
 
 .route-scene__city {
-  fill: var(--arc-ink);
+  fill: var(--arc-on-band);
   font-family: var(--arc-font-sans);
   font-size: 14px;
   font-weight: 600;
@@ -60,18 +68,19 @@
 
 .route-scene__unit {
   circle {
-    fill: var(--arc-accent);
+    fill: var(--arc-on-band);
   }
 
   path {
-    fill: var(--arc-on-fill);
+    fill: var(--arc-fill);
   }
 }
 
 .route-scene__trip {
   position: absolute;
-  top: 38%;
+  top: 36%;
   left: 52%;
+  color: var(--arc-ink);
   box-sizing: border-box;
   display: grid;
   gap: 12px;
@@ -100,8 +109,8 @@
 .route-scene__status {
   padding: 4px 10px;
   border-radius: var(--arc-radius-pill);
-  background: var(--arc-wait-bg);
-  color: var(--arc-wait);
+  background: var(--arc-fill-soft);
+  color: var(--arc-fill);
   font-size: 12px;
   font-weight: 500;
 }
@@ -123,13 +132,19 @@
     width: 62%;
     height: 100%;
     border-radius: inherit;
-    background: var(--arc-ink);
+    background: var(--arc-fill);
   }
 }
 
 .route-scene__trip-foot {
   color: var(--arc-muted);
   font-size: 12px;
+}
+
+@keyframes route-scene-lanes {
+  to {
+    stroke-dashoffset: -36;
+  }
 }
 
 @keyframes route-scene-draw {
@@ -177,6 +192,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .route-scene__line,
+  .route-scene__lanes,
   .route-scene__pulse,
   .route-scene__trip {
     animation: none;

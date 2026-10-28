@@ -1,4 +1,4 @@
-// Botones de Arcadia: píldoras sin borde y enlaces de texto. Una sola píldora de tinta por pantalla.
+// Botones: rectángulos de radio 8 del Figma y enlaces de texto. Un solo botón principal por pantalla.
 .ui-button {
   position: relative;
   display: inline-flex;
@@ -7,7 +7,7 @@
   min-height: 40px;
   padding: 0 16px;
   border: 1px solid transparent;
-  border-radius: var(--arc-radius-pill);
+  border-radius: var(--arc-radius-control);
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
