@@ -6,6 +6,7 @@ import { AccessLayout } from '@shared/access/access-layout/access-layout';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { PlatformAccessStore } from '../state/platform-access.store';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 @Component({
   selector: 'app-platform-sign-in',
   imports: [ReactiveFormsModule, RouterLink, AccessLayout, AutoFocus, UiButton],
@@ -100,11 +101,11 @@ export class PlatformSignIn {
     password: ['', [Validators.required, Validators.maxLength(72)]],
   });
   protected bad(field: 'email' | 'password') {
-    return this.form.controls[field].touched && this.form.controls[field].invalid;
+    return showError(this.form.controls[field]);
   }
   protected submit() {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     this.store.signIn(

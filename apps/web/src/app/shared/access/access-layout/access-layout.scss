@@ -1,6 +1,5 @@
-// Desde 1100 px: columna de acceso de 600 con relleno de 64 y bloque de la derecha a 16 de los bordes;
-// la marca y el pie van en las esquinas, a 24.
-// Debajo, una sola columna de 360 centrada, sin montar la vista decorativa.
+// Una sola columna de 360 en el centro de la página, en ambos ejes. Al cambiar de paso,
+// GlideOnResize desliza el bloque hasta su nuevo centro en lugar de saltar.
 .access {
   position: relative;
   box-sizing: border-box;
@@ -10,7 +9,7 @@
   justify-content: center;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 72px 16px;
+  padding: 96px 16px;
   background: var(--arc-bg);
   color: var(--arc-ink);
 }
@@ -34,89 +33,18 @@
 
 .access__copyright {
   position: absolute;
-  bottom: 24px;
+  bottom: 16px;
   left: 16px;
+  margin: 0;
   color: var(--arc-muted);
   font-size: 12px;
   line-height: 16px;
 }
 
-.access__showcase {
-  position: fixed;
-  top: 16px;
-  right: 16px;
-  bottom: 16px;
-  left: 600px;
-  box-sizing: border-box;
-  overflow: hidden;
-  padding: 56px;
-  border-radius: var(--arc-radius-block);
-  background: var(--arc-brand-gradient);
-  background-size: 220% 220%;
-  color: var(--arc-on-band);
-  animation: access-drift 12s ease-in-out infinite;
-}
-
-@keyframes access-drift {
-  0%,
-  100% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .access__showcase {
-    animation: none;
-  }
-}
-
-.access__slogan {
-  position: relative;
-  z-index: 1;
-  max-width: 440px;
-  font-size: var(--arc-showcase-title-size);
-  font-weight: 600;
-  line-height: var(--arc-showcase-title-line);
-  letter-spacing: -0.02em;
-
-  .access__eyebrow {
-    display: block;
-    margin-bottom: 8px;
-    color: var(--arc-on-band-muted);
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 16px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-}
-
-@media (min-width: 1100px) {
-  .access {
-    display: block;
-    padding: 0;
-  }
-
-  // Marca y pie en las esquinas, fuera de la columna del formulario.
+@media (min-width: 768px) {
   .access__brand {
     top: 24px;
     left: 24px;
-  }
-
-  .access__column {
-    display: flex;
-    align-items: center;
-    width: 600px;
-    max-width: none;
-    min-height: 100dvh;
-    padding: 72px 64px;
-  }
-
-  .access__panel {
-    width: 360px;
   }
 
   .access__copyright {

@@ -15,6 +15,7 @@ import { MailIcon } from '@shared/ui/icons/mail-icon';
 import { RiseTitle } from '@shared/ui/rise-title/rise-title';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { AccessStore } from '../../state/access.store';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 
 /** Avisos que otras pantallas del acceso dejan al volver al ingreso. */
 const NOTICES: Readonly<Record<string, string>> = {
@@ -67,13 +68,14 @@ export class SignIn {
 
   protected backToStart(): void {
     this.form.controls.email.markAsUntouched();
+    this.form.controls.email.markAsPristine();
     this.step.set('start');
   }
 
   protected continueWithEmail(): void {
     const email = this.form.controls.email;
     if (email.invalid) {
-      email.markAsTouched();
+      revealErrors(email);
       return;
     }
     this.store.request.clearError();
@@ -88,7 +90,7 @@ export class SignIn {
 
   protected submit(): void {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     this.store.signIn(this.form.getRawValue(), () => {
@@ -98,6 +100,6 @@ export class SignIn {
 
   protected isInvalid(field: 'email' | 'password'): boolean {
     const control = this.form.controls[field];
-    return control.touched && control.invalid;
+    return showError(control);
   }
 }

@@ -15,8 +15,7 @@ const TOKEN = [
   'firma-de-prueba',
 ].join('.');
 
-/** Ventana simulada: jsdom no trae matchMedia, así que el ancho se decide aquí antes de crear la pantalla. */
-let wideScreen = false;
+/** Ventana simulada: jsdom no trae matchMedia, que usan las transiciones entre pasos. */
 
 function stubMatchMedia(): void {
   Object.defineProperty(window, 'matchMedia', {
@@ -24,7 +23,7 @@ function stubMatchMedia(): void {
     writable: true,
     value: (query: string): MediaQueryList =>
       ({
-        matches: wideScreen && query === '(min-width: 1100px)',
+        matches: false,
         media: query,
         onchange: null,
         addEventListener: () => undefined,
@@ -48,7 +47,6 @@ describe('SignIn', () => {
 
   beforeEach(async () => {
     sessionStorage.clear();
-    wideScreen = false;
     stubMatchMedia();
     await TestBed.configureTestingModule({
       imports: [SignIn],
@@ -214,21 +212,15 @@ describe('SignIn', () => {
     expect(title.querySelectorAll('.arc-entrance-word[aria-hidden="true"]').length).toBe(4);
   });
 
-  it('does not mount the route scene below 1100 px', () => {
-    wideScreen = false;
+  it('waits until the person types before warning about the email', () => {
     createFixture();
+    startWithEmail();
+    field('email').dispatchEvent(new Event('blur'));
+    fixture.detectChanges();
+    expect(text()).not.toContain('Ingrese su correo electrónico.');
 
-    expect(fixture.nativeElement.querySelector('app-route-scene')).toBeNull();
-  });
-
-  it('mounts the route scene at 1100 px, hidden from assistive technology and inert', () => {
-    wideScreen = true;
-    createFixture();
-
-    const preview = fixture.nativeElement.querySelector('app-route-scene') as HTMLElement;
-    expect(preview).not.toBeNull();
-    expect(preview.getAttribute('aria-hidden')).toBe('true');
-    expect(preview.hasAttribute('inert')).toBe(true);
-    expect(preview.querySelector('button, a, input, select, textarea, [tabindex]')).toBeNull();
+    type('email', 'ana');
+    fixture.detectChanges();
+    expect(text()).toContain('Ingrese un correo electrónico válido.');
   });
 });

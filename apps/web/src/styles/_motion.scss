@@ -97,7 +97,14 @@
 // El paso que sale se desvanece en el mismo lugar mientras entra el siguiente.
 .arc-stage-leave {
   pointer-events: none;
-  animation: arc-stage-leave var(--arc-dur-instant) var(--arc-ease-out) forwards;
+  animation: arc-stage-leave 220ms var(--arc-ease-out) forwards;
+}
+
+// El paso que sale queda encima, sin ocupar alto, hasta terminar de desvanecerse.
+.arc-stage-out-of-flow {
+  position: absolute;
+  right: 0;
+  left: 0;
 }
 
 .arc-entrance-word {

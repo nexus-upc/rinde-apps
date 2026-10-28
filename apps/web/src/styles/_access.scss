@@ -82,6 +82,7 @@
 
 // Los pasos comparten la misma celda: el que sale y el que entra se cruzan sin mover la página.
 .access-steps {
+  position: relative;
   display: grid;
 
   > * {
