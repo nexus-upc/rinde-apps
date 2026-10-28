@@ -22,10 +22,19 @@
 }
 
 .access__footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 0.35em;
   margin-top: 12px;
   color: var(--arc-muted);
   font-size: 14px;
   line-height: 20px;
+
+  // Dos acciones en el pie quedan en los extremos, como en Arcadia.
+  &:has(> :nth-child(2)) {
+    justify-content: space-between;
+  }
 }
 
 .access__stack {
@@ -68,5 +77,14 @@
 
   .ui-button {
     min-width: 144px;
+  }
+}
+
+// Los pasos comparten la misma celda: el que sale y el que entra se cruzan sin mover la página.
+.access-steps {
+  display: grid;
+
+  > * {
+    grid-area: 1 / 1;
   }
 }

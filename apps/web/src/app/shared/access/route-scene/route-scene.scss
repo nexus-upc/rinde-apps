@@ -1,0 +1,184 @@
+// La escena ocupa el bloque gris del acceso; el viaje flota sobre la ruta sin recibir foco ni clics.
+:host {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+}
+
+.route-scene__map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.route-scene__dot {
+  fill: var(--arc-border);
+}
+
+.route-scene__road {
+  fill: none;
+  stroke: var(--arc-border);
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.route-scene__line {
+  fill: none;
+  stroke: var(--arc-ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 1400;
+  animation: route-scene-draw 2400ms var(--arc-ease-emphasis) 300ms backwards;
+}
+
+.route-scene__stop {
+  fill: var(--arc-bg);
+  stroke: var(--arc-ink);
+  stroke-width: 3;
+}
+
+.route-scene__end {
+  fill: var(--arc-ink);
+}
+
+.route-scene__pulse {
+  fill: var(--arc-ink);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: route-scene-pulse 1800ms var(--arc-ease-out) infinite;
+}
+
+.route-scene__city {
+  fill: var(--arc-ink);
+  font-family: var(--arc-font-sans);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.route-scene__unit {
+  circle {
+    fill: var(--arc-accent);
+  }
+
+  path {
+    fill: var(--arc-on-fill);
+  }
+}
+
+.route-scene__trip {
+  position: absolute;
+  top: 38%;
+  left: 52%;
+  box-sizing: border-box;
+  display: grid;
+  gap: 12px;
+  width: 296px;
+  padding: 20px;
+  border-radius: var(--arc-radius-card);
+  background: var(--arc-card);
+  box-shadow: 0 24px 48px -24px color-mix(in srgb, var(--arc-shadow) 28%, transparent);
+  animation:
+    route-scene-arrive 420ms var(--arc-ease-entrance) 900ms backwards,
+    route-scene-float 6s ease-in-out 1400ms infinite;
+}
+
+.route-scene__trip-head,
+.route-scene__trip-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.route-scene__code {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.route-scene__status {
+  padding: 4px 10px;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-wait-bg);
+  color: var(--arc-wait);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.route-scene__route {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.route-scene__bar {
+  display: block;
+  height: 6px;
+  overflow: hidden;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-surface);
+
+  span {
+    display: block;
+    width: 62%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--arc-ink);
+  }
+}
+
+.route-scene__trip-foot {
+  color: var(--arc-muted);
+  font-size: 12px;
+}
+
+@keyframes route-scene-draw {
+  from {
+    stroke-dashoffset: 1400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes route-scene-pulse {
+  from {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.8);
+  }
+}
+
+@keyframes route-scene-arrive {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes route-scene-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-scene__line,
+  .route-scene__pulse,
+  .route-scene__trip {
+    animation: none;
+  }
+}

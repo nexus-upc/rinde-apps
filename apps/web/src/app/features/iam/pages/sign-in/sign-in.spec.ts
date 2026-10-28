@@ -186,7 +186,7 @@ describe('SignIn', () => {
     expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
-  it('shows the spinner while the request is pending and goes to the trips page on success', () => {
+  it('shows the spinner while the request is pending and goes to the trips page on success', async () => {
     createFixture();
     const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     continueTo('admin@rinde.test');
@@ -202,7 +202,8 @@ describe('SignIn', () => {
       .flush({ accessToken: TOKEN, tokenType: 'Bearer', expiresInSeconds: 28800 });
 
     expect(sessionStorage.getItem(STORAGE_KEY)).toBe(TOKEN);
-    expect(navigate).toHaveBeenCalledWith('/trips');
+    // La pantalla de carga prepara el espacio antes de navegar.
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith('/trips'));
   });
 
   it('announces the title once and animates its words separately', () => {
@@ -213,18 +214,18 @@ describe('SignIn', () => {
     expect(title.querySelectorAll('.arc-entrance-word[aria-hidden="true"]').length).toBe(4);
   });
 
-  it('does not mount the entrance preview below 1100 px', () => {
+  it('does not mount the route scene below 1100 px', () => {
     wideScreen = false;
     createFixture();
 
-    expect(fixture.nativeElement.querySelector('app-entrance-preview')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-route-scene')).toBeNull();
   });
 
-  it('mounts the entrance preview at 1100 px, hidden from assistive technology and inert', () => {
+  it('mounts the route scene at 1100 px, hidden from assistive technology and inert', () => {
     wideScreen = true;
     createFixture();
 
-    const preview = fixture.nativeElement.querySelector('app-entrance-preview') as HTMLElement;
+    const preview = fixture.nativeElement.querySelector('app-route-scene') as HTMLElement;
     expect(preview).not.toBeNull();
     expect(preview.getAttribute('aria-hidden')).toBe('true');
     expect(preview.hasAttribute('inert')).toBe(true);

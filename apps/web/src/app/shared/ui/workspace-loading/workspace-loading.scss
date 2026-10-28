@@ -1,0 +1,68 @@
+// Marca de 40, 16 hasta el aro y su texto; aro de 16 y 8 entre aro y texto. Entra en 260 ms y sale en 120.
+.workspace-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: var(--arc-bg);
+  color: var(--arc-ink);
+  animation: workspace-loading-in var(--arc-dur-base) var(--arc-ease-out) backwards;
+
+  &.is-leaving {
+    animation: workspace-loading-out var(--arc-dur-instant) var(--arc-ease-out) forwards;
+  }
+}
+
+.workspace-loading__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.workspace-loading__ring {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--arc-border);
+  border-top-color: var(--arc-ink);
+  border-radius: 50%;
+  animation: workspace-loading-spin 720ms linear infinite;
+}
+
+@keyframes workspace-loading-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes workspace-loading-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes workspace-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Con movimiento reducido el indicador queda quieto y solo cambia la opacidad.
+@media (prefers-reduced-motion: reduce) {
+  .workspace-loading__ring {
+    animation: none;
+  }
+}

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { WorkspaceTransition } from '@core/loading/workspace-transition';
 import { AccessLayout } from '@shared/access/access-layout/access-layout';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
@@ -92,7 +93,7 @@ import { PlatformAccessStore } from '../state/platform-access.store';
 })
 export class PlatformSignIn {
   protected readonly store = inject(PlatformAccessStore);
-  private readonly router = inject(Router);
+  private readonly transition = inject(WorkspaceTransition);
   private readonly returnUrl = inject(ActivatedRoute).snapshot.queryParamMap.get('returnUrl');
   protected readonly form = inject(NonNullableFormBuilder).group({
     email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
@@ -109,7 +110,7 @@ export class PlatformSignIn {
     this.store.signIn(
       this.form.getRawValue(),
       () =>
-        void this.router.navigateByUrl(
+        void this.transition.enter(
           this.returnUrl === '/platform/mailbox' ? '/platform/mailbox' : '/platform',
         ),
     );

@@ -55,19 +55,22 @@
 
 .access__slogan {
   position: relative;
+  z-index: 1;
+  max-width: 440px;
   font-size: var(--arc-showcase-title-size);
   font-weight: 600;
   line-height: var(--arc-showcase-title-line);
   letter-spacing: -0.02em;
 
-  span {
+  .access__eyebrow {
     display: block;
-    margin-top: 8px;
-    color: var(--arc-muted);
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 20px;
-    letter-spacing: 0;
+    margin-bottom: 8px;
+    color: var(--arc-subtle);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
 }
 

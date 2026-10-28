@@ -1,8 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  AnimationCallbackEvent,
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { WorkspaceTransition } from '@core/loading/workspace-transition';
 import { AccessLayout } from '@shared/access/access-layout/access-layout';
 import { AutoFocus } from '@shared/forms/autofocus';
+import { leaveStep } from '@shared/motion/leave-step';
 import { MailIcon } from '@shared/ui/icons/mail-icon';
 import { RiseTitle } from '@shared/ui/rise-title/rise-title';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
@@ -33,7 +41,7 @@ const NOTICES: Readonly<Record<string, string>> = {
 })
 export class SignIn {
   private readonly store = inject(AccessStore);
-  private readonly router = inject(Router);
+  private readonly transition = inject(WorkspaceTransition);
   private readonly fb = inject(NonNullableFormBuilder);
   private readonly query = inject(ActivatedRoute).snapshot.queryParamMap;
 
@@ -48,6 +56,10 @@ export class SignIn {
   protected readonly notice = signal<string | null>(
     NOTICES[this.query.get('notice') ?? ''] ?? null,
   );
+
+  protected leave(event: AnimationCallbackEvent): void {
+    leaveStep(event);
+  }
 
   protected goToEmail(): void {
     this.step.set('email');
@@ -80,7 +92,7 @@ export class SignIn {
       return;
     }
     this.store.signIn(this.form.getRawValue(), () => {
-      void this.router.navigateByUrl('/trips');
+      void this.transition.enter('/trips');
     });
   }
 
