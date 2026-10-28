@@ -1,6 +1,6 @@
 # rinde-web
 
-Aplicación web de RINDE by NEXUS para el administrador y el responsable de operaciones. Consume la API a través del gateway (`rinde-gateway`, puerto 8000). Está hecha con Angular 22, componentes standalone y SCSS.
+Aplicación web de RINDE by NEXUS para el administrador, el responsable de operaciones y el dueño de Rinde. Consume la API a través del gateway (`rinde-gateway`, puerto 8000). Está hecha con Angular 22, componentes standalone y SCSS.
 
 Incluye registro, verificación de correo, inicio de sesión, recuperación de contraseña e invitaciones
 (de US08 a US11), administración de usuarios y la pantalla de suscripción (de US38 a US40).
@@ -48,7 +48,10 @@ La dirección de la API está en `src/environments/environment.ts` (`apiBaseUrl`
 | `core/`                   | Sesión, configuración HTTP, acciones asíncronas y avisos globales.             |
 | `features/iam/`           | Acceso y usuarios, separados en models, data-access, state, pages y ui.        |
 | `features/subscriptions/` | Planes, vigencia y checkout, con las mismas capas por funcionalidad.           |
-| `features/trips/`         | Tablero provisional pendiente de S2-11.                                        |
+| `features/trips/`         | Viajes: tablero y programación (S2-11) y detalle y asignación (S2-12).        |
+| `features/expenses/`      | Gastos de un viaje y su revisión (S2-13).                                      |
+| `features/platform/`      | Panel del dueño de Rinde.                                                      |
+| `features/demo-mailbox/`  | Buzón de demostración del dueño.                                               |
 | `layout/`                 | Composición del espacio de trabajo y navegación.                               |
 | `shared/`                 | Componentes de presentación, marca y directivas sin conocimiento de la sesión. |
 
