@@ -1,6 +1,7 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { problemMessage } from '@core/http/problem-message';
+import { catchError, forkJoin, of } from 'rxjs';
 import { HomeApi } from '../data-access/home-api';
 import { TripSummary, WeekDay } from '../models/home.models';
 
@@ -31,6 +32,8 @@ export class HomeStore {
   private readonly loadState = signal<'loading' | 'ready' | 'error'>('loading');
   private readonly errorState = signal('');
   private readonly tripsState = signal<readonly TripSummary[]>([]);
+  private readonly platesState = signal<ReadonlyMap<string, string>>(new Map());
+  private readonly driversState = signal<ReadonlyMap<string, string>>(new Map());
   private readonly todayState = signal(new Date());
   readonly state = this.loadState.asReadonly();
   readonly error = this.errorState.asReadonly();
@@ -95,14 +98,28 @@ export class HomeStore {
     };
   });
 
+  /** Placa y conductor de un viaje, con los nombres de Fleet cuando se pudieron consultar. */
+  assignment(trip: TripSummary): string | null {
+    if (!trip.vehicleId || !trip.driverId) return null;
+    const plate = this.platesState().get(trip.vehicleId);
+    const driver = this.driversState().get(trip.driverId);
+    return plate && driver ? `${plate}, ${driver}` : 'Unidad y conductor asignados';
+  }
+
   load(): void {
     this.loadState.set('loading');
     this.todayState.set(new Date());
-    this.api
-      .trips()
+    // Sin Fleet el inicio sigue funcionando: solo deja de mostrar placas y nombres.
+    forkJoin({
+      trips: this.api.trips(),
+      vehicles: this.api.vehicles().pipe(catchError(() => of([]))),
+      drivers: this.api.drivers().pipe(catchError(() => of([]))),
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (trips) => {
+        next: ({ trips, vehicles, drivers }) => {
+          this.platesState.set(new Map(vehicles.map((item) => [item.id, item.plateNumber])));
+          this.driversState.set(new Map(drivers.map((item) => [item.id, item.fullName])));
           this.tripsState.set(trips);
           this.loadState.set('ready');
         },

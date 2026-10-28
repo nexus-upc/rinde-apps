@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { API_BASE_URL } from '@core/config/api-config';
 import { Observable } from 'rxjs';
-import { TripSummary } from '../models/home.models';
+import { FleetDriver, FleetVehicle, TripSummary } from '../models/home.models';
 
 /** Lecturas que necesita el inicio, a través del gateway. */
 @Injectable({ providedIn: 'root' })
@@ -12,5 +12,13 @@ export class HomeApi {
 
   trips(): Observable<TripSummary[]> {
     return this.http.get<TripSummary[]>(`${this.base}/trips`);
+  }
+
+  vehicles(): Observable<FleetVehicle[]> {
+    return this.http.get<FleetVehicle[]>(`${this.base}/vehicles`);
+  }
+
+  drivers(): Observable<FleetDriver[]> {
+    return this.http.get<FleetDriver[]>(`${this.base}/drivers`);
   }
 }

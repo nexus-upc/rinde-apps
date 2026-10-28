@@ -7,7 +7,8 @@ import { TripSummary } from '../../models/home.models';
 import { isoDay } from '../../state/home.store';
 import { HomePage } from './home-page';
 
-const TRIPS_URL = `${environment.apiBaseUrl}/api/v1/trips`;
+const BASE = `${environment.apiBaseUrl}/api/v1`;
+const TRIPS_URL = `${BASE}/trips`;
 
 function trip(code: string, status: TripSummary['status'], offset: number): TripSummary {
   const date = new Date();
@@ -40,29 +41,35 @@ describe('HomePage', () => {
   });
   afterEach(() => http.verify());
 
+  /** Responde los viajes; Fleet devuelve la unidad y el conductor de los viajes asignados. */
+  function respond(trips: TripSummary[] | null, status = 200) {
+    http.expectOne(`${BASE}/vehicles`).flush([{ id: 'vehicle', plateNumber: 'ABC-123' }]);
+    http.expectOne(`${BASE}/drivers`).flush([{ id: 'driver', fullName: 'Luis Quispe' }]);
+    if (status === 200) http.expectOne(TRIPS_URL).flush(trips);
+    else http.expectOne(TRIPS_URL).flush(null, { status, statusText: 'Error' });
+    fixture.detectChanges();
+  }
+
   it('summarizes the trips in route, the next departure and what lacks an assignment', () => {
     expect(text()).toContain('Cargando el inicio');
-    http
-      .expectOne(TRIPS_URL)
-      .flush([
-        trip('TRP-000001', 'IN_ROUTE', 0),
-        trip('TRP-000002', 'IN_ROUTE', -1),
-        trip('TRP-000003', 'SCHEDULED', 2),
-        trip('TRP-000004', 'FINISHED', -30),
-      ]);
-    fixture.detectChanges();
+    respond([
+      trip('TRP-000001', 'IN_ROUTE', 0),
+      trip('TRP-000002', 'IN_ROUTE', -1),
+      trip('TRP-000003', 'SCHEDULED', 2),
+      trip('TRP-000004', 'FINISHED', -30),
+    ]);
 
     expect(text()).toContain('2 viajes en camino');
     expect(text()).toContain('1 salida espera unidad y conductor.');
     expect(text()).toContain('Lima a Chimbote');
     expect(text()).toContain('Viajes de hoy');
     expect(text()).toContain('TRP-000003 sin asignar');
+    expect(text()).toContain('ABC-123, Luis Quispe');
     expect(text()).not.toContain('TRP-000004');
   });
 
   it('shows the upcoming departures when nothing leaves today', () => {
-    http.expectOne(TRIPS_URL).flush([trip('TRP-000005', 'ASSIGNED', 3)]);
-    fixture.detectChanges();
+    respond([trip('TRP-000005', 'ASSIGNED', 3)]);
 
     expect(text()).toContain('Ningún viaje en camino');
     expect(text()).toContain('Próximas salidas');
@@ -70,16 +77,14 @@ describe('HomePage', () => {
   });
 
   it('offers a retry when the trips cannot be loaded', () => {
-    http.expectOne(TRIPS_URL).flush(null, { status: 500, statusText: 'Error' });
-    fixture.detectChanges();
+    respond(null, 500);
     expect(text()).toContain('No pudimos cargar el inicio');
 
     const retry = Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll('button'),
     ).find((button) => button.textContent?.trim() === 'Reintentar');
     retry!.click();
-    http.expectOne(TRIPS_URL).flush([]);
-    fixture.detectChanges();
+    respond([]);
     expect(text()).toContain('Aún no hay viajes programados');
   });
 });

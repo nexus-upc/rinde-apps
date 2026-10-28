@@ -74,8 +74,7 @@ export class HomePage {
   }
 
   protected unit(trip: TripSummary): string {
-    if (trip.vehicleId && trip.driverId) return 'Unidad y conductor asignados';
-    return trip.vehicleId || trip.driverId ? 'Asignación incompleta' : 'Sin asignar';
+    return this.store.assignment(trip) ?? 'Sin asignar';
   }
 }
 

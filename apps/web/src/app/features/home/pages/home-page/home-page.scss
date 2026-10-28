@@ -1,9 +1,11 @@
 // Inicio sobre blanco: saludo, banda con el degradado de marca y dos columnas sin tarjetas.
+// Ocupa todo el ancho disponible y se reacomoda según su propio ancho, no el de la ventana.
 .home {
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  max-width: 1120px;
+  gap: 28px;
+  width: 100%;
 }
 
 .home__head {
@@ -61,8 +63,8 @@
 
 .home__hero {
   display: flex;
-  gap: 36px;
-  padding: 32px 36px;
+  gap: 32px;
+  padding: 28px 32px;
   border-radius: var(--arc-radius-card);
   background: var(--arc-brand-gradient);
   background-size: 220% 220%;
@@ -71,8 +73,8 @@
 
   h2 {
     margin: 0;
-    font-size: 40px;
-    line-height: 44px;
+    font-size: 36px;
+    line-height: 42px;
     font-weight: 600;
     letter-spacing: -0.03em;
   }
@@ -116,7 +118,7 @@
   flex-direction: column;
   justify-content: center;
   gap: 10px;
-  width: 300px;
+  width: clamp(240px, 28%, 340px);
 
   > span {
     color: var(--arc-on-band-muted);
@@ -152,8 +154,8 @@
 
 .home__grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  gap: 48px;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 30%, 360px);
+  gap: clamp(32px, 4cqi, 56px);
 }
 
 .home__section-head {
@@ -184,10 +186,10 @@
 
 .home__row {
   display: grid;
-  grid-template-columns: 64px minmax(0, 1.4fr) minmax(0, 1.2fr) 112px;
+  grid-template-columns: 56px minmax(0, 1.2fr) minmax(0, 1fr) 112px;
   align-items: center;
   gap: 16px;
-  min-height: 56px;
+  min-height: 52px;
   padding: 0 12px;
   border-radius: var(--arc-radius-row);
   transition: background-color var(--arc-dur-fast) ease;
@@ -217,8 +219,21 @@
 }
 
 .home__unit {
+  overflow: hidden;
   color: var(--arc-muted);
   font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &.is-missing {
+    justify-self: start;
+    padding: 2px 10px;
+    border-radius: var(--arc-radius-pill);
+    background: var(--arc-fill-soft);
+    color: var(--arc-fill);
+    font-size: 12px;
+    font-weight: 500;
+  }
 }
 
 .home__status {
@@ -421,13 +436,14 @@
   }
 }
 
-@media (max-width: 1024px) {
+// Por debajo de 880 px de contenido, la semana y los avisos pasan debajo de los viajes.
+@container (max-width: 880px) {
   .home__grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-@media (max-width: 768px) {
+@container (max-width: 640px) {
   .home__hero {
     flex-direction: column;
     gap: 20px;
@@ -449,12 +465,10 @@
   }
 
   .home__row {
-    grid-template-columns: 56px minmax(0, 1fr);
-    padding: 10px 12px;
+    grid-template-columns: 48px minmax(0, 1fr) auto;
 
-    .home__unit,
-    .home__status {
-      grid-column: 2;
+    .home__unit {
+      display: none;
     }
   }
 }

@@ -20,3 +20,15 @@ export interface WeekDay {
   readonly today: boolean;
   readonly future: boolean;
 }
+
+/** Lo que el inicio muestra de una unidad de Fleet. */
+export interface FleetVehicle {
+  readonly id: string;
+  readonly plateNumber: string;
+}
+
+/** Lo que el inicio muestra de un conductor de Fleet. */
+export interface FleetDriver {
+  readonly id: string;
+  readonly fullName: string;
+}

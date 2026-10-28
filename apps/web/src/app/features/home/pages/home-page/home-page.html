@@ -69,7 +69,9 @@
                 <span>{{ route(trip) }}</span>
                 <span class="home__mono home__code">{{ trip.code }}</span>
               </span>
-              <span class="home__unit">{{ unit(trip) }}</span>
+              <span class="home__unit" [class.is-missing]="!trip.vehicleId || !trip.driverId">
+                {{ unit(trip) }}
+              </span>
               <span class="home__status" [attr.data-status]="trip.status">
                 <span aria-hidden="true"></span>{{ status(trip) }}
               </span>
