@@ -6,7 +6,7 @@ Monorepo de las aplicaciones cliente de RINDE by NEXUS. El backend está en nexu
 
 | Carpeta | Estado | Build |
 |---|---|---|
-| apps/web | Angular 22, versión 0.2.0. Incluye acceso y usuarios, suscripciones y administración de plataforma. | npm run build:web desde la raíz. |
+| apps/web | Angular 22, versión 0.3.0. Incluye acceso y usuarios, suscripciones, administración de plataforma y buzón de demostración. | npm run build:web desde la raíz. |
 | apps/mobile | Espacio reservado para Android en Kotlin. El repositorio anterior estaba vacío. | Pendiente de implementación y configuración Gradle. |
 | apps/landing-page | Espacio reservado para la landing de US01 a US07. El repositorio anterior estaba vacío. | Pendiente de implementación. |
 
@@ -31,7 +31,7 @@ npm start -- --host 127.0.0.1
 
 El servidor web usa http://localhost:4200 y consume el gateway en http://localhost:8000. El acceso del dueño está en /platform/sign-in. Los secretos del backend no forman parte de este repositorio. La documentación de la aplicación y del diseño está en apps/web/README.md, apps/web/docs y apps/web/DESIGN.md.
 
-npm run check conserva las comprobaciones de arquitectura, pruebas unitarias y build. npm run test:platform conserva la comprobación de navegador y requiere su entorno de backend de prueba configurado; no es necesaria para compilar.
+npm run check conserva las comprobaciones de arquitectura, pruebas unitarias y build. npm run test:platform y npm run test:mailbox ejecutan las comprobaciones de navegador del panel del dueño y del buzón de demostración. Requieren su entorno de backend de prueba configurado; no son necesarias para compilar.
 
 ## Trabajo del equipo
 
