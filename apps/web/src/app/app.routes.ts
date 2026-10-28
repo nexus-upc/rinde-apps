@@ -61,9 +61,9 @@ export const routes: Routes = [
       },
       {
         path: 'trips',
-        loadComponent: () =>
-          import('./features/trips/trips-placeholder/trips-placeholder').then(
-            (module) => module.TripsPlaceholder,
+        loadChildren: () =>
+          import('./features/trips/trips.routes').then(
+            (module) => module.TRIPS_ROUTES,
           ),
       },
       { path: '', pathMatch: 'full', redirectTo: 'home' },

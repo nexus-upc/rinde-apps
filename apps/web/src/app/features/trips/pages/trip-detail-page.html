@@ -1,0 +1,62 @@
+<div class="trip-detail-page">
+  @if (store.state() === 'loading') {
+    <app-state-panel
+      title="Cargando viaje"
+      message="Obteniendo la información operativa y los recursos disponibles..."
+    />
+  } @else if (store.state() === 'error') {
+    <app-state-panel
+      [error]="true"
+      title="Error al cargar el viaje"
+      [message]="store.error()"
+      actionLabel="Reintentar"
+      (action)="retry()"
+    />
+  } @else if (store.trip(); as trip) {
+    <app-page-header
+      [title]="'Viaje ' + trip.code"
+      description="Consulta de información operativa y asignación de recursos de flota."
+    >
+      <button uiButton variant="secondary" type="button" (click)="goBack()">
+        Volver
+      </button>
+    </app-page-header>
+
+    @if (store.maintenanceAlert()) {
+      <div class="alert-banner alert-banner--warning" role="alert">
+        <strong>Aviso de Mantenimiento:</strong>
+        La unidad asignada tiene mantenimiento próximo (DUE_SOON).
+      </div>
+    }
+
+    <div class="trip-detail-page__content">
+      <div class="trip-detail-page__main">
+        <app-trip-info
+          [trip]="trip"
+          [vehicle]="store.assignedVehicle()"
+          [driver]="store.assignedDriver()"
+        />
+      </div>
+
+      @if (store.canAssign()) {
+        <aside class="trip-detail-page__aside">
+          <app-trip-assignment-form
+            [vehicles]="store.vehicles()"
+            [drivers]="store.drivers()"
+            [selectedVehicleId]="store.selectedVehicleId()"
+            [selectedDriverId]="store.selectedDriverId()"
+            [confirmOverdue]="store.confirmOverdue()"
+            [showOverdueConfirmation]="store.overdueRequiresConfirmation()"
+            [maintenanceAlert]="store.maintenanceAlert()"
+            [busy]="store.busy()"
+            [actionError]="store.actionError()"
+            (vehicleChange)="store.selectVehicle($event)"
+            (driverChange)="store.selectDriver($event)"
+            (confirmOverdueChange)="store.setConfirmOverdue($event)"
+            (submitAssignment)="store.assign()"
+          />
+        </aside>
+      }
+    </div>
+  }
+</div>

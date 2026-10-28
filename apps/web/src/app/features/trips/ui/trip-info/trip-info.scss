@@ -1,0 +1,162 @@
+.trip-info {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.trip-info__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--arc-border, #e2e8f0);
+}
+
+.trip-info__route {
+  h2 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+  }
+}
+
+.trip-info__code {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--arc-muted, #64748b);
+  font-family: var(--arc-font-mono, monospace);
+}
+
+.trip-info__status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: var(--arc-surface, #f1f5f9);
+  color: var(--arc-foreground, #0f172a);
+
+  &.status-scheduled {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  &.status-assigned {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  &.status-in_route {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  &.status-finished {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  &.status-settled {
+    background: #f3e8ff;
+    color: #7e22ce;
+  }
+}
+
+.trip-info__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.info-card {
+  padding: 16px;
+  border: 1px solid var(--arc-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--arc-card-bg, #ffffff);
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 12px;
+    font-size: 14px;
+  }
+
+  dt {
+    font-weight: 500;
+    color: var(--arc-muted, #64748b);
+  }
+
+  dd {
+    margin: 0;
+    color: var(--arc-foreground, #0f172a);
+  }
+
+  .empty-notice {
+    margin: 0;
+    font-size: 13px;
+    color: var(--arc-muted, #64748b);
+    font-style: italic;
+  }
+
+  .alert-label,
+  .alert-value {
+    color: #b91c1c;
+    font-weight: 600;
+  }
+}
+
+.trip-info__history {
+  padding: 16px;
+  border: 1px solid var(--arc-border, #e2e8f0);
+  border-radius: 8px;
+
+  h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+  }
+
+  .history-item__badge {
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--arc-surface, #f1f5f9);
+    font-weight: 600;
+    font-size: 11px;
+  }
+
+  .history-item__date {
+    color: var(--arc-muted, #64748b);
+  }
+
+  .history-item__reason {
+    color: var(--arc-foreground, #0f172a);
+  }
+}
