@@ -8,5 +8,5 @@ export const platformGuard: CanActivateFn = (_route, state) => {
       queryParams:
         state.url === '/platform/mailbox' ? { returnUrl: '/platform/mailbox' } : undefined,
     });
-  return auth.user()?.scope === 'PLATFORM' ? true : inject(Router).createUrlTree(['/trips']);
+  return auth.user()?.scope === 'PLATFORM' ? true : inject(Router).createUrlTree(['/home']);
 };

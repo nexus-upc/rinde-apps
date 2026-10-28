@@ -27,8 +27,8 @@ export const routes: Routes = [
       },
     ],
   },
-  // La raíz va al tablero; el guard decide entre el ingreso, el panel del dueño o la empresa.
-  { path: '', pathMatch: 'full', redirectTo: 'trips' },
+  // La raíz va al inicio; el guard decide entre el ingreso, el panel del dueño o la empresa.
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
   {
     path: '',
     loadChildren: () =>
@@ -55,13 +55,18 @@ export const routes: Routes = [
           import('./features/iam/iam.routes').then((module) => module.IAM_USER_ROUTES),
       },
       {
+        path: 'home',
+        loadChildren: () =>
+          import('./features/home/home.routes').then((module) => module.HOME_ROUTES),
+      },
+      {
         path: 'trips',
         loadComponent: () =>
           import('./features/trips/trips-placeholder/trips-placeholder').then(
             (module) => module.TripsPlaceholder,
           ),
       },
-      { path: '', pathMatch: 'full', redirectTo: 'trips' },
+      { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },
   { path: '**', redirectTo: '' },

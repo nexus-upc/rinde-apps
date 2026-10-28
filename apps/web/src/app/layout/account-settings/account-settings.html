@@ -1,0 +1,110 @@
+<dialog
+  #dialog
+  class="settings"
+  aria-labelledby="settings-title"
+  (close)="closed.emit()"
+  (click)="onBackdrop($event)"
+>
+  <div class="settings__panel">
+    <div class="settings__rail">
+      <div class="settings__who">
+        <span class="settings__disc" aria-hidden="true">{{ initials() }}</span>
+        <span class="settings__stack">
+          <strong>{{ profile()?.fullName ?? email() }}</strong>
+          <small>{{ roleLabel() }}</small>
+        </span>
+      </div>
+
+      <nav aria-label="Secciones de ajustes">
+        @for (group of groups; track group.label) {
+          <div class="settings__group">
+            <span class="settings__group-label">{{ group.label }}</span>
+            @for (id of group.items; track id) {
+              <button
+                class="settings__tab"
+                type="button"
+                [class.is-current]="current() === id"
+                [attr.aria-current]="current() === id ? 'page' : null"
+                (click)="pick(id)"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                  <path [attr.d]="icons[sections[id].icon]" />
+                </svg>
+                <span class="settings__label">{{ sections[id].label }}</span>
+                @if (sections[id].soon) {
+                  <span class="settings__tag">Pronto</span>
+                }
+              </button>
+            }
+          </div>
+        }
+      </nav>
+
+      <div class="settings__foot">
+        <span class="settings__tab settings__tab--plain">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="icons.info" />
+          </svg>
+          <span class="settings__label">Acerca de Rinde</span>
+          <span class="settings__tag">Pronto</span>
+        </span>
+        <button class="settings__tab settings__tab--danger" type="button" (click)="signOut.emit()">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="icons.signOut" />
+          </svg>
+          Cerrar sesión
+        </button>
+      </div>
+    </div>
+
+    <div class="settings__body">
+      <header class="settings__head">
+        <h2 id="settings-title">{{ section().label }}</h2>
+        <button class="settings__close" type="button" aria-label="Cerrar" (click)="dialog.close()">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="icons.close" />
+          </svg>
+        </button>
+      </header>
+
+      @if (section().soon; as soon) {
+        <div class="settings__pane settings__soon">
+          <span class="settings__soon-disc" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path [attr.d]="icons[section().icon]" />
+            </svg>
+          </span>
+          <strong>{{ section().label }} llegará pronto</strong>
+          <p>{{ soon }}</p>
+        </div>
+      } @else {
+        <div class="settings__pane">
+          <div class="settings__profile">
+            <span class="settings__photo" aria-hidden="true">{{ initials() }}</span>
+            <span class="settings__stack">
+              <strong class="settings__name">{{ profile()?.fullName ?? email() }}</strong>
+              <small>{{ email() }}</small>
+            </span>
+            <button class="settings__pill" type="button" disabled>Editar perfil, pronto</button>
+          </div>
+          @if (facts().length) {
+            <dl class="settings__facts">
+              @for (fact of facts(); track fact.label) {
+                <div>
+                  <dt>{{ fact.label }}</dt>
+                  <dd>{{ fact.value }}</dd>
+                </div>
+              }
+            </dl>
+          } @else {
+            <p class="settings__note">Cargando tus datos.</p>
+          }
+          <p class="settings__note">
+            El correo es tu usuario de acceso. Para cambiar tu rol o tu correo, habla con quien
+            administra tu empresa.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</dialog>

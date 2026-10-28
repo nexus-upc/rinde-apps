@@ -71,7 +71,7 @@ describe('Platform session boundary', () => {
       { accessToken: token('ADMINISTRATOR'), tokenType: 'Bearer', expiresInSeconds: 300 },
       'TENANT',
     );
-    expect(TestBed.inject(Router).serializeUrl(guard(platformGuard) as UrlTree)).toBe('/trips');
+    expect(TestBed.inject(Router).serializeUrl(guard(platformGuard) as UrlTree)).toBe('/home');
   });
   it('does not store tokens returned for a different scope', () => {
     const auth = TestBed.inject(AuthService);

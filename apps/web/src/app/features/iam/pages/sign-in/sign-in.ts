@@ -92,7 +92,7 @@ export class SignIn {
       return;
     }
     this.store.signIn(this.form.getRawValue(), () => {
-      void this.transition.enter('/trips');
+      void this.transition.enter('/home');
     });
   }
 

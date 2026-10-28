@@ -49,7 +49,7 @@ async function signIn(page, email, password) {
   await page.getByRole('button', { name: 'Continuar', exact: true }).click();
   await page.locator('#password').fill(password);
   await page.getByRole('button', { name: 'Continuar', exact: true }).click();
-  await page.waitForURL((url) => url.pathname === '/trips');
+  await page.waitForURL((url) => url.pathname === '/home');
 }
 async function mailbox(page, email, purpose) {
   await page.goto(web + '/platform/mailbox');
@@ -180,10 +180,11 @@ async function run() {
     await request('GET', '/api/v1/platform/demo-mailbox/messages', null, companyToken, 403);
     await request('GET', '/api/v1/platform/demo-mailbox/messages', null, null, 401);
     await guest.goto(web + '/platform/mailbox');
-    await guest.waitForURL((url) => url.pathname === '/trips');
+    await guest.waitForURL((url) => url.pathname === '/home');
     checks.push('Empresa y visitante anónimo sin acceso a mensajes ni enlaces del operador');
 
-    await guest.getByRole('button', { name: 'Cerrar sesión', exact: true }).click();
+    await guest.locator('button[aria-haspopup="menu"]').click();
+    await guest.getByRole('menuitem', { name: 'Cerrar sesión', exact: true }).click();
     await guest.goto(web + '/recover');
     await guest.locator('#email').fill(companyEmail);
     await guest.getByRole('button', { name: 'Enviar enlace', exact: true }).click();

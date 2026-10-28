@@ -186,7 +186,7 @@ describe('SignIn', () => {
     expect(sessionStorage.getItem(STORAGE_KEY)).toBeNull();
   });
 
-  it('shows the spinner while the request is pending and goes to the trips page on success', async () => {
+  it('shows the spinner while the request is pending and goes to the home page on success', async () => {
     createFixture();
     const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
     continueTo('admin@rinde.test');
@@ -203,7 +203,7 @@ describe('SignIn', () => {
 
     expect(sessionStorage.getItem(STORAGE_KEY)).toBe(TOKEN);
     // La pantalla de carga prepara el espacio antes de navegar.
-    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith('/trips'));
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith('/home'));
   });
 
   it('announces the title once and animates its words separately', () => {

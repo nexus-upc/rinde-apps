@@ -1,4 +1,156 @@
-@use './shell-layout';
+// Marco del panel del dueño: menú lateral y barra superior sobre el mismo fondo, sin líneas.
+$sidebar-width: 232px;
+
+.shell__skip {
+  position: fixed;
+  top: 8px;
+  left: 16px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-fill);
+  color: var(--arc-on-fill);
+  transform: translateY(-150%);
+  &:focus {
+    transform: none;
+  }
+}
+
+.shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--arc-bg);
+}
+
+.shell__sidebar {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: $sidebar-width;
+  padding: 24px 16px;
+  background: var(--arc-bg);
+}
+
+.shell__brand {
+  margin: 0 8px 32px;
+}
+
+.shell__nav {
+  display: grid;
+  gap: 4px;
+}
+
+.shell__link {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--arc-radius-row);
+  color: var(--arc-ink);
+  font-size: 14px;
+  line-height: 20px;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--arc-surface);
+  }
+
+  &--active {
+    background: var(--arc-surface);
+    font-weight: 500;
+  }
+}
+
+.shell__main {
+  min-width: 0;
+  margin-left: $sidebar-width;
+}
+
+.shell__topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+  min-height: 56px;
+  padding: 0 40px;
+  background: var(--arc-bg);
+}
+
+.shell__session {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  margin-right: auto;
+  color: var(--arc-muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.shell__name {
+  color: var(--arc-ink);
+  font-weight: 500;
+}
+
+.shell__name,
+.shell__tenant,
+.shell__email {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.shell__signout {
+  flex: none;
+  white-space: nowrap;
+  min-height: 40px;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.shell__content {
+  padding: 32px 40px;
+}
+
+// Con puntero táctil, los controles llegan a 44 px aunque se vean más chicos.
+@media (pointer: coarse) {
+  .shell__link,
+  .shell__signout {
+    min-height: 44px;
+  }
+}
+
+@media (max-width: 768px) {
+  .shell__sidebar {
+    position: static;
+    width: auto;
+    padding: 16px;
+  }
+
+  .shell__brand {
+    margin: 0 8px 16px;
+  }
+
+  .shell__main {
+    margin-left: 0;
+  }
+
+  .shell__topbar {
+    padding: 0 16px;
+  }
+
+  .shell__content {
+    padding: 24px 16px;
+  }
+}
 .platform-mobile {
   display: none;
 }

@@ -197,7 +197,7 @@ async function run() {
     await request('GET', '/api/v1/platform/companies', null, company.accessToken, 403);
     await request('GET', '/api/v1/users', null, owner, 403);
     await companyPage.goto(web + '/platform');
-    await companyPage.waitForURL((url) => url.pathname === '/trips');
+    await companyPage.waitForURL((url) => url.pathname === '/home');
     await page.goto(web + '/users');
     await page.waitForURL((url) => url.pathname === '/platform');
     checks.push('Separación de permisos en API y navegación en ambos sentidos');
