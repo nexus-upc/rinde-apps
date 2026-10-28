@@ -1,0 +1,90 @@
+<section class="trip-info">
+  <div class="trip-info__header">
+    <div class="trip-info__route">
+      <h2>{{ trip().origin }} &rarr; {{ trip().destination }}</h2>
+      <span class="trip-info__code">{{ trip().code }}</span>
+    </div>
+    <span class="trip-info__status-badge status-{{ trip().status.toLowerCase() }}">
+      {{ statusLabel() }}
+    </span>
+  </div>
+
+  <div class="trip-info__grid">
+    <div class="info-card">
+      <h3>Datos de la Carga</h3>
+      <dl>
+        <dt>Descripción:</dt>
+        <dd>{{ trip().cargoDescription }}</dd>
+        <dt>Peso:</dt>
+        <dd>{{ trip().cargoWeightKg !== null ? (trip().cargoWeightKg + ' kg') : 'No especificado' }}</dd>
+        <dt>Fecha de salida programada:</dt>
+        <dd>{{ trip().departureDate }}</dd>
+      </dl>
+    </div>
+
+    <div class="info-card">
+      <h3>Recursos Asignados</h3>
+      @if (trip().vehicleId) {
+        <dl>
+          <dt>Vehículo:</dt>
+          <dd>
+            @if (vehicle()) {
+              {{ vehicle()?.brand }} {{ vehicle()?.model }} ({{ vehicle()?.plateNumber }})
+            } @else {
+              ID: {{ trip().vehicleId }}
+            }
+          </dd>
+          <dt>Conductor:</dt>
+          <dd>
+            @if (driver()) {
+              {{ driver()?.fullName }} (Licencia: {{ driver()?.licenseNumber }})
+            } @else {
+              ID: {{ trip().driverId }}
+            }
+          </dd>
+          <dt>Fecha de asignación:</dt>
+          <dd>{{ trip().assignedAt | date:'medium' }}</dd>
+          @if (trip().overdueMaintenanceConfirmedBy) {
+            <dt class="alert-label">Mantenimiento vencido:</dt>
+            <dd class="alert-value">Confirmado y autorizado</dd>
+          }
+        </dl>
+      } @else {
+        <p class="empty-notice">Aún no se han asignado vehículo ni conductor a este viaje.</p>
+      }
+    </div>
+
+    @if (trip().startedAt || trip().finishedAt) {
+      <div class="info-card">
+        <h3>Ejecución del Viaje</h3>
+        <dl>
+          @if (trip().startedAt) {
+            <dt>Inicio de viaje:</dt>
+            <dd>{{ trip().startedAt | date:'medium' }}</dd>
+          }
+          @if (trip().finishedAt) {
+            <dt>Fin de viaje:</dt>
+            <dd>{{ trip().finishedAt | date:'medium' }}</dd>
+          }
+        </dl>
+      </div>
+    }
+  </div>
+
+  @if (trip().statusChanges && trip().statusChanges.length > 0) {
+    <div class="trip-info__history">
+      <h3>Historial de Estados</h3>
+      <ul class="history-list">
+        @for (item of trip().statusChanges; track item.changedAt) {
+          <li class="history-item">
+            <span class="history-item__badge">{{ item.status }}</span>
+            <span class="history-item__date">{{ item.changedAt | date:'medium' }}</span>
+            @if (item.reason) {
+              <span class="history-item__reason">{{ item.reason }}</span>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</section>
