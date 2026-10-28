@@ -6,19 +6,10 @@
 .brand-mark {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
   line-height: 1;
 }
 
-.brand-mark__symbol {
+.brand-mark__logo {
   display: block;
   flex: none;
-  fill: currentColor;
-}
-
-.brand-mark__name {
-  font-family: var(--arc-font-brand);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  white-space: nowrap;
 }

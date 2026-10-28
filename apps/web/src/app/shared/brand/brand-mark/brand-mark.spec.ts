@@ -15,7 +15,7 @@ describe('BrandMark', () => {
     await TestBed.configureTestingModule({ imports: [HostComponent] }).compileComponents();
   });
 
-  it('exposes the name as text and hides the symbol from assistive technology', () => {
+  it('exposes the name as text and hides the logo from assistive technology', () => {
     const fixture = TestBed.createComponent(BrandMark);
     fixture.detectChanges();
     const host = fixture.nativeElement as HTMLElement;
@@ -25,13 +25,13 @@ describe('BrandMark', () => {
     expect(host.querySelector('path')?.getAttribute('fill')).toBe('currentColor');
   });
 
-  it('draws the symbol at 24 px by default', () => {
+  it('draws the horizontal logo 24 px high by default, keeping its proportion', () => {
     const fixture = TestBed.createComponent(BrandMark);
     fixture.detectChanges();
     const svg = (fixture.nativeElement as HTMLElement).querySelector('svg');
 
-    expect(svg?.getAttribute('width')).toBe('24');
     expect(svg?.getAttribute('height')).toBe('24');
+    expect(svg?.getAttribute('width')).toBe('86');
   });
 
   it('follows the size input', () => {
@@ -39,6 +39,6 @@ describe('BrandMark', () => {
     fixture.detectChanges();
     const svg = (fixture.nativeElement as HTMLElement).querySelector('svg');
 
-    expect(svg?.getAttribute('width')).toBe('16');
+    expect(svg?.getAttribute('height')).toBe('16');
   });
 });
