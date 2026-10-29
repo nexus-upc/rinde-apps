@@ -1,0 +1,104 @@
+<section
+  class="trips-dashboard"
+  aria-labelledby="trips-title"
+  [attr.aria-busy]="store.state() === 'loading' || null"
+>
+  <app-page-header
+    title="Tablero de viajes"
+    titleId="trips-title"
+    description="Los viajes programados de tu empresa."
+    [count]="store.state() === 'ready' ? store.trips().length.toString() : ''"
+  >
+    <button
+      class="text-link"
+      type="button"
+      (click)="store.load()"
+      [disabled]="store.state() === 'loading'"
+    >
+      Actualizar
+    </button>
+    <button
+      uiButton
+      type="button"
+      (click)="showForm.set(true)"
+      [disabled]="store.state() === 'loading' || showForm()"
+    >
+      Programar viaje
+    </button>
+  </app-page-header>
+
+  @if (showForm()) {
+    <app-trip-form
+      [busy]="store.busy()"
+      [error]="store.actionError()"
+      (submitted)="createTrip($event)"
+      (cancelled)="showForm.set(false)"
+    />
+  }
+
+  <div class="trips-dashboard__filters" role="group" aria-label="Filtrar por estado">
+    <button
+      class="filter-chip"
+      type="button"
+      [class.filter-chip--active]="store.activeStatusFilter() === null"
+      (click)="filterByStatus(null)"
+    >
+      Todos
+    </button>
+    @for (opt of statusOptions; track opt.value) {
+      <button
+        class="filter-chip"
+        type="button"
+        [class.filter-chip--active]="store.activeStatusFilter() === opt.value"
+        (click)="filterByStatus(opt.value)"
+      >
+        {{ opt.label }}
+      </button>
+    }
+  </div>
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <div class="trips-dashboard__loading" role="status">
+        <span class="visually-hidden">Cargando viajes</span>
+        @for (item of [1, 2, 3, 4]; track item) {
+          <div class="trips-dashboard__skeleton" aria-hidden="true"></div>
+        }
+      </div>
+    }
+    @case ('error') {
+      <app-state-panel
+        title="No se pudieron cargar los viajes"
+        [message]="store.error()"
+        [error]="true"
+        actionLabel="Reintentar"
+        (action)="store.load()"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="6" cy="18" r="2" />
+          <circle cx="18" cy="6" r="2" />
+          <path d="M8 18h7a3 3 0 0 0 0-6h-4a3 3 0 0 1 0-6h5" />
+        </svg>
+      </app-state-panel>
+    }
+    @case ('ready') {
+      @if (store.trips().length > 0) {
+        <app-trip-list [trips]="store.trips()" (tripSelected)="navigateToDetail($event)" />
+      } @else {
+        <app-state-panel
+          title="No hay viajes"
+          message="Aún no hay viajes registrados. Usa el botón 'Programar viaje' para agregar el primero."
+        />
+      }
+    }
+  }
+</section>

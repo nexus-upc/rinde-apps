@@ -1,0 +1,100 @@
+<section class="trip-form" aria-label="Programar nuevo viaje">
+  <h2 class="trip-form__title">Programar viaje</h2>
+
+  @if (error()) {
+    <p class="trip-form__error" role="alert">{{ error() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="field">
+      <label class="field__label" for="tf-origin">Origen</label>
+      <input
+        id="tf-origin"
+        class="field__input"
+        type="text"
+        formControlName="origin"
+        placeholder="Ciudad o dirección de origen"
+        maxlength="200"
+        [class.field__input--invalid]="isInvalid('origin')"
+        [attr.aria-invalid]="isInvalid('origin') || null"
+        [attr.aria-describedby]="isInvalid('origin') ? 'tf-origin-error' : null"
+      />
+      @if (isInvalid('origin')) {
+        <p id="tf-origin-error" class="field__error">Ingrese el origen.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="tf-destination">Destino</label>
+      <input
+        id="tf-destination"
+        class="field__input"
+        type="text"
+        formControlName="destination"
+        placeholder="Ciudad o dirección de destino"
+        maxlength="200"
+        [class.field__input--invalid]="isInvalid('destination')"
+        [attr.aria-invalid]="isInvalid('destination') || null"
+        [attr.aria-describedby]="isInvalid('destination') ? 'tf-destination-error' : null"
+      />
+      @if (isInvalid('destination')) {
+        <p id="tf-destination-error" class="field__error">Ingrese el destino.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="tf-cargo">Descripción de carga</label>
+      <textarea
+        id="tf-cargo"
+        class="field__input field__input--textarea"
+        formControlName="cargoDescription"
+        placeholder="Describe la mercadería a transportar"
+        maxlength="500"
+        rows="3"
+        [class.field__input--invalid]="isInvalid('cargoDescription')"
+        [attr.aria-invalid]="isInvalid('cargoDescription') || null"
+        [attr.aria-describedby]="isInvalid('cargoDescription') ? 'tf-cargo-error' : null"
+      ></textarea>
+      @if (isInvalid('cargoDescription')) {
+        <p id="tf-cargo-error" class="field__error">Ingrese la descripción de la carga.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="tf-weight">Peso de carga (kg) <span class="field__optional">Opcional</span></label>
+      <input
+        id="tf-weight"
+        class="field__input"
+        type="number"
+        formControlName="cargoWeightKg"
+        placeholder="Ej. 1500"
+        min="0"
+      />
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="tf-date">Fecha de salida</label>
+      <input
+        id="tf-date"
+        class="field__input"
+        type="date"
+        formControlName="departureDate"
+        [class.field__input--invalid]="isInvalid('departureDate')"
+        [attr.aria-invalid]="isInvalid('departureDate') || null"
+        [attr.aria-describedby]="isInvalid('departureDate') ? 'tf-date-error' : null"
+      />
+      @if (isInvalid('departureDate')) {
+        <p id="tf-date-error" class="field__error">Ingrese la fecha de salida.</p>
+      }
+    </div>
+
+    <div class="trip-form__actions">
+      <button uiButton variant="secondary" type="button" [disabled]="busy()" (click)="cancelled.emit()">
+        Cancelar
+      </button>
+      <button uiButton type="submit" [loading]="busy()" [disabled]="busy()">
+        Programar viaje
+      </button>
+    </div>
+  </form>
+</section>

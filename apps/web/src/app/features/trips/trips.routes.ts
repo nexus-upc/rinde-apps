@@ -4,7 +4,7 @@ export const TRIPS_ROUTES: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./trips-placeholder/trips-placeholder').then((m) => m.TripsPlaceholder),
+      import('./pages/trips-dashboard-page').then((m) => m.TripsDashboardPage),
   },
   {
     path: ':id',

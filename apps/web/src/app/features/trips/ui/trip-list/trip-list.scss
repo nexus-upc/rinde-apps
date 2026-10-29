@@ -1,0 +1,52 @@
+.trip-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.trip-list__row {
+  display: grid;
+  grid-template-columns: 7rem 1fr 10rem 8rem;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 12px 16px;
+  background: var(--arc-surface);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+
+  &:hover {
+    background: var(--arc-surface-hover, color-mix(in srgb, var(--arc-surface) 90%, currentColor));
+  }
+}
+
+.trip-list__code {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: 13px;
+}
+
+.trip-list__route {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.trip-list__date {
+  color: var(--arc-muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.trip-list__status {
+  font-size: 13px;
+  color: var(--arc-muted);
+  text-align: right;
+}
