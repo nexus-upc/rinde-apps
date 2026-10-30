@@ -96,8 +96,8 @@
               class="review-textarea"
               rows="3"
               placeholder="Ejemplo: Comprobante ilegible, monto no coincide con la factura, o concepto fuera de política..."
-              [ngModel]="observationReason()"
-              (ngModelChange)="observationReason.set($event)"
+              [value]="observationReason()"
+              (input)="onReasonInput($event)"
               [disabled]="busy()"
             ></textarea>
           </section>

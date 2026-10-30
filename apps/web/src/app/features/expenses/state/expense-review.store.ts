@@ -71,6 +71,10 @@ export class ExpenseReviewStore {
     this.actionErrorState.set('');
   }
 
+  clearActionError(): void {
+    this.actionErrorState.set('');
+  }
+
   approve(expenseId: string, onComplete?: () => void): void {
     this.busyState.set(true);
     this.actionErrorState.set('');

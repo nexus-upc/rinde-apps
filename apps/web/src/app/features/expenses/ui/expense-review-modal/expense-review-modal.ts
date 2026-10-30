@@ -26,6 +26,7 @@ export class ExpenseReviewModal {
   readonly closeModal = output<void>();
   readonly approve = output<string>();
   readonly observe = output<{ id: string; reason: string }>();
+  readonly clearError = output<void>();
 
   protected readonly observationReason = signal('');
 
@@ -38,6 +39,14 @@ export class ExpenseReviewModal {
         this.observationReason.set('');
       }
     });
+  }
+
+  onReasonInput(event: Event): void {
+    const target = event.target as HTMLTextAreaElement | null;
+    this.observationReason.set(target?.value ?? '');
+    if (this.actionError()) {
+      this.clearError.emit();
+    }
   }
 
   getCategoryLabel(category?: ExpenseCategory): string {
@@ -61,10 +70,11 @@ export class ExpenseReviewModal {
 
   onObserve(): void {
     const exp = this.expense();
+    const reason = this.observationReason().trim();
     if (exp) {
       this.observe.emit({
         id: exp.id,
-        reason: this.observationReason(),
+        reason,
       });
     }
   }
