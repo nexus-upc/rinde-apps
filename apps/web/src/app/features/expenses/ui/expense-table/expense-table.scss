@@ -1,0 +1,155 @@
+.expense-table-container {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--arc-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--arc-card-bg, #ffffff);
+}
+
+.expense-table-empty {
+  padding: 40px;
+  text-align: center;
+  color: var(--arc-muted, #64748b);
+  font-size: 14px;
+}
+
+.expense-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+
+  th {
+    background: var(--arc-surface, #f8fafc);
+    color: var(--arc-muted, #64748b);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--arc-border, #e2e8f0);
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--arc-border, #e2e8f0);
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+
+  tr:hover td {
+    background: var(--arc-surface-hover, #f8fafc);
+  }
+
+  tr.is-observed td {
+    background: #fff5f5;
+  }
+}
+
+.date-cell {
+  white-space: nowrap;
+  color: var(--arc-muted, #64748b);
+  font-size: 13px;
+}
+
+.issuer-cell {
+  strong {
+    color: var(--arc-foreground, #0f172a);
+    font-weight: 600;
+  }
+}
+
+.doc-cell {
+  font-family: var(--arc-font-mono, monospace);
+  font-size: 13px;
+
+  .doc-type {
+    display: inline-block;
+    padding: 2px 6px;
+    background: #f1f5f9;
+    border-radius: 4px;
+    margin-right: 6px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+}
+
+.category-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.amount-cell {
+  white-space: nowrap;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #f1f5f9;
+  color: #475569;
+
+  &.status-registered {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  &.status-approved {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  &.status-observed {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  &.status-locked {
+    background: #f3e8ff;
+    color: #6b21a8;
+  }
+}
+
+.evidence-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #2563eb;
+  font-weight: 500;
+}
+
+.no-evidence {
+  font-size: 12px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.actions-col {
+  text-align: right;
+}
+
+.actions-cell {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}

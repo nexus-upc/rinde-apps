@@ -1,0 +1,79 @@
+<div class="expense-table-container">
+  @if (expenses().length === 0) {
+    <div class="expense-table-empty">
+      <p>No se encontraron gastos registrados para este viaje.</p>
+    </div>
+  } @else {
+    <table class="expense-table">
+      <thead>
+        <tr>
+          <th>Fecha</th>
+          <th>ID / Clave</th>
+          <th>Categoría</th>
+          <th>Monto</th>
+          <th>Estado</th>
+          <th>Evidencia</th>
+          <th class="actions-col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of expenses(); track item.id) {
+          <tr [class.is-observed]="item.status === 'OBSERVED'" [class.is-approved]="item.status === 'APPROVED'">
+            <td class="date-cell">{{ item.expenseDate }}</td>
+            <td class="doc-cell">
+              <span class="doc-num">{{ item.idempotencyKey || item.id }}</span>
+            </td>
+            <td>
+              <span class="category-badge">{{ getCategoryLabel(item.category) }}</span>
+            </td>
+            <td class="amount-cell">
+              <strong>{{ item.amount | currency:item.currency:'symbol':'1.2-2' }}</strong>
+            </td>
+            <td>
+              <span
+                class="status-badge"
+                [class.status-registered]="item.status === 'REGISTERED'"
+                [class.status-approved]="item.status === 'APPROVED'"
+                [class.status-observed]="item.status === 'OBSERVED'"
+                [class.status-locked]="item.status === 'LOCKED'"
+              >
+                {{ getStatusLabel(item.status) }}
+              </span>
+            </td>
+            <td>
+              @if (item.evidence) {
+                <span class="evidence-tag">
+                  📎 Adjunto ({{ (item.evidence.fileSizeBytes / 1024) | number:'1.0-0' }} KB)
+                </span>
+              } @else {
+                <span class="no-evidence">Sin archivo</span>
+              }
+            </td>
+            <td class="actions-cell">
+              <button
+                uiButton
+                variant="secondary"
+                type="button"
+                [disabled]="busy()"
+                (click)="reviewExpense.emit(item)"
+              >
+                Revisar
+              </button>
+              @if (item.status === 'REGISTERED') {
+                <button
+                  uiButton
+                  variant="primary"
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="quickApprove.emit(item.id)"
+                >
+                  Aprobar
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

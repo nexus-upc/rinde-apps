@@ -1,0 +1,99 @@
+<div class="expense-review-page">
+  <app-page-header
+    title="Revisión de Gastos Operativos (US24)"
+    description="Auditoría, aprobación y observación de comprobantes de viaje."
+  >
+    <button uiButton variant="secondary" type="button" (click)="goBack()">
+      Volver a Viajes
+    </button>
+  </app-page-header>
+
+  <section class="trip-search-bar">
+    <label for="trip-search-input" class="search-label">ID del Viaje:</label>
+    <div class="search-input-group">
+      <input
+        id="trip-search-input"
+        type="text"
+        class="search-input"
+        placeholder="Ejemplo: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        [ngModel]="inputTripId()"
+        (ngModelChange)="inputTripId.set($event)"
+        (keyup.enter)="searchTrip()"
+      />
+      <button
+        uiButton
+        variant="primary"
+        type="button"
+        [disabled]="!inputTripId().trim() || store.state() === 'loading'"
+        (click)="searchTrip()"
+      >
+        Buscar Gastos
+      </button>
+    </div>
+  </section>
+
+  @if (store.state() === 'loading') {
+    <app-state-panel
+      title="Cargando comprobantes"
+      message="Obteniendo la lista de gastos registrados para el viaje..."
+    />
+  } @else if (store.state() === 'error') {
+    <app-state-panel
+      [error]="true"
+      title="Error al consultar gastos"
+      [message]="store.error()"
+      actionLabel="Reintentar"
+      (action)="retry()"
+    />
+  } @else if (store.state() === 'ready') {
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-title">Total Comprobantes</span>
+        <span class="metric-value">{{ store.totalExpenses() }}</span>
+      </div>
+
+      <div class="metric-card metric-card--pending">
+        <span class="metric-title">Pendientes (Por revisar)</span>
+        <span class="metric-value">{{ store.pendingExpenses().length }}</span>
+      </div>
+
+      <div class="metric-card metric-card--approved">
+        <span class="metric-title">Aprobados</span>
+        <span class="metric-value">{{ store.approvedExpenses().length }}</span>
+      </div>
+
+      <div class="metric-card metric-card--observed">
+        <span class="metric-title">Observados</span>
+        <span class="metric-value">{{ store.observedExpenses().length }}</span>
+      </div>
+
+      <div class="metric-card metric-card--total">
+        <span class="metric-title">Monto Total Reportado</span>
+        <span class="metric-value">{{ store.totalAmount() | currency:'PEN':'symbol':'1.2-2' }}</span>
+      </div>
+    </section>
+
+    <section class="table-section">
+      <app-expense-table
+        [expenses]="store.expenses()"
+        [busy]="store.busy()"
+        (reviewExpense)="onReviewExpense($event)"
+        (quickApprove)="onQuickApprove($event)"
+      />
+    </section>
+  } @else {
+    <div class="idle-placeholder">
+      <p>Ingresa el identificador de un viaje para comenzar la revisión de comprobantes.</p>
+    </div>
+  }
+
+  <app-expense-review-modal
+    [expense]="store.selectedExpense()"
+    [busy]="store.busy()"
+    [actionError]="store.actionError()"
+    (closeModal)="onCloseModal()"
+    (approve)="onApprove($event)"
+    (observe)="onObserve($event)"
+    (clearError)="store.clearActionError()"
+  />
+</div>
