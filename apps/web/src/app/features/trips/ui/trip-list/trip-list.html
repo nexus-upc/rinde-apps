@@ -1,0 +1,12 @@
+<ul class="trip-list" role="list">
+  @for (trip of trips(); track trip.id) {
+    <li class="trip-list__item">
+      <button class="trip-list__row" type="button" (click)="tripSelected.emit(trip.id)">
+        <span class="trip-list__code">{{ trip.code }}</span>
+        <span class="trip-list__route">{{ trip.origin }} → {{ trip.destination }}</span>
+        <span class="trip-list__date">{{ trip.departureDate }}</span>
+        <span class="trip-list__status">{{ statusLabels[trip.status] }}</span>
+      </button>
+    </li>
+  }
+</ul>

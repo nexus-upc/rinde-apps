@@ -69,3 +69,26 @@ export const TRIP_STATUS_LABELS: Readonly<Record<TripStatus, string>> = {
   FINISHED: 'Finalizado',
   SETTLED: 'Liquidado',
 };
+
+export interface TripSummary {
+  readonly id: string;
+  readonly code: string;
+  readonly origin: string;
+  readonly destination: string;
+  readonly departureDate: string;
+  readonly status: TripStatus;
+  readonly vehicleId: string | null;
+  readonly driverId: string | null;
+}
+
+export interface TripFilters {
+  readonly status?: TripStatus;
+}
+
+export interface CreateTripPayload {
+  readonly origin: string;
+  readonly destination: string;
+  readonly cargoDescription: string;
+  readonly cargoWeightKg: number | null;
+  readonly departureDate: string;
+}

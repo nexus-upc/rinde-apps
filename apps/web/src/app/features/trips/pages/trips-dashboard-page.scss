@@ -1,0 +1,53 @@
+.trips-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 32px;
+  max-width: 960px;
+}
+
+.trips-dashboard__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trips-dashboard__skeleton {
+  height: 52px;
+  border-radius: 8px;
+  background: var(--arc-surface);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.trips-dashboard__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid var(--arc-border, #e0e0e0);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  color: inherit;
+  transition: background 0.15s, border-color 0.15s;
+
+  &:hover {
+    background: var(--arc-surface);
+  }
+
+  &.filter-chip--active {
+    background: var(--arc-accent, #1a1a2e);
+    border-color: var(--arc-accent, #1a1a2e);
+    color: #fff;
+  }
+}
