@@ -69,7 +69,7 @@ export class ShellLayout {
       items: [
         { label: 'Inicio', icon: 'home', path: '/home' },
         { label: 'Viajes', icon: 'trips', path: '/trips' },
-        { label: 'Gastos', icon: 'expenses' },
+        { label: 'Gastos', icon: 'expenses', path: '/expenses' },
       ],
     };
     if (this.user()?.role !== 'ADMINISTRATOR') return [today, OPERATION];
