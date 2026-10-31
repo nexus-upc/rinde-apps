@@ -1,0 +1,103 @@
+// Degradado de marca con el logo en blanco, la barra de avance y el paso actual.
+// Entra en 260 ms y sale en 120.
+.workspace-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  background: var(--arc-brand-gradient);
+  background-size: 220% 220%;
+  color: var(--arc-on-band);
+  animation:
+    workspace-loading-in var(--arc-dur-base) var(--arc-ease-out) backwards,
+    workspace-loading-drift 9s ease-in-out infinite;
+
+  &.is-leaving {
+    animation: workspace-loading-out var(--arc-dur-instant) var(--arc-ease-out) forwards;
+  }
+}
+
+.workspace-loading__bar {
+  display: block;
+  width: 240px;
+  height: 4px;
+  overflow: hidden;
+  border-radius: var(--arc-radius-pill);
+  background: color-mix(in srgb, var(--arc-on-band) 24%, transparent);
+
+  span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--arc-on-band);
+    transition: width 420ms var(--arc-ease-out);
+  }
+}
+
+.workspace-loading__line {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: color-mix(in srgb, var(--arc-on-band) 90%, transparent);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.workspace-loading__ring {
+  box-sizing: border-box;
+  width: 16px;
+  height: 16px;
+  border: 2px solid color-mix(in srgb, var(--arc-on-band) 30%, transparent);
+  border-top-color: var(--arc-on-band);
+  border-radius: 50%;
+  animation: workspace-loading-spin 720ms linear infinite;
+}
+
+@keyframes workspace-loading-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes workspace-loading-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes workspace-loading-drift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes workspace-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Con movimiento reducido solo cambia la opacidad y el avance de la barra.
+@media (prefers-reduced-motion: reduce) {
+  .workspace-loading {
+    animation: none;
+  }
+
+  .workspace-loading__ring {
+    animation: none;
+  }
+}

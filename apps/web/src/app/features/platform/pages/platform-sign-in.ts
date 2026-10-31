@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { WorkspaceTransition } from '@core/loading/workspace-transition';
 import { AccessLayout } from '@shared/access/access-layout/access-layout';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { PlatformAccessStore } from '../state/platform-access.store';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 @Component({
   selector: 'app-platform-sign-in',
   imports: [ReactiveFormsModule, RouterLink, AccessLayout, AutoFocus, UiButton],
@@ -92,19 +94,26 @@ import { PlatformAccessStore } from '../state/platform-access.store';
 })
 export class PlatformSignIn {
   protected readonly store = inject(PlatformAccessStore);
-  private readonly router = inject(Router);
+  private readonly transition = inject(WorkspaceTransition);
+  private readonly returnUrl = inject(ActivatedRoute).snapshot.queryParamMap.get('returnUrl');
   protected readonly form = inject(NonNullableFormBuilder).group({
     email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
     password: ['', [Validators.required, Validators.maxLength(72)]],
   });
   protected bad(field: 'email' | 'password') {
-    return this.form.controls[field].touched && this.form.controls[field].invalid;
+    return showError(this.form.controls[field]);
   }
   protected submit() {
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
-    this.store.signIn(this.form.getRawValue(), () => void this.router.navigateByUrl('/platform'));
+    this.store.signIn(
+      this.form.getRawValue(),
+      () =>
+        void this.transition.enter(
+          this.returnUrl === '/platform/mailbox' ? '/platform/mailbox' : '/platform',
+        ),
+    );
   }
 }

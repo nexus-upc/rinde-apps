@@ -1,6 +1,6 @@
 {
   "name": "rinde-apps",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "packageManager": "npm@11.19.0",
   "workspaces": ["apps/web"],
@@ -11,6 +11,7 @@
     "check:architecture": "npm run check:architecture --workspace=rinde-web",
     "check": "npm run check --workspace=rinde-web",
     "test": "npm run test --workspace=rinde-web --",
-    "test:platform": "npm run test:platform --workspace=rinde-web"
+    "test:platform": "npm run test:platform --workspace=rinde-web",
+    "test:mailbox": "npm run test:mailbox --workspace=rinde-web"
   }
 }

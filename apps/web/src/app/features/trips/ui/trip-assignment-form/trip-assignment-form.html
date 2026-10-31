@@ -1,0 +1,88 @@
+<div class="assignment-form">
+  <h3>Asignación de Recursos</h3>
+  <p class="assignment-form__description">
+    Seleccione la unidad de transporte y el conductor habilitado para ejecutar este viaje.
+  </p>
+
+  @if (maintenanceAlert()) {
+    <div class="alert-banner alert-banner--warning" role="alert">
+      <strong>Aviso de Mantenimiento:</strong>
+      La unidad asignada tiene mantenimiento próximo (DUE_SOON).
+    </div>
+  }
+
+  @if (actionError()) {
+    <div class="alert-banner alert-banner--error" role="alert">
+      {{ actionError() }}
+    </div>
+  }
+
+  <form class="assignment-form__fields" (submit)="$event.preventDefault(); onSubmit()">
+    <div class="form-group">
+      <label for="vehicle-select">Vehículo:</label>
+      <select
+        id="vehicle-select"
+        class="form-control"
+        [value]="selectedVehicleId()"
+        [disabled]="busy()"
+        (change)="onVehicleSelect($event)"
+      >
+        <option value="" disabled>Seleccione un vehículo</option>
+        @for (vehicle of vehicles(); track vehicle.id) {
+          <option [value]="vehicle.id">
+            {{ vehicle.brand }} {{ vehicle.model }} - Placa: {{ vehicle.plateNumber }} (Capacidad: {{ vehicle.payloadCapacityKg }} kg)
+          </option>
+        }
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="driver-select">Conductor:</label>
+      <select
+        id="driver-select"
+        class="form-control"
+        [value]="selectedDriverId()"
+        [disabled]="busy()"
+        (change)="onDriverSelect($event)"
+      >
+        <option value="" disabled>Seleccione un conductor</option>
+        @for (driver of drivers(); track driver.id) {
+          <option [value]="driver.id">
+            {{ driver.fullName }} - Licencia: {{ driver.licenseNumber }} (Cat. {{ driver.licenseCategory }})
+          </option>
+        }
+      </select>
+    </div>
+
+    @if (showOverdueConfirmation() || confirmOverdue()) {
+      <div class="form-group form-group--checkbox">
+        <label class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="confirmOverdue()"
+            [disabled]="busy()"
+            (change)="onConfirmOverdueToggle($event)"
+          />
+          <span>Confirmar asignación con mantenimiento vencido</span>
+        </label>
+        <p class="checkbox-hint">
+          Marque esta casilla si la unidad tiene mantenimiento vencido y cuenta con la autorización requerida.
+        </p>
+      </div>
+    }
+
+    <div class="form-actions">
+      <button
+        uiButton
+        type="submit"
+        [disabled]="busy() || !selectedVehicleId() || !selectedDriverId()"
+      >
+        @if (busy()) {
+          Asignando...
+        } @else {
+          Asignar Viaje
+        }
+      </button>
+    </div>
+  </form>
+</div>

@@ -14,9 +14,21 @@ export const routes: Routes = [
     canActivate: [platformGuard],
     canActivateChild: [platformGuard],
     loadComponent: () => import('./layout/platform-shell').then((m) => m.PlatformShell),
-    loadChildren: () =>
-      import('./features/platform/platform.routes').then((m) => m.PLATFORM_ROUTES),
+    children: [
+      {
+        path: 'mailbox',
+        loadComponent: () =>
+          import('./features/demo-mailbox/pages/mailbox-page').then((m) => m.MailboxPage),
+      },
+      {
+        path: '',
+        loadChildren: () =>
+          import('./features/platform/platform.routes').then((m) => m.PLATFORM_ROUTES),
+      },
+    ],
   },
+  // La raíz va al inicio; el guard decide entre el ingreso, el panel del dueño o la empresa.
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
   {
     path: '',
     loadChildren: () =>
@@ -43,13 +55,25 @@ export const routes: Routes = [
           import('./features/iam/iam.routes').then((module) => module.IAM_USER_ROUTES),
       },
       {
+        path: 'home',
+        loadChildren: () =>
+          import('./features/home/home.routes').then((module) => module.HOME_ROUTES),
+      },
+      {
         path: 'trips',
-        loadComponent: () =>
-          import('./features/trips/trips-placeholder/trips-placeholder').then(
-            (module) => module.TripsPlaceholder,
+        loadChildren: () =>
+          import('./features/trips/trips.routes').then(
+            (module) => module.TRIPS_ROUTES,
           ),
       },
-      { path: '', pathMatch: 'full', redirectTo: 'trips' },
+      {
+        path: 'expenses',
+        loadChildren: () =>
+          import('./features/expenses/expenses.routes').then(
+            (module) => module.EXPENSES_ROUTES,
+          ),
+      },
+      { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },
   { path: '**', redirectTo: '' },

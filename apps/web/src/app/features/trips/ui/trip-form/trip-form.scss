@@ -1,0 +1,47 @@
+.trip-form {
+  padding: 24px;
+  background: var(--arc-surface);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.trip-form__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.trip-form__error {
+  margin: 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--arc-danger, #d00) 10%, transparent);
+  color: var(--arc-danger, #d00);
+  font-size: 14px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trip-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 8px;
+}
+
+.field__input--textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.field__optional {
+  font-weight: 400;
+  color: var(--arc-muted);
+  font-size: 12px;
+}

@@ -2,6 +2,7 @@ import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { RequestAction } from '@core/async/request-action';
 import { ROLE_LABELS } from '@core/auth/auth.models';
 import { AuthService } from '@core/auth/auth.service';
+import { DemoModeService } from '@core/config/demo-mode.service';
 import { ToastService } from '@core/feedback/toast.service';
 import { IamApi } from '../data-access/iam-api';
 import { InviteUserRequest, UpdateUserRequest, User, UserRole } from '../models/iam.models';
@@ -10,6 +11,7 @@ import { InviteUserRequest, UpdateUserRequest, User, UserRole } from '../models/
 @Injectable()
 export class UsersStore {
   private readonly api = inject(IamApi);
+  private readonly demoMode = inject(DemoModeService);
   private readonly auth = inject(AuthService);
   private readonly toasts = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
@@ -53,7 +55,11 @@ export class UsersStore {
       onSuccess: (user) => {
         this.usersState.update((users) => [...users, user]);
         this.invitingState.set(false);
-        this.toasts.show(`Invitación enviada a ${user.email}.`);
+        this.toasts.show(
+          this.demoMode.mailboxEnabled()
+            ? `Invitación preparada para ${user.email} en el buzón de demostración.`
+            : `Invitación creada para ${user.email}.`,
+        );
       },
       errorMessage: 'No se pudo enviar la invitación. Intente nuevamente.',
     });

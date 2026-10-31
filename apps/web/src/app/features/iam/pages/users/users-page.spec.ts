@@ -113,7 +113,7 @@ describe('UsersPage', () => {
     fixture.detectChanges();
 
     expect(root().querySelectorAll('.user-row').length).toBe(3);
-    expect(toasts.messages()[0]?.text).toBe('Invitación enviada a rosa@andes.pe.');
+    expect(toasts.messages()[0]?.text).toBe('Invitación creada para rosa@andes.pe.');
   });
 
   it('disables another user and updates the row', () => {

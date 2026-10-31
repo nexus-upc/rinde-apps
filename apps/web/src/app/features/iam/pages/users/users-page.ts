@@ -10,6 +10,8 @@ import {
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
+import { DemoModeService } from '@core/config/demo-mode.service';
+import { DemoMailNotice } from '@shared/ui/demo-mail-notice/demo-mail-notice';
 import { UsersStore } from '../../state/users.store';
 import { InviteUserForm } from '../../ui/invite-user-form/invite-user-form';
 import { UserList } from '../../ui/user-list/user-list';
@@ -18,12 +20,13 @@ import { UserList } from '../../ui/user-list/user-list';
 @Component({
   selector: 'app-users-page',
   providers: [UsersStore],
-  imports: [PageHeader, StatePanel, UiButton, InviteUserForm, UserList],
+  imports: [DemoMailNotice, PageHeader, StatePanel, UiButton, InviteUserForm, UserList],
   templateUrl: './users-page.html',
   styleUrl: './users-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UsersPage {
+  protected readonly demoMode = inject(DemoModeService);
   protected readonly store = inject(UsersStore);
   private readonly trigger = viewChild<UiButton, ElementRef<HTMLButtonElement>>('inviteTrigger', {
     read: ElementRef,

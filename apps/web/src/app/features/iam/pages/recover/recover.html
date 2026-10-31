@@ -4,10 +4,11 @@
       <header class="access__header">
         <app-rise-title text="Revisa tu correo" />
         <p class="access__lead">
-          Si {{ form.controls.email.value }} tiene una cuenta, recibirá un enlace para crear una
-          contraseña nueva. El enlace vence en una hora.
+          Si {{ form.controls.email.value }} tiene una cuenta, se habrá preparado un enlace para
+          crear una contraseña nueva. El enlace vence en una hora.
         </p>
       </header>
+      <app-demo-mail-notice [enabled]="demoMode.mailboxEnabled()" />
       <a
         uiButton
         block

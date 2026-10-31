@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, output } from '@angu
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 @Component({
   selector: 'app-platform-reason',
   imports: [ReactiveFormsModule, AutoFocus, UiButton],
@@ -90,13 +91,13 @@ export class PlatformReason {
     reason: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(500)]],
   });
   protected invalid() {
-    return this.form.controls.reason.touched && this.form.controls.reason.invalid;
+    return showError(this.form.controls.reason);
   }
   protected submit() {
     const value = this.form.controls.reason.value.trim();
     if (value.length < 3) this.form.controls.reason.setErrors({ minlength: true });
     if (this.form.invalid) {
-      this.form.markAllAsTouched();
+      revealErrors(this.form);
       return;
     }
     this.confirm.emit(value);

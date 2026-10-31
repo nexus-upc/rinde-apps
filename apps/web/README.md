@@ -1,6 +1,6 @@
 # rinde-web
 
-Aplicación web de RINDE by NEXUS para el administrador y el responsable de operaciones. Consume la API a través del gateway (`rinde-gateway`, puerto 8000). Está hecha con Angular 22, componentes standalone y SCSS.
+Aplicación web de RINDE by NEXUS para el administrador, el responsable de operaciones y el dueño de Rinde. Consume la API a través del gateway (`rinde-gateway`, puerto 8000). Está hecha con Angular 22, componentes standalone y SCSS.
 
 Incluye registro, verificación de correo, inicio de sesión, recuperación de contraseña e invitaciones
 (de US08 a US11), administración de usuarios y la pantalla de suscripción (de US38 a US40).
@@ -48,7 +48,10 @@ La dirección de la API está en `src/environments/environment.ts` (`apiBaseUrl`
 | `core/`                   | Sesión, configuración HTTP, acciones asíncronas y avisos globales.             |
 | `features/iam/`           | Acceso y usuarios, separados en models, data-access, state, pages y ui.        |
 | `features/subscriptions/` | Planes, vigencia y checkout, con las mismas capas por funcionalidad.           |
-| `features/trips/`         | Tablero provisional pendiente de S2-11.                                        |
+| `features/trips/`         | Viajes: tablero y programación (S2-11) y detalle y asignación (S2-12).        |
+| `features/expenses/`      | Gastos de un viaje y su revisión (S2-13).                                      |
+| `features/platform/`      | Panel del dueño de Rinde.                                                      |
+| `features/demo-mailbox/`  | Buzón de demostración del dueño.                                               |
 | `layout/`                 | Composición del espacio de trabajo y navegación.                               |
 | `shared/`                 | Componentes de presentación, marca y directivas sin conocimiento de la sesión. |
 
@@ -82,8 +85,9 @@ el entorno de pruebas. Si no está habilitado, la página muestra el pago pendie
 La clave HMAC del webhook permanece en el servidor y nunca se envía a Angular.
 
 El monolito necesita `RINDE_IAM_REMOTE_ENABLED=true` e `IAM_SERVICE_URL` para consultar la empresa
-en IAM separado. Notifications recibe los eventos en segundo plano: todavía no hay un buzón
-de avisos en la web ni un proveedor push real.
+en IAM separado. Notifications recibe los eventos en segundo plano: todavía no hay una bandeja
+de avisos operativos en la web ni un proveedor push real. El buzón de demostración de la
+sección siguiente solo contiene los mensajes de acceso de IAM.
 
 ## Administración de plataforma
 
@@ -93,6 +97,12 @@ Las acciones de acceso y catálogo piden un motivo. Suspender una empresa impide
 
 La funcionalidad platform conserva models, data-access, state, pages y ui. El marco y la navegación de plataforma están separados del marco de empresa. La sesión identifica el ámbito y evita consultar /users/me con una identidad de plataforma. DESIGN.md describe los tokens y patrones Arcadia existentes y su extensión.
 
+## Buzón de demostración
+
+No hay un proveedor de correo. Cuando IAM tiene habilitado `RINDE_DEMO_MAILBOX_ENABLED`, guarda los mensajes de verificación de empresa, invitación y recuperación de contraseña, y el dueño los revisa en /platform/mailbox. Solo la sesión de plataforma puede listarlos y abrirlos; el servidor rechaza a una cuenta de empresa o a una visita anónima. La web consulta /api/v1/demo/features y, si el modo está desactivado, oculta la navegación y no pide mensajes.
+
+La funcionalidad features/demo-mailbox conserva models, data-access, state, pages y ui. Incluye búsqueda por destinatario o empresa, filtro por tipo, paginación, lectura, carga, error y reintento. En móvil alterna listado y lectura y devuelve el foco al volver. El enlace del destinatario se abre en otra pestaña con noopener y noreferrer, sin transferir la sesión del dueño. Los enlaces usados o vencidos, o de una cuenta deshabilitada, no muestran acción. Los avisos de registro, invitación y recuperación explican el buzón sin afirmar que se envió un correo externo. Después de autenticar al dueño, el único retorno permitido es /platform/mailbox.
+
 ## Comprobación del panel en navegador
 
 npm run test:platform usa playwright-core y requiere un backend de comprobación y esta web en ejecución. En Windows usa Edge; puede elegirse otro canal con RINDE_BROWSER_CHANNEL. En otros entornos debe estar instalado Chromium para Playwright. No ejecutar esta prueba contra datos de producción: crea registros de demostración.
@@ -100,3 +110,5 @@ npm run test:platform usa playwright-core y requiere un backend de comprobación
 El backend debe estar levantado con Docker Compose en un proyecto cuyo nombre empiece por rinde-platform-, con el alta inicial del dueño y el pago simulado habilitados. RINDE_TEST_ENV indica la ruta del archivo privado de Compose; RINDE_TEST_PROJECT indica el proyecto. Por defecto se usa la carpeta local de este workspace, ../../../rinde-backend/.env.platform y el proyecto rinde-platform-review. Las direcciones pueden cambiarse con RINDE_WEB_BASE y RINDE_API_BASE.
 
 La prueba lee las credenciales de ese entorno privado sin mostrarlas, crea una empresa de demostración y prepara solo el hash de su token de verificación en la base de prueba. Después ejecuta acceso del dueño, búsqueda, suspensión y restablecimiento, alta de un plan, contratación y pago simulado desde la web de empresa, consulta de registros, auditoría, recuperación de un error inyectado y navegación sin cruce de permisos. Comprueba desbordamiento, controles táctiles y retorno de foco. Los resultados y capturas van a .impeccable/review, ignorado por Git. Las fixtures quedan en ese entorno de revisión.
+
+npm run test:mailbox usa el mismo entorno, con el buzón habilitado en IAM. Recorre registro y verificación, invitación y acceso del conductor y recuperación de contraseña con los enlaces obtenidos del buzón, sin preparar hashes en la base. También comprueba el rechazo a una cuenta de empresa y a una visita anónima, el aislamiento de la pestaña del destinatario y las anchuras móviles de 344, 360 y 390 px.

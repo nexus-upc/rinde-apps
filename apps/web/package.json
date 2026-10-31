@@ -1,6 +1,6 @@
 {
   "name": "rinde-web",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -9,7 +9,8 @@
     "test": "ng test",
     "check:architecture": "node scripts/check-architecture.mjs",
     "check": "npm run check:architecture && npm test -- --watch=false && npm run build",
-    "test:platform": "node tests/platform/browser.cjs"
+    "test:platform": "node tests/platform/browser.cjs",
+    "test:mailbox": "node tests/demo-mailbox/browser.cjs"
   },
   "private": true,
   "packageManager": "npm@11.19.0",
@@ -20,8 +21,8 @@
     "@angular/forms": "^22.0.0",
     "@angular/platform-browser": "^22.0.0",
     "@angular/router": "^22.0.0",
-    "@fontsource-variable/dm-sans": "^5.3.0",
-    "@fontsource/sora": "^5.3.0",
+    "@fontsource-variable/geist": "^5.3.0",
+    "@fontsource-variable/geist-mono": "^5.3.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },

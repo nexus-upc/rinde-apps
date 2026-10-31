@@ -1,0 +1,137 @@
+@if (expense(); as item) {
+  <div class="modal-backdrop" (click)="closeModal.emit()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <h2 class="modal-title">Revisión de Comprobante</h2>
+          <span class="modal-subtitle">Gasto ID: {{ item.id }}</span>
+        </div>
+        <button type="button" class="close-btn" (click)="closeModal.emit()" aria-label="Cerrar modal">
+          ✕
+        </button>
+      </header>
+
+      <div class="modal-body">
+        @if (actionError()) {
+          <div class="alert-error" role="alert">
+            {{ actionError() }}
+          </div>
+        }
+
+        <div class="details-grid">
+          <div class="detail-card">
+            <span class="detail-label">Clave de Idempotencia</span>
+            <span class="detail-value mono">{{ item.idempotencyKey || 'N/A' }}</span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Categoría</span>
+            <span class="detail-value">{{ getCategoryLabel(item.category) }}</span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Monto Total</span>
+            <span class="detail-value amount">{{ item.amount | currency:item.currency:'symbol':'1.2-2' }}</span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Fecha del Gasto</span>
+            <span class="detail-value">{{ item.expenseDate }}</span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Estado Actual</span>
+            <span
+              class="status-pill"
+              [class.status-registered]="item.status === 'REGISTERED'"
+              [class.status-approved]="item.status === 'APPROVED'"
+              [class.status-observed]="item.status === 'OBSERVED'"
+              [class.status-locked]="item.status === 'LOCKED'"
+            >
+              {{ getStatusLabel(item.status) }}
+            </span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Bloqueado por Liquidación</span>
+            <span class="detail-value">{{ item.isLocked ? 'Sí (Cerrado)' : 'No (Modificable)' }}</span>
+          </div>
+        </div>
+
+        <section class="evidence-section">
+          <h3 class="section-title">Evidencia / Archivo Digital</h3>
+          @if (item.evidence; as ev) {
+            <div class="evidence-box">
+              <div class="evidence-info">
+                <span class="file-name">Comprobante digital adjunto</span>
+                <span class="file-size">({{ (ev.fileSizeBytes / 1024) | number:'1.0-0' }} KB)</span>
+              </div>
+              <div class="evidence-preview">
+                <img [src]="ev.imageUrl" alt="Comprobante" />
+              </div>
+              <div class="evidence-link">
+                <a [href]="ev.imageUrl" target="_blank" rel="noopener noreferrer">
+                  Ver o abrir imagen en tamaño original ↗
+                </a>
+              </div>
+            </div>
+          } @else {
+            <div class="evidence-empty">
+              <p>No se adjuntó archivo de evidencia para este comprobante.</p>
+            </div>
+          }
+        </section>
+
+        @if (item.status === 'LOCKED' || item.isLocked) {
+          <div class="lock-notice">
+            Este gasto pertenece a un viaje cuya liquidación ha sido cerrada. No admite modificaciones de estado.
+          </div>
+        } @else {
+          <section class="review-action-section">
+            <label for="obs-reason" class="review-label">
+              Motivo de Observación (Obligatorio en caso de observar):
+            </label>
+            <textarea
+              id="obs-reason"
+              class="review-textarea"
+              rows="3"
+              placeholder="Ejemplo: Comprobante ilegible, monto no coincide con la factura, o concepto fuera de política..."
+              [value]="observationReason()"
+              (input)="onReasonInput($event)"
+              [disabled]="busy()"
+            ></textarea>
+          </section>
+        }
+      </div>
+
+      <footer class="modal-footer">
+        <button uiButton variant="secondary" type="button" [disabled]="busy()" (click)="closeModal.emit()">
+          Cancelar
+        </button>
+
+        @if (item.status !== 'LOCKED' && !item.isLocked) {
+          <button
+            uiButton
+            variant="secondary"
+            type="button"
+            class="btn-observe"
+            [disabled]="busy() || !observationReason().trim()"
+            (click)="onObserve()"
+          >
+            Observar Gasto
+          </button>
+
+          <button
+            uiButton
+            variant="primary"
+            type="button"
+            [disabled]="busy()"
+            (click)="onApprove()"
+          >
+            Aprobar Gasto
+          </button>
+        }
+      </footer>
+    </div>
+  </div>
+}

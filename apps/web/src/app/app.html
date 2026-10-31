@@ -1,2 +1,5 @@
 <router-outlet />
 <app-toasts [messages]="toasts.messages()" />
+@if (transition.visible()) {
+  <app-workspace-loading [leaving]="transition.leaving()" [step]="transition.step()" />
+}

@@ -7,5 +7,5 @@ export const adminGuard: CanActivateFn = () => {
   if (inject(AuthService).user()?.role === 'ADMINISTRATOR') {
     return true;
   }
-  return inject(Router).createUrlTree(['/trips']);
+  return inject(Router).createUrlTree(['/home']);
 };

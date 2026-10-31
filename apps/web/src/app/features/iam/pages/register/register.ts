@@ -1,12 +1,15 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
+import { DemoModeService } from '@core/config/demo-mode.service';
+import { DemoMailNotice } from '@shared/ui/demo-mail-notice/demo-mail-notice';
 import { AccessLayout } from '@shared/access/access-layout/access-layout';
 import { AutoFocus } from '@shared/forms/autofocus';
 import { RiseTitle } from '@shared/ui/rise-title/rise-title';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import { PASSWORD_VALIDATORS } from '../../forms/password-validators';
 import { AccessStore } from '../../state/access.store';
+import { revealErrors, showError } from '@shared/forms/field-errors';
 
 type RegisterStep = 1 | 2 | 3 | 4 | 'sent';
 
@@ -22,11 +25,20 @@ const STEP_FIELDS = {
 @Component({
   selector: 'app-register',
   providers: [AccessStore],
-  imports: [AutoFocus, ReactiveFormsModule, RouterLink, AccessLayout, RiseTitle, UiButton],
+  imports: [
+    DemoMailNotice,
+    AutoFocus,
+    ReactiveFormsModule,
+    RouterLink,
+    AccessLayout,
+    RiseTitle,
+    UiButton,
+  ],
   templateUrl: './register.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Register {
+  protected readonly demoMode = inject(DemoModeService);
   private readonly store = inject(AccessStore);
   private readonly fb = inject(NonNullableFormBuilder);
 
@@ -61,7 +73,7 @@ export class Register {
     const fields = STEP_FIELDS[step];
     const invalid = fields.filter((name) => this.form.controls[name].invalid);
     if (invalid.length > 0) {
-      fields.forEach((name) => this.form.controls[name].markAsTouched());
+      fields.forEach((name) => revealErrors(this.form.controls[name]));
       return;
     }
     if (step === 2) {
@@ -86,7 +98,7 @@ export class Register {
 
   protected isInvalid(name: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[name];
-    return control.touched && control.invalid;
+    return showError(control);
   }
 
   private submit(): void {

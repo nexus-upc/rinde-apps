@@ -1,0 +1,135 @@
+<div class="home arc-entrance-stage">
+  <header class="home__head">
+    <div class="home__title">
+      <h1>{{ greeting }}</h1>
+      <span>{{ todayLabel }}</span>
+    </div>
+    <a class="home__action arc-tap" routerLink="/trips">
+      <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Programar viaje
+    </a>
+  </header>
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <div class="home__loading" role="status">
+        <span class="home__skeleton home__skeleton--hero"></span>
+        <span class="home__skeleton"></span>
+        <span class="visually-hidden">Cargando el inicio</span>
+      </div>
+    }
+    @case ('error') {
+      <app-state-panel
+        title="No pudimos cargar el inicio"
+        [message]="store.error()"
+        actionLabel="Reintentar"
+        [error]="true"
+        (action)="store.load()"
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24">
+          <path d="M12 4 2.5 20h19zM12 10v4M12 17v.01" />
+        </svg>
+      </app-state-panel>
+    }
+    @default {
+      <section class="home__hero" aria-labelledby="home-route">
+        <div class="home__hero-main">
+          <span class="home__live"><span aria-hidden="true"></span>En ruta ahora</span>
+          <h2 id="home-route">{{ inRouteLabel() }}</h2>
+          <p>{{ assignmentLabel() }}</p>
+        </div>
+        <span class="home__hero-rule" aria-hidden="true"></span>
+        <div class="home__hero-next">
+          <span>Próxima salida</span>
+          @if (store.nextDeparture(); as next) {
+            <strong>{{ route(next) }}, {{ day(next) }}</strong>
+            <a class="arc-tap" routerLink="/trips">Ver en Viajes</a>
+          } @else {
+            <strong>Sin salidas programadas</strong>
+            <a class="arc-tap" routerLink="/trips">Programar viaje</a>
+          }
+        </div>
+      </section>
+
+      <div class="home__grid">
+        <section class="home__agenda" aria-labelledby="home-agenda">
+          <div class="home__section-head">
+            <h2 id="home-agenda">
+              {{ store.agendaIsToday() ? 'Viajes de hoy' : 'Próximas salidas' }}
+              <span>{{ countLabel(store.agenda().length) }}</span>
+            </h2>
+            <a routerLink="/trips">Ver en Viajes</a>
+          </div>
+          @for (trip of store.agenda(); track trip.id) {
+            <div class="home__row">
+              <span class="home__mono">{{ day(trip) }}</span>
+              <span class="home__route">
+                <span>{{ route(trip) }}</span>
+                <span class="home__mono home__code">{{ trip.code }}</span>
+              </span>
+              <span class="home__unit" [class.is-missing]="!trip.vehicleId || !trip.driverId">
+                {{ unit(trip) }}
+              </span>
+              <span class="home__status" [attr.data-status]="trip.status">
+                <span aria-hidden="true"></span>{{ status(trip) }}
+              </span>
+            </div>
+          } @empty {
+            <p class="home__empty">Aún no hay viajes programados para tu empresa.</p>
+          }
+        </section>
+
+        <aside class="home__side">
+          <section aria-labelledby="home-week">
+            <div class="home__section-head">
+              <h2 id="home-week">Esta semana</h2>
+              <span class="home__hint">{{ weekRangeLabel() }}</span>
+            </div>
+            <dl class="home__totals">
+              <div>
+                <dd>{{ store.weekTotals().finished }}</dd>
+                <dt>terminados</dt>
+              </div>
+              <div>
+                <dd>{{ store.weekTotals().pending }}</dd>
+                <dt>por salir</dt>
+              </div>
+              <div>
+                <dd>{{ store.weekTotals().inRoute }}</dd>
+                <dt>en ruta</dt>
+              </div>
+            </dl>
+            <div class="home__bars" aria-hidden="true">
+              @for (day of store.week(); track day.label; let index = $index) {
+                <div class="home__bar" [class.is-today]="day.today" [class.is-future]="day.future">
+                  <span
+                    [style.height.px]="8 + (day.count / weekPeak()) * 48"
+                    [style.animation-delay.ms]="200 + index * 50"
+                  ></span>
+                  <small>{{ day.label }}</small>
+                </div>
+              }
+            </div>
+          </section>
+
+          <section class="home__attention" aria-labelledby="home-attention">
+            <h2 id="home-attention">Requiere atención</h2>
+            @for (trip of store.unassigned().slice(0, 3); track trip.id) {
+              <div class="home__notice">
+                <span aria-hidden="true"></span>
+                <span>
+                  <strong>{{ trip.code }} sin asignar</strong>
+                  <small>{{ route(trip) }}, sale {{ day(trip) }}.</small>
+                </span>
+              </div>
+            } @empty {
+              <p class="home__hint">Nada pendiente por ahora.</p>
+            }
+          </section>
+        </aside>
+      </div>
+    }
+  }
+</div>

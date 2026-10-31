@@ -1,0 +1,123 @@
+<dialog
+  #dialog
+  class="settings"
+  aria-labelledby="settings-title"
+  (close)="closed.emit()"
+  (cancel)="onCancel($event)"
+  (click)="onBackdrop($event)"
+>
+  <div class="settings__panel">
+    <div class="settings__rail">
+      <div class="settings__who">
+        <span class="settings__disc" aria-hidden="true">{{ initials() }}</span>
+        <span class="settings__stack">
+          <strong>{{ profile()?.fullName ?? email() }}</strong>
+          <small>{{ roleLabel() }}</small>
+        </span>
+      </div>
+
+      <nav #rail class="settings__nav" aria-label="Secciones de ajustes">
+        <span #thumb class="settings__thumb" aria-hidden="true"></span>
+        @for (group of groups; track group.label) {
+          <span class="settings__group-label">{{ group.label }}</span>
+          @for (id of group.items; track id) {
+            <button
+              class="settings__tab"
+              type="button"
+              [class.is-current]="current() === id"
+              [attr.aria-current]="current() === id ? 'page' : null"
+              (click)="pick(id)"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+                <path [attr.d]="icons[sections[id].icon]" />
+              </svg>
+              <span class="settings__label">{{ sections[id].label }}</span>
+              @if (sections[id].soon) {
+                <span class="settings__tag">Pronto</span>
+              }
+            </button>
+          }
+        }
+      </nav>
+
+      <button class="settings__tab settings__tab--danger" type="button" (click)="signOut.emit()">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+          <path [attr.d]="icons.signOut" />
+        </svg>
+        <span class="settings__label">Cerrar sesión</span>
+      </button>
+    </div>
+
+    <div class="settings__body">
+      <header class="settings__head">
+        <h2 id="settings-title">{{ section().label }}</h2>
+        <button
+          class="settings__round settings__round--quiet"
+          type="button"
+          aria-label="Acerca de Rinde"
+          [attr.aria-pressed]="current() === 'about'"
+          (click)="pick('about')"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="icons.info" />
+          </svg>
+        </button>
+        <button class="settings__round" type="button" aria-label="Cerrar ajustes" (click)="close()">
+          <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="icons.close" />
+          </svg>
+        </button>
+      </header>
+
+      @if (current() === 'about') {
+        <div class="settings__pane settings__soon">
+          <span class="settings__soon-disc" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path [attr.d]="icons.info" /></svg>
+          </span>
+          <strong>Rinde by NEXUS</strong>
+          <p>
+            Gestión operativa para pymes de transporte de carga: viajes, flota, gastos y
+            liquidaciones en un solo lugar.
+          </p>
+        </div>
+      } @else if (section().soon; as soon) {
+        <div class="settings__pane settings__soon">
+          <span class="settings__soon-disc" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path [attr.d]="icons[section().icon]" />
+            </svg>
+          </span>
+          <strong>{{ section().label }} llegará pronto</strong>
+          <p>{{ soon }}</p>
+        </div>
+      } @else {
+        <div class="settings__pane">
+          <div class="settings__profile">
+            <span class="settings__photo" aria-hidden="true">{{ initials() }}</span>
+            <span class="settings__stack">
+              <strong class="settings__name">{{ profile()?.fullName ?? email() }}</strong>
+              <small>{{ email() }}</small>
+            </span>
+            <button class="settings__pill" type="button" disabled>Editar perfil, pronto</button>
+          </div>
+          @if (facts().length) {
+            <dl class="settings__facts">
+              @for (fact of facts(); track fact.label) {
+                <div>
+                  <dt>{{ fact.label }}</dt>
+                  <dd>{{ fact.value }}</dd>
+                </div>
+              }
+            </dl>
+          } @else {
+            <p class="settings__note">Cargando tus datos.</p>
+          }
+          <p class="settings__note">
+            El correo es tu usuario de acceso. Para cambiar tu rol o tu correo, habla con quien
+            administra tu empresa.
+          </p>
+        </div>
+      }
+    </div>
+  </div>
+</dialog>
