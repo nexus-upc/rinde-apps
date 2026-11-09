@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, effect, input, output, signal } fro
 import { FormsModule } from '@angular/forms';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import {
+  EvidenceLoadState,
   EXPENSE_CATEGORY_LABELS,
   EXPENSE_STATUS_LABELS,
   Expense,
@@ -22,6 +23,8 @@ export class ExpenseReviewModal {
   readonly expense = input<Expense | null>(null);
   readonly busy = input<boolean>(false);
   readonly actionError = input<string>('');
+  readonly evidenceUrl = input<string | null>(null);
+  readonly evidenceState = input<EvidenceLoadState>('idle');
 
   readonly closeModal = output<void>();
   readonly approve = output<string>();

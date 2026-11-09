@@ -2,8 +2,13 @@ import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastService } from '@core/feedback/toast.service';
 import { problemMessage } from '@core/http/problem-message';
+import { Subscription } from 'rxjs';
 import { ExpenseApi } from '../data-access/expense-api';
-import { Expense, UpdateExpenseStatusPayload } from '../models/expense.models';
+import {
+  EvidenceLoadState,
+  Expense,
+  UpdateExpenseStatusPayload,
+} from '../models/expense.models';
 
 /** Estado y lógica para la revisión y aprobación/observación de gastos de un viaje (US24). */
 @Injectable()
@@ -19,6 +24,9 @@ export class ExpenseReviewStore {
   private readonly selectedExpenseState = signal<Expense | null>(null);
   private readonly busyState = signal(false);
   private readonly actionErrorState = signal('');
+  private readonly evidenceUrlState = signal<string | null>(null);
+  private readonly evidenceLoadState = signal<EvidenceLoadState>('idle');
+  private evidenceRequest?: Subscription;
 
   readonly tripId = this.tripIdState.asReadonly();
   readonly state = this.loadState.asReadonly();
@@ -27,6 +35,13 @@ export class ExpenseReviewStore {
   readonly selectedExpense = this.selectedExpenseState.asReadonly();
   readonly busy = this.busyState.asReadonly();
   readonly actionError = this.actionErrorState.asReadonly();
+  /** URL local (blob) del comprobante seleccionado; existe solo mientras la página vive. */
+  readonly evidenceUrl = this.evidenceUrlState.asReadonly();
+  readonly evidenceState = this.evidenceLoadState.asReadonly();
+
+  constructor() {
+    this.destroyRef.onDestroy(() => this.releaseEvidence());
+  }
 
   readonly totalExpenses = computed(() => this.expensesState().length);
   readonly approvedExpenses = computed(() =>
@@ -69,6 +84,7 @@ export class ExpenseReviewStore {
   selectExpense(expense: Expense | null): void {
     this.selectedExpenseState.set(expense);
     this.actionErrorState.set('');
+    this.loadEvidence(expense?.evidence?.contentUrl ?? null);
   }
 
   clearActionError(): void {
@@ -141,5 +157,35 @@ export class ExpenseReviewStore {
     if (this.selectedExpenseState()?.id === updated.id) {
       this.selectedExpenseState.set(updated);
     }
+  }
+
+  /** Descarga el comprobante con el JWT; una descarga anterior se cancela para no mostrar un archivo ajeno. */
+  private loadEvidence(contentUrl: string | null): void {
+    this.evidenceRequest?.unsubscribe();
+    this.releaseEvidence();
+    if (!contentUrl) {
+      this.evidenceLoadState.set('idle');
+      return;
+    }
+
+    this.evidenceLoadState.set('loading');
+    this.evidenceRequest = this.api
+      .getEvidenceContent(contentUrl)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (file) => {
+          this.evidenceUrlState.set(URL.createObjectURL(file));
+          this.evidenceLoadState.set('ready');
+        },
+        error: () => this.evidenceLoadState.set('error'),
+      });
+  }
+
+  private releaseEvidence(): void {
+    const url = this.evidenceUrlState();
+    if (url) {
+      URL.revokeObjectURL(url);
+    }
+    this.evidenceUrlState.set(null);
   }
 }

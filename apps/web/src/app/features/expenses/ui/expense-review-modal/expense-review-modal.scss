@@ -243,6 +243,16 @@
   }
 }
 
+.evidence-status {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+
+  &--error {
+    color: #991b1b;
+  }
+}
+
 .lock-notice {
   padding: 12px 16px;
   border-radius: 6px;

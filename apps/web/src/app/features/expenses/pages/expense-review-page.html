@@ -91,6 +91,8 @@
     [expense]="store.selectedExpense()"
     [busy]="store.busy()"
     [actionError]="store.actionError()"
+    [evidenceUrl]="store.evidenceUrl()"
+    [evidenceState]="store.evidenceState()"
     (closeModal)="onCloseModal()"
     (approve)="onApprove($event)"
     (observe)="onObserve($event)"
