@@ -25,3 +25,6 @@ export const ROLE_LABELS: Readonly<Record<string, string>> = {
   OPERATIONS_MANAGER: 'Responsable de operaciones',
   DRIVER: 'Conductor',
 };
+
+/** Roles de empresa que ven y abren flota, conductores, liquidaciones e incidencias. */
+export const OPERATION_ROLES: readonly string[] = ['ADMINISTRATOR', 'OPERATIONS_MANAGER'];
