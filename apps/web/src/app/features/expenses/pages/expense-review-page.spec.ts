@@ -7,6 +7,7 @@ import { Expense } from '../models/expense.models';
 import { ExpenseReviewPage } from './expense-review-page';
 
 const BASE = `${environment.apiBaseUrl}/api/v1`;
+const EVIDENCE_URL = `${environment.apiBaseUrl}/api/v1/expenses/exp-1/evidences/evi-1/content`;
 
 const MOCK_EXPENSES: Expense[] = [
   {
@@ -24,8 +25,10 @@ const MOCK_EXPENSES: Expense[] = [
     isLocked: false,
     evidence: {
       id: 'evi-1',
-      imageUrl: 'http://localhost:8080/files/ticket_primax.jpg',
+      fileName: 'ticket_primax.jpg',
+      contentType: 'image/jpeg',
       fileSizeBytes: 1048576,
+      contentUrl: '/api/v1/expenses/exp-1/evidences/evi-1/content',
       uploadedAt: '2026-10-28T12:00:00Z',
     },
     createdAt: '2026-10-28T12:00:00Z',
@@ -52,8 +55,16 @@ describe('ExpenseReviewPage', () => {
   let fixture: ComponentFixture<ExpenseReviewPage>;
   let component: ExpenseReviewPage;
   let http: HttpTestingController;
+  // jsdom no implementa las URL de objeto; se simulan para verificar su creación y liberación.
+  const createObjectUrl = vi.fn(() => 'blob:rinde-evidence-1');
+  const revokeObjectUrl = vi.fn();
 
   beforeEach(async () => {
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectUrl });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectUrl });
+    createObjectUrl.mockClear();
+    revokeObjectUrl.mockClear();
+
     await TestBed.configureTestingModule({
       imports: [ExpenseReviewPage],
       providers: [
@@ -150,5 +161,55 @@ describe('ExpenseReviewPage', () => {
 
     const native = fixture.nativeElement as HTMLElement;
     expect(native.textContent).toContain('Observado');
+  });
+
+  it('debe descargar el comprobante con la ruta autenticada y mostrarlo como imagen', () => {
+    fixture.detectChanges();
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(MOCK_EXPENSES);
+    fixture.detectChanges();
+
+    component.onReviewExpense(MOCK_EXPENSES[0]!);
+    fixture.detectChanges();
+
+    const reqContent = http.expectOne(EVIDENCE_URL);
+    expect(reqContent.request.method).toBe('GET');
+    expect(reqContent.request.responseType).toBe('blob');
+    reqContent.flush(new Blob(['jpeg'], { type: 'image/jpeg' }));
+    fixture.detectChanges();
+
+    expect(createObjectUrl).toHaveBeenCalledTimes(1);
+    const img = (fixture.nativeElement as HTMLElement).querySelector('.evidence-preview img');
+    expect(img?.getAttribute('src')).toBe('blob:rinde-evidence-1');
+  });
+
+  it('debe liberar la URL del comprobante al destruir la página', () => {
+    fixture.detectChanges();
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(MOCK_EXPENSES);
+    component.onReviewExpense(MOCK_EXPENSES[0]!);
+    http.expectOne(EVIDENCE_URL).flush(new Blob(['jpeg'], { type: 'image/jpeg' }));
+
+    fixture.destroy();
+
+    expect(revokeObjectUrl).toHaveBeenCalledWith('blob:rinde-evidence-1');
+  });
+
+  it('debe avisar si el archivo del comprobante no se puede descargar', () => {
+    fixture.detectChanges();
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(MOCK_EXPENSES);
+    component.onReviewExpense(MOCK_EXPENSES[0]!);
+    http
+      .expectOne(EVIDENCE_URL)
+      .flush(new Blob(['{}'], { type: 'application/problem+json' }), {
+        status: 404,
+        statusText: 'Not Found',
+      });
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement as HTMLElement;
+    expect(native.textContent).toContain('No fue posible cargar el comprobante.');
+    expect(createObjectUrl).not.toHaveBeenCalled();
   });
 });

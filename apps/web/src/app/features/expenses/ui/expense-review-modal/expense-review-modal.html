@@ -63,17 +63,29 @@
           @if (item.evidence; as ev) {
             <div class="evidence-box">
               <div class="evidence-info">
-                <span class="file-name">Comprobante digital adjunto</span>
+                <span class="file-name">{{ ev.fileName }}</span>
                 <span class="file-size">({{ (ev.fileSizeBytes / 1024) | number:'1.0-0' }} KB)</span>
               </div>
-              <div class="evidence-preview">
-                <img [src]="ev.imageUrl" alt="Comprobante" />
-              </div>
-              <div class="evidence-link">
-                <a [href]="ev.imageUrl" target="_blank" rel="noopener noreferrer">
-                  Ver o abrir imagen en tamaño original ↗
-                </a>
-              </div>
+              @if (evidenceState() === 'loading') {
+                <p class="evidence-status">Cargando comprobante...</p>
+              } @else if (evidenceState() === 'error') {
+                <p class="evidence-status evidence-status--error" role="alert">
+                  No fue posible cargar el comprobante.
+                </p>
+              } @else if (evidenceUrl(); as url) {
+                @if (isImage(ev.contentType)) {
+                  <div class="evidence-preview">
+                    <img [src]="url" alt="Comprobante" />
+                  </div>
+                }
+                <div class="evidence-link">
+                  <a [href]="url" target="_blank" rel="noopener noreferrer">
+                    Ver o abrir archivo en tamaño original ↗
+                  </a>
+                </div>
+              } @else {
+                <p class="evidence-status">El archivo de este comprobante no está disponible.</p>
+              }
             </div>
           } @else {
             <div class="evidence-empty">

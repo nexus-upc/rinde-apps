@@ -24,10 +24,16 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   OTHER: 'Otros',
 };
 
+/** Estado de la descarga del archivo de un comprobante. */
+export type EvidenceLoadState = 'idle' | 'loading' | 'ready' | 'error';
+
 export interface Evidence {
   id: string;
-  imageUrl: string;
+  fileName: string;
+  contentType: string;
   fileSizeBytes: number;
+  /** Ruta autenticada del archivo; null en comprobantes anteriores al almacenamiento. */
+  contentUrl: string | null;
   uploadedAt: string;
 }
 
