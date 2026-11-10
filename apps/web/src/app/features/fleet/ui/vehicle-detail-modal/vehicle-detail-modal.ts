@@ -23,6 +23,7 @@ export class VehicleDetailModal {
   readonly healthError = input<string | null>(null);
 
   readonly closeModal = output<void>();
+  readonly recordMaintenanceRequested = output<string>();
 
   protected readonly statusLabels = VEHICLE_STATUS_LABELS;
   protected readonly maintenanceLabels = MAINTENANCE_STATE_LABELS;

@@ -1,20 +1,32 @@
 <section class="fleet" aria-labelledby="fleet-title">
   <app-page-header
-    title="Flota"
+    title="Flota y Mantenimiento"
     titleId="fleet-title"
     [count]="store.state() === 'ready' ? store.countLabel() : ''"
   >
-    @if (!store.creating()) {
+    <div class="fleet__header-actions">
       <button
-        #createTrigger
         uiButton
+        variant="secondary"
         type="button"
-        [disabled]="store.state() !== 'ready'"
-        (click)="store.openCreate()"
+        [disabled]="store.state() !== 'ready' || store.vehicles().length === 0"
+        (click)="onRecordRequested()"
       >
-        Registrar vehículo
+        Registrar mantenimiento
       </button>
-    }
+
+      @if (!store.creating()) {
+        <button
+          #createTrigger
+          uiButton
+          type="button"
+          [disabled]="store.state() !== 'ready'"
+          (click)="store.openCreate()"
+        >
+          Registrar vehículo
+        </button>
+      }
+    </div>
   </app-page-header>
 
   @if (store.creating()) {
@@ -26,9 +38,51 @@
     />
   }
 
+  @if (store.recordingMaintenance()) {
+    <app-maintenance-form
+      [vehicles]="store.vehicles()"
+      [preselectedVehicleId]="store.preselectedVehicleId()"
+      [pending]="store.recordAction.pending()"
+      [error]="store.recordAction.error()"
+      (submitted)="store.recordMaintenance($event)"
+      (cancelled)="store.closeRecordMaintenance()"
+    />
+  }
+
+  <div class="fleet__nav" role="tablist" aria-label="Secciones de flota">
+    <button
+      class="nav-tab"
+      role="tab"
+      type="button"
+      [class.nav-tab--active]="store.activeTab() === 'vehicles'"
+      [attr.aria-selected]="store.activeTab() === 'vehicles'"
+      (click)="store.setTab('vehicles')"
+    >
+      Vehículos ({{ store.vehicles().length }})
+    </button>
+
+    <button
+      class="nav-tab"
+      role="tab"
+      type="button"
+      [class.nav-tab--active]="store.activeTab() === 'alerts'"
+      [attr.aria-selected]="store.activeTab() === 'alerts'"
+      (click)="store.setTab('alerts')"
+    >
+      Alertas de Mantenimiento
+      @if (store.alertsCount() > 0) {
+        <span class="nav-tab__badge">{{ store.alertsCount() }}</span>
+      }
+    </button>
+  </div>
+
   @switch (store.state()) {
     @case ('loading') {
-      <app-vehicle-list [loading]="true" />
+      @if (store.activeTab() === 'vehicles') {
+        <app-vehicle-list [loading]="true" />
+      } @else {
+        <app-maintenance-alert-list [loading]="true" />
+      }
     }
     @case ('error') {
       <app-state-panel
@@ -54,10 +108,17 @@
       </app-state-panel>
     }
     @default {
-      <app-vehicle-list
-        [vehicles]="store.vehicles()"
-        (vehicleSelected)="store.openVehicleDetail($event)"
-      />
+      @if (store.activeTab() === 'vehicles') {
+        <app-vehicle-list
+          [vehicles]="store.vehicles()"
+          (vehicleSelected)="store.openVehicleDetail($event)"
+        />
+      } @else {
+        <app-maintenance-alert-list
+          [alerts]="store.alerts()"
+          (recordRequested)="onRecordRequested($event)"
+        />
+      }
     }
   }
 
@@ -67,5 +128,6 @@
     [healthLoading]="store.healthLoadState() === 'loading'"
     [healthError]="store.healthError()"
     (closeModal)="store.closeVehicleDetail()"
+    (recordMaintenanceRequested)="onRecordRequested($event)"
   />
 </section>

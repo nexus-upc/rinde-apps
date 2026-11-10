@@ -1,0 +1,60 @@
+@if (loading()) {
+  <ul class="alert-list" aria-busy="true" aria-label="Cargando alertas de mantenimiento">
+    @for (index of [1, 2]; track index) {
+      <li class="alert-row alert-row--skeleton" aria-hidden="true">
+        <span class="skeleton skeleton--badge"></span>
+        <span class="skeleton skeleton--text"></span>
+        <span class="skeleton skeleton--pill"></span>
+      </li>
+    }
+  </ul>
+} @else if (alerts().length === 0) {
+  <div class="empty-state">
+    <div class="empty-state__icon" aria-hidden="true">✓</div>
+    <p class="empty-state__title">Todas las unidades se encuentran al día</p>
+    <p class="empty-state__description">
+      No se registran unidades con mantenimiento próximo (DUE_SOON) ni vencido (OVERDUE).
+    </p>
+  </div>
+} @else {
+  <div class="alert-banner" role="alert">
+    <strong>Atención requerida:</strong>
+    Se han detectado {{ alerts().length }} unidades con servicios técnicos pendientes o próximos a vencer.
+  </div>
+
+  <ul class="alert-list" role="list">
+    @for (alert of alerts(); track alert.vehicleId) {
+      <li class="alert-row" [class.alert-row--danger]="alert.state === 'OVERDUE'">
+        <div class="alert-row__primary">
+          <span class="alert-row__plate">{{ alert.plateNumber }}</span>
+          <div class="alert-row__info">
+            <span class="alert-row__message">{{ alert.message }}</span>
+            <span class="alert-row__date">
+              Fecha límite recomendada: {{ alert.nextMaintenanceDate | date:'mediumDate' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="alert-row__badge">
+          <span
+            class="health-badge"
+            [class.health-warn]="alert.state === 'DUE_SOON'"
+            [class.health-danger]="alert.state === 'OVERDUE'"
+          >
+            {{ stateLabels[alert.state] ?? alert.state }}
+          </span>
+        </div>
+
+        <div class="alert-row__action">
+          <button
+            uiButton
+            type="button"
+            (click)="recordRequested.emit(alert.vehicleId)"
+          >
+            Registrar Servicio
+          </button>
+        </div>
+      </li>
+    }
+  </ul>
+}
