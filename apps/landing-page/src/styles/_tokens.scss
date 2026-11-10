@@ -1,0 +1,58 @@
+// Tokens de Rinde: valores del archivo de Figma (grises slate, azul de marca y Geist), con la
+// estructura y el movimiento de Arcadia. Los componentes solo usan estas variables.
+:root {
+  --arc-font-brand: var(--arc-font-sans);
+  --arc-font-sans:
+    'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --arc-font-mono: 'Geist Mono Variable', ui-monospace, 'Cascadia Mono', monospace;
+
+  // Tamaños de título: acceso (28/34) y página (34/38).
+  --arc-entrance-title-size: 28px;
+  --arc-entrance-title-line: 34px;
+  --arc-page-title-size: 34px;
+  --arc-page-title-line: 38px;
+
+  // Superficies y texto (gris/50 a gris/900).
+  --arc-bg: #ffffff;
+  --arc-card: #ffffff;
+  --arc-surface: #f1f5f9;
+  --arc-surface-soft: #f8fafc;
+  --arc-border: #e2e8f0;
+  --arc-border-strong: #cbd5e1;
+  --arc-ink: #0f172a;
+  --arc-muted: #475569;
+  --arc-subtle: #64748b;
+  --arc-faint: #94a3b8;
+  --arc-shadow: #0f172a;
+
+  // Azul de marca (azul/700 y azul/600) y su degradado (indigo/600, azul/700 y celeste/500).
+  --arc-fill: #1d4ed8;
+  --arc-fill-hover: #2563eb;
+  --arc-on-fill: #ffffff;
+  --arc-fill-soft: #eff6ff;
+  --arc-band: #1d4ed8;
+  --arc-on-band: #ffffff;
+  --arc-on-band-muted: #dbeafe;
+  --arc-brand-start: #4f46e5;
+  --arc-brand-end: #0ea5e9;
+  --arc-brand-gradient: linear-gradient(120deg, #4f46e5, #1d4ed8 45%, #0ea5e9 90%);
+  --arc-disabled-bg: #e2e8f0;
+  --arc-disabled-ink: #94a3b8;
+
+  // Foco y estados.
+  --arc-accent: #2563eb;
+  --arc-focus-ring: #dbeafe;
+  --arc-danger: #b91c1c;
+  --arc-danger-bg: #fef2f2;
+  --arc-success: #15803d;
+  --arc-success-bg: #f0fdf4;
+  --arc-wait: #1d4ed8;
+  --arc-wait-bg: #eff6ff;
+
+  // Radios: campos y botones, filas, tarjetas, bloque del acceso y píldoras.
+  --arc-radius-control: 8px;
+  --arc-radius-row: 12px;
+  --arc-radius-card: 20px;
+  --arc-radius-block: 24px;
+  --arc-radius-pill: 999px;
+}

@@ -1,0 +1,28 @@
+<app-site-header [links]="links" [cta]="demoLink" />
+
+<main>
+  <app-hero-section [content]="hero" />
+  <app-features-section [content]="features" />
+  <app-driver-section [content]="driver" />
+  <app-plans-section [content]="plans" />
+  <app-faq-section [content]="faq" />
+
+  <section id="demo" class="demo" aria-labelledby="demo-title">
+    <div class="landing-container demo__inner">
+      <h2 id="demo-title" class="demo__title">{{ demo.title }}</h2>
+      <p class="demo__lead">{{ demo.lead }}</p>
+      <div class="demo__form">
+        <app-demo-request-form
+          [pending]="store.pending()"
+          [sent]="store.sent()"
+          [error]="store.error()"
+          [fieldErrors]="store.fieldErrors()"
+          (submitted)="store.submit($event)"
+          (restarted)="store.reset()"
+        />
+      </div>
+    </div>
+  </section>
+</main>
+
+<app-site-footer [content]="footer" [links]="links" />

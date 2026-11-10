@@ -1,0 +1,42 @@
+// La landing lee a 16 px; el tamaño global de la aplicación (14 px) se reserva para el espacio de trabajo.
+:host {
+  display: block;
+  overflow-x: clip;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.demo {
+  padding-block: 56px;
+  scroll-margin-top: 72px;
+}
+
+.demo__inner {
+  max-width: 760px;
+}
+
+.demo__title {
+  font-size: 26px;
+  line-height: 32px;
+  overflow-wrap: anywhere;
+}
+
+.demo__lead {
+  margin-top: 12px;
+  color: var(--arc-muted);
+}
+
+.demo__form {
+  margin-top: 24px;
+}
+
+@media (min-width: 768px) {
+  .demo {
+    padding-block: 80px;
+  }
+
+  .demo__title {
+    font-size: 32px;
+    line-height: 38px;
+  }
+}

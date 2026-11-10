@@ -1,0 +1,153 @@
+@if (sent()) {
+  <div class="demo-form__done" role="status">
+    <p class="demo-form__done-text">
+      Recibimos su solicitud. El equipo de RINDE se comunicará con usted pronto.
+    </p>
+    <button uiButton type="button" variant="secondary" (click)="restart()">
+      Enviar otra solicitud
+    </button>
+  </div>
+} @else {
+  <form class="demo-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    @if (error(); as message) {
+      <p class="form-alert" role="alert">{{ message }}</p>
+    }
+
+    <div class="demo-form__grid">
+      @let fullNameError = errorOf('fullName');
+      <div class="field">
+        <label class="field__label" for="demo-fullName">Nombre completo *</label>
+        <input
+          #field
+          id="demo-fullName"
+          name="fullName"
+          class="field__input"
+          [class.field__input--invalid]="fullNameError"
+          type="text"
+          autocomplete="name"
+          formControlName="fullName"
+          [attr.aria-invalid]="fullNameError ? 'true' : null"
+          [attr.aria-describedby]="fullNameError ? 'demo-fullName-error' : null"
+        />
+        @if (fullNameError) {
+          <span class="field__error" id="demo-fullName-error">{{ fullNameError }}</span>
+        }
+      </div>
+
+      @let companyNameError = errorOf('companyName');
+      <div class="field">
+        <label class="field__label" for="demo-companyName">Empresa *</label>
+        <input
+          #field
+          id="demo-companyName"
+          name="companyName"
+          class="field__input"
+          [class.field__input--invalid]="companyNameError"
+          type="text"
+          autocomplete="organization"
+          formControlName="companyName"
+          [attr.aria-invalid]="companyNameError ? 'true' : null"
+          [attr.aria-describedby]="companyNameError ? 'demo-companyName-error' : null"
+        />
+        @if (companyNameError) {
+          <span class="field__error" id="demo-companyName-error">{{ companyNameError }}</span>
+        }
+      </div>
+
+      @let emailError = errorOf('email');
+      <div class="field">
+        <label class="field__label" for="demo-email">Correo electrónico *</label>
+        <input
+          #field
+          id="demo-email"
+          name="email"
+          class="field__input"
+          [class.field__input--invalid]="emailError"
+          type="email"
+          autocomplete="email"
+          formControlName="email"
+          [attr.aria-invalid]="emailError ? 'true' : null"
+          [attr.aria-describedby]="emailError ? 'demo-email-error' : null"
+        />
+        @if (emailError) {
+          <span class="field__error" id="demo-email-error">{{ emailError }}</span>
+        }
+      </div>
+
+      @let phoneError = errorOf('phone');
+      <div class="field">
+        <div class="field__label-row">
+          <label class="field__label" for="demo-phone">Teléfono</label>
+          <span class="field__hint">Opcional</span>
+        </div>
+        <input
+          #field
+          id="demo-phone"
+          name="phone"
+          class="field__input"
+          [class.field__input--invalid]="phoneError"
+          type="tel"
+          autocomplete="tel"
+          formControlName="phone"
+          [attr.aria-invalid]="phoneError ? 'true' : null"
+          [attr.aria-describedby]="phoneError ? 'demo-phone-error' : null"
+        />
+        @if (phoneError) {
+          <span class="field__error" id="demo-phone-error">{{ phoneError }}</span>
+        }
+      </div>
+
+      @let fleetSizeError = errorOf('fleetSize');
+      <div class="field">
+        <label class="field__label" for="demo-fleetSize">Cantidad de unidades *</label>
+        <input
+          #field
+          id="demo-fleetSize"
+          name="fleetSize"
+          class="field__input"
+          [class.field__input--invalid]="fleetSizeError"
+          type="number"
+          inputmode="numeric"
+          min="1"
+          max="500"
+          step="1"
+          formControlName="fleetSize"
+          [attr.aria-invalid]="fleetSizeError ? 'true' : null"
+          [attr.aria-describedby]="fleetSizeError ? 'demo-fleetSize-error' : null"
+        />
+        @if (fleetSizeError) {
+          <span class="field__error" id="demo-fleetSize-error">{{ fleetSizeError }}</span>
+        }
+      </div>
+    </div>
+
+    @let messageError = errorOf('message');
+    <div class="field">
+      <div class="field__label-row">
+        <label class="field__label" for="demo-message">Mensaje</label>
+        <span class="field__hint">Opcional</span>
+      </div>
+      <textarea
+        #field
+        id="demo-message"
+        name="message"
+        class="field__input demo-form__textarea"
+        [class.field__input--invalid]="messageError"
+        rows="4"
+        formControlName="message"
+        [attr.aria-invalid]="messageError ? 'true' : null"
+        [attr.aria-describedby]="
+          messageError ? 'demo-message-error demo-message-hint' : 'demo-message-hint'
+        "
+      ></textarea>
+      <span class="field__hint" id="demo-message-hint">
+        {{ messageLength() }}/{{ messageLimit }} caracteres
+      </span>
+      @if (messageError) {
+        <span class="field__error" id="demo-message-error">{{ messageError }}</span>
+      }
+    </div>
+
+    <button uiButton type="submit" block [loading]="pending()">Solicitar demostración</button>
+  </form>
+}
