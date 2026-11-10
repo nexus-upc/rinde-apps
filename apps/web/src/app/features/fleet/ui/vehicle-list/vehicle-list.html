@@ -1,0 +1,56 @@
+@if (loading()) {
+  <ul class="vehicle-list" aria-busy="true" aria-label="Cargando flota de vehículos">
+    @for (index of [1, 2, 3]; track index) {
+      <li class="vehicle-row vehicle-row--skeleton" aria-hidden="true">
+        <span class="skeleton skeleton--badge"></span>
+        <span class="skeleton skeleton--text"></span>
+        <span class="skeleton skeleton--pill"></span>
+      </li>
+    }
+  </ul>
+} @else if (vehicles().length === 0) {
+  <div class="empty-state">
+    <p class="empty-state__title">No hay vehículos registrados</p>
+    <p class="empty-state__description">
+      Utilice el botón "Registrar vehículo" en la parte superior para agregar la primera unidad a la flota.
+    </p>
+  </div>
+} @else {
+  <ul class="vehicle-list" role="list">
+    @for (vehicle of vehicles(); track vehicle.id) {
+      <li class="vehicle-row">
+        <div class="vehicle-row__primary">
+          <span class="vehicle-row__plate">{{ vehicle.plateNumber }}</span>
+          <div class="vehicle-row__info">
+            <span class="vehicle-row__model">{{ vehicle.brand }} {{ vehicle.model }}</span>
+            <span class="vehicle-row__specs">
+              Año: {{ vehicle.modelYear }} &bull; Capacidad: {{ vehicle.payloadCapacityKg | number:'1.0-2' }} kg
+            </span>
+          </div>
+        </div>
+
+        <div class="vehicle-row__status">
+          <span
+            class="status-pill"
+            [class.status-available]="vehicle.status === 'AVAILABLE'"
+            [class.status-trip]="vehicle.status === 'IN_TRIP'"
+            [class.status-maintenance]="vehicle.status === 'IN_MAINTENANCE' || vehicle.status === 'MAINTENANCE'"
+          >
+            {{ statusLabels[vehicle.status] ?? vehicle.status }}
+          </span>
+        </div>
+
+        <div class="vehicle-row__action">
+          <button
+            uiButton
+            variant="secondary"
+            type="button"
+            (click)="vehicleSelected.emit(vehicle)"
+          >
+            Ver Ficha
+          </button>
+        </div>
+      </li>
+    }
+  </ul>
+}
