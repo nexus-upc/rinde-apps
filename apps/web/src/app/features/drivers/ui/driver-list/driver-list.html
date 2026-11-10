@@ -1,0 +1,65 @@
+@if (loading()) {
+  <ul class="driver-list" aria-busy="true" aria-label="Cargando conductores">
+    @for (index of [1, 2, 3]; track index) {
+      <li class="driver-row driver-row--skeleton" aria-hidden="true">
+        <span class="skeleton skeleton--avatar"></span>
+        <span class="skeleton skeleton--text"></span>
+        <span class="skeleton skeleton--pill"></span>
+      </li>
+    }
+  </ul>
+} @else if (drivers().length === 0) {
+  <div class="empty-state">
+    <p class="empty-state__title">No hay conductores registrados</p>
+    <p class="empty-state__description">
+      Utilice el botón "Registrar conductor" en la parte superior para incorporar el primer conductor a la empresa.
+    </p>
+  </div>
+} @else {
+  <ul class="driver-list" role="list">
+    @for (driver of drivers(); track driver.id) {
+      <li class="driver-row">
+        <div class="driver-row__who">
+          <span class="driver-row__avatar" aria-hidden="true">
+            {{ driver.fullName.charAt(0) }}
+          </span>
+          <div class="driver-row__info">
+            <span class="driver-row__name">{{ driver.fullName }}</span>
+            <span class="driver-row__meta">
+              {{ driver.documentType }}: {{ driver.documentNumber }} &bull; Licencia: {{ driver.licenseNumber }} (Cat. {{ driver.licenseCategory }})
+            </span>
+            <span class="driver-row__account">
+              @if (driver.userId) {
+                <span class="account-tag account-tag--linked">Cuenta vinculada</span>
+              } @else {
+                <span class="account-tag account-tag--none">Sin cuenta de acceso</span>
+              }
+              &bull; Vence: {{ driver.licenseExpirationDate | date:'mediumDate' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="driver-row__status">
+          <span
+            class="status-pill"
+            [class.status-enabled]="driver.status === 'ENABLED'"
+            [class.status-disabled]="driver.status === 'DISABLED'"
+          >
+            {{ statusLabels[driver.status] ?? driver.status }}
+          </span>
+        </div>
+
+        <div class="driver-row__action">
+          <button
+            uiButton
+            variant="secondary"
+            type="button"
+            (click)="driverSelected.emit(driver)"
+          >
+            Ver Ficha
+          </button>
+        </div>
+      </li>
+    }
+  </ul>
+}

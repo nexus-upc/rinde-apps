@@ -1,0 +1,136 @@
+@if (driver(); as item) {
+  <div class="modal-backdrop" (click)="closeModal.emit()">
+    <div class="modal-dialog arc-entrance-stage" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <h2 class="modal-title">Ficha de Conductor: {{ item.fullName }}</h2>
+          <span class="modal-subtitle">{{ item.documentType }}: {{ item.documentNumber }}</span>
+        </div>
+        <button
+          type="button"
+          class="close-btn"
+          (click)="closeModal.emit()"
+          aria-label="Cerrar ficha"
+        >
+          &times;
+        </button>
+      </header>
+
+      <div class="modal-body">
+        <section class="section">
+          <h3 class="section__title">Identidad y Brevete</h3>
+          <div class="details-grid">
+            <div class="detail-card">
+              <span class="detail-label">Nombre Completo</span>
+              <span class="detail-value">{{ item.fullName }}</span>
+            </div>
+
+            <div class="detail-card">
+              <span class="detail-label">Documento de Identidad</span>
+              <span class="detail-value">{{ item.documentType }} - {{ item.documentNumber }}</span>
+            </div>
+
+            <div class="detail-card">
+              <span class="detail-label">Número de Licencia</span>
+              <span class="detail-value mono">{{ item.licenseNumber }}</span>
+            </div>
+
+            <div class="detail-card">
+              <span class="detail-label">Categoría</span>
+              <span class="detail-value">{{ item.licenseCategory }}</span>
+            </div>
+
+            <div class="detail-card">
+              <span class="detail-label">Vencimiento de Licencia</span>
+              <span class="detail-value">{{ item.licenseExpirationDate | date:'mediumDate' }}</span>
+            </div>
+
+            <div class="detail-card">
+              <span class="detail-label">Estado del Registro</span>
+              <span
+                class="status-pill"
+                [class.status-enabled]="item.status === 'ENABLED'"
+                [class.status-disabled]="item.status === 'DISABLED'"
+              >
+                {{ statusLabels[item.status] ?? item.status }}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <section class="section">
+          <h3 class="section__title">Vínculo con Cuenta de Usuario</h3>
+          <div class="account-card">
+            @if (item.userId) {
+              <div class="account-card__linked">
+                <span class="badge badge--success">Cuenta Activa Vinculada</span>
+                <span class="account-card__uid mono">User ID: {{ item.userId }}</span>
+                <p class="account-card__desc">
+                  Este conductor puede autenticarse en la aplicación móvil con sus credenciales institucionales.
+                </p>
+              </div>
+            } @else {
+              <div class="account-card__unlinked">
+                <span class="badge badge--neutral">Sin cuenta vinculada</span>
+                <p class="account-card__desc">
+                  El conductor está registrado en la flota pero no tiene una cuenta de usuario asociada para ingresar a la app.
+                </p>
+              </div>
+            }
+          </div>
+        </section>
+
+        <section class="section">
+          <h3 class="section__title">Elegibilidad Operativa para Viajes</h3>
+          @if (eligibilityLoading()) {
+            <p class="notice">Verificando elegibilidad técnica con el servicio de flota...</p>
+          } @else if (eligibility(); as elig) {
+            <div class="details-grid">
+              <div class="detail-card">
+                <span class="detail-label">Habilitación Operativa</span>
+                <span
+                  class="badge"
+                  [class.badge--success]="elig.eligible"
+                  [class.badge--danger]="!elig.eligible"
+                >
+                  {{ elig.eligible ? 'Habilitado para asignar' : 'Inhabilitado' }}
+                </span>
+              </div>
+
+              <div class="detail-card">
+                <span class="detail-label">Vigencia de Brevete</span>
+                <span
+                  class="badge"
+                  [class.badge--success]="elig.licenseStatus === 'VALID'"
+                  [class.badge--danger]="elig.licenseStatus === 'EXPIRED'"
+                >
+                  {{ licenseLabels[elig.licenseStatus] ?? elig.licenseStatus }}
+                </span>
+              </div>
+
+              <div class="detail-card detail-card--full">
+                <span class="detail-label">Diagnóstico del Sistema</span>
+                <span class="detail-value">{{ elig.reason }}</span>
+              </div>
+            </div>
+          } @else {
+            <p class="notice notice--muted">
+              {{ eligibilityError() ?? 'No se pudo consultar la elegibilidad técnica del conductor.' }}
+            </p>
+          }
+        </section>
+      </div>
+
+      <footer class="modal-footer">
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          (click)="closeModal.emit()"
+        >
+          Cerrar
+        </button>
+      </footer>
+    </div>
+  </div>
+}

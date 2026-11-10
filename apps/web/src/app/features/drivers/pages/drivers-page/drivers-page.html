@@ -1,6 +1,72 @@
-<section class="marker" aria-labelledby="drivers-title">
-  <app-page-header title="Conductores" titleId="drivers-title" />
-  <div class="marker__body">
-    <p>Pantalla en construcción (Sprint 3)</p>
-  </div>
+<section class="drivers" aria-labelledby="drivers-title">
+  <app-page-header
+    title="Conductores"
+    titleId="drivers-title"
+    [count]="store.state() === 'ready' ? store.countLabel() : ''"
+  >
+    @if (!store.creating()) {
+      <button
+        #createTrigger
+        uiButton
+        type="button"
+        [disabled]="store.state() !== 'ready'"
+        (click)="store.openCreate()"
+      >
+        Registrar conductor
+      </button>
+    }
+  </app-page-header>
+
+  @if (store.creating()) {
+    <app-driver-form
+      [accounts]="store.activeAccounts()"
+      [pending]="store.createAction.pending()"
+      [error]="store.createAction.error()"
+      (submitted)="store.createDriver($event)"
+      (cancelled)="closeCreate()"
+    />
+  }
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <app-driver-list [loading]="true" />
+    }
+    @case ('error') {
+      <app-state-panel
+        title="No se pudo cargar la lista de conductores"
+        [message]="store.error() ?? 'Revisa tu conexión e inténtalo otra vez.'"
+        [error]="true"
+        actionLabel="Reintentar"
+        (action)="store.load()"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 8v5M12 16h.01" />
+        </svg>
+      </app-state-panel>
+    }
+    @default {
+      <app-driver-list
+        [drivers]="store.drivers()"
+        (driverSelected)="store.openDriverDetail($event)"
+      />
+    }
+  }
+
+  <app-driver-detail-modal
+    [driver]="store.selectedDriver()"
+    [eligibility]="store.selectedEligibility()"
+    [eligibilityLoading]="store.eligibilityLoadState() === 'loading'"
+    [eligibilityError]="store.eligibilityError()"
+    (closeModal)="store.closeDriverDetail()"
+  />
 </section>
