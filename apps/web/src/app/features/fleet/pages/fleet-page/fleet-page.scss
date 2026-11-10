@@ -2,3 +2,63 @@
   display: grid;
   gap: 16px;
 }
+
+.fleet__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fleet__nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--arc-border);
+  padding-bottom: 8px;
+}
+
+.nav-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--arc-radius-pill);
+  background: transparent;
+  color: var(--arc-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--arc-dur-fast) var(--arc-ease-out);
+
+  &:hover {
+    background: var(--arc-surface);
+    color: var(--arc-ink);
+  }
+
+  &--active {
+    background: var(--arc-ink);
+    color: var(--arc-bg);
+    font-weight: 600;
+
+    &:hover {
+      background: var(--arc-ink);
+      color: var(--arc-bg);
+    }
+  }
+}
+
+.nav-tab__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-danger, #b91c1c);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+}

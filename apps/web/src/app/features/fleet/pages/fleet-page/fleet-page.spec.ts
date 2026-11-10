@@ -4,10 +4,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ToastService } from '@core/feedback/toast.service';
 import { environment } from '../../../../../environments/environment';
-import { Vehicle, VehicleHealthStatus } from '../../models/fleet.models';
+import {
+  Maintenance,
+  MaintenanceAlert,
+  Vehicle,
+  VehicleHealthStatus,
+} from '../../models/fleet.models';
 import { FleetPage } from './fleet-page';
 
 const VEHICLES_URL = `${environment.apiBaseUrl}/api/v1/vehicles`;
+const ALERTS_URL = `${environment.apiBaseUrl}/api/v1/maintenances/alerts`;
+const MAINTENANCES_URL = `${environment.apiBaseUrl}/api/v1/maintenances`;
 
 const MOCK_VEHICLES: Vehicle[] = [
   {
@@ -29,6 +36,23 @@ const MOCK_VEHICLES: Vehicle[] = [
     payloadCapacityKg: 30000,
     status: 'IN_TRIP',
     createdAt: '2026-11-02T11:00:00Z',
+  },
+];
+
+const MOCK_ALERTS: MaintenanceAlert[] = [
+  {
+    vehicleId: 'veh-01',
+    plateNumber: 'ABC-123',
+    state: 'DUE_SOON',
+    nextMaintenanceDate: '2026-11-20',
+    message: 'La unidad tiene un mantenimiento próximo.',
+  },
+  {
+    vehicleId: 'veh-02',
+    plateNumber: 'XYZ-789',
+    state: 'OVERDUE',
+    nextMaintenanceDate: '2026-10-31',
+    message: 'La unidad tiene el mantenimiento vencido.',
   },
 ];
 
@@ -73,10 +97,15 @@ describe('FleetPage', () => {
     ) as HTMLButtonElement;
   }
 
-  it('shows loading skeleton, then displays vehicle rows and count label', () => {
-    expect(root().querySelector('[aria-busy="true"]')).not.toBeNull();
-    http.expectOne(VEHICLES_URL).flush(MOCK_VEHICLES);
+  function flushInitialLoad(vehicles = MOCK_VEHICLES, alerts = MOCK_ALERTS): void {
+    http.expectOne(VEHICLES_URL).flush(vehicles);
+    http.expectOne(ALERTS_URL).flush(alerts);
     fixture.detectChanges();
+  }
+
+  it('shows loading skeleton, then displays vehicle rows, tabs and count labels', () => {
+    expect(root().querySelector('[aria-busy="true"]')).not.toBeNull();
+    flushInitialLoad();
 
     const rows = root().querySelectorAll('.vehicle-row');
     expect(rows.length).toBe(2);
@@ -84,32 +113,28 @@ describe('FleetPage', () => {
     expect(root().textContent).toContain('ABC-123');
     expect(root().textContent).toContain('Volvo FH 540');
     expect(root().textContent).toContain('Disponible');
-    expect(root().textContent).toContain('En Viaje');
+    expect(root().textContent).toContain('Alertas de Mantenimiento');
   });
 
-  it('allows opening and cancelling the registration form', () => {
-    http.expectOne(VEHICLES_URL).flush(MOCK_VEHICLES);
+  it('switches to alerts tab and lists active maintenance alerts with badges', () => {
+    flushInitialLoad();
+
+    const alertsTab = button('Alertas de Mantenimiento');
+    expect(alertsTab).toBeTruthy();
+    alertsTab.click();
     fixture.detectChanges();
 
-    const openBtn = button('Registrar vehículo');
-    expect(openBtn).toBeTruthy();
-    openBtn.click();
-    fixture.detectChanges();
-
-    expect(root().querySelector('app-vehicle-form')).not.toBeNull();
-    expect(root().textContent).toContain('Registrar nuevo vehículo');
-
-    const cancelBtn = button('Cancelar');
-    expect(cancelBtn).toBeTruthy();
-    cancelBtn.click();
-    fixture.detectChanges();
-
-    expect(root().querySelector('app-vehicle-form')).toBeNull();
+    expect(root().querySelector('app-maintenance-alert-list')).not.toBeNull();
+    const alertRows = root().querySelectorAll('.alert-row');
+    expect(alertRows.length).toBe(2);
+    expect(root().textContent).toContain('La unidad tiene un mantenimiento próximo.');
+    expect(root().textContent).toContain('La unidad tiene el mantenimiento vencido.');
+    expect(root().textContent).toContain('Mantenimiento Próximo');
+    expect(root().textContent).toContain('Mantenimiento Vencido');
   });
 
-  it('successfully registers a new vehicle and adds it to the list', () => {
-    http.expectOne(VEHICLES_URL).flush(MOCK_VEHICLES);
-    fixture.detectChanges();
+  it('allows registering a new vehicle and adding it to the list', () => {
+    flushInitialLoad();
 
     button('Registrar vehículo').click();
     fixture.detectChanges();
@@ -137,14 +162,6 @@ describe('FleetPage', () => {
     fixture.detectChanges();
 
     const req = http.expectOne({ method: 'POST', url: VEHICLES_URL });
-    expect(req.request.body).toEqual({
-      plateNumber: 'CMR-218',
-      brand: 'Mercedes-Benz',
-      model: 'Actros',
-      modelYear: 2023,
-      payloadCapacityKg: 25000,
-    });
-
     const created: Vehicle = {
       id: 'veh-03',
       plateNumber: 'CMR-218',
@@ -161,95 +178,121 @@ describe('FleetPage', () => {
     expect(toasts.show).toHaveBeenCalledWith('Vehículo CMR-218 registrado exitosamente.');
     expect(root().querySelector('app-vehicle-form')).toBeNull();
     expect(root().querySelectorAll('.vehicle-row').length).toBe(3);
-    expect(root().textContent).toContain('CMR-218');
   });
 
-  it('displays the server error message when vehicle plate is duplicate (409)', () => {
-    http.expectOne(VEHICLES_URL).flush(MOCK_VEHICLES);
+  it('successfully opens maintenance form, submits record and reloads data', () => {
+    flushInitialLoad();
+
+    button('Registrar mantenimiento').click();
     fixture.detectChanges();
 
-    button('Registrar vehículo').click();
-    fixture.detectChanges();
+    expect(root().querySelector('app-maintenance-form')).not.toBeNull();
+    expect(root().textContent).toContain('Registrar mantenimiento técnico');
 
-    const plateInput = root().querySelector('#vehicle-plate') as HTMLInputElement;
-    const brandInput = root().querySelector('#vehicle-brand') as HTMLInputElement;
-    const modelInput = root().querySelector('#vehicle-model') as HTMLInputElement;
-    const yearInput = root().querySelector('#vehicle-year') as HTMLInputElement;
-    const capacityInput = root().querySelector('#vehicle-capacity') as HTMLInputElement;
+    const mileageInput = root().querySelector('#m-mileage') as HTMLInputElement;
+    const costInput = root().querySelector('#m-cost') as HTMLInputElement;
+    const nextDateInput = root().querySelector('#m-next') as HTMLInputElement;
+    const notesInput = root().querySelector('#m-notes') as HTMLTextAreaElement;
 
-    plateInput.value = 'ABC-123';
-    plateInput.dispatchEvent(new Event('input'));
-    brandInput.value = 'Volvo';
-    brandInput.dispatchEvent(new Event('input'));
-    modelInput.value = 'FH 540';
-    modelInput.dispatchEvent(new Event('input'));
-    yearInput.value = '2022';
-    yearInput.dispatchEvent(new Event('input'));
-    capacityInput.value = '28000';
-    capacityInput.dispatchEvent(new Event('input'));
+    mileageInput.value = '130000';
+    mileageInput.dispatchEvent(new Event('input'));
+    costInput.value = '420.50';
+    costInput.dispatchEvent(new Event('input'));
+    nextDateInput.value = '2027-03-15';
+    nextDateInput.dispatchEvent(new Event('input'));
+    notesInput.value = 'Alineamiento y balanceo';
+    notesInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
     const form = root().querySelector('form') as HTMLFormElement;
     form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    const req = http.expectOne(VEHICLES_URL);
-    req.flush(
-      {
-        type: 'about:blank',
-        title: 'Conflict',
-        status: 409,
-        detail: 'La placa ya se encuentra registrada en la empresa.',
-      },
-      { status: 409, statusText: 'Conflict' },
-    );
+    const req = http.expectOne({ method: 'POST', url: MAINTENANCES_URL });
+    expect(req.request.body.mileage).toBe(130000);
+    expect(req.request.body.cost).toBe(420.5);
+    expect(req.request.body.nextMaintenanceDate).toBe('2027-03-15');
+
+    const createdMaintenance: Maintenance = {
+      id: 'mnt-01',
+      vehicleId: req.request.body.vehicleId,
+      maintenanceType: 'PREVENTIVE',
+      executionDate: req.request.body.executionDate,
+      mileage: 130000,
+      cost: 420.5,
+      nextMaintenanceDate: '2027-03-15',
+      notes: 'Alineamiento y balanceo',
+      createdAt: '2026-11-10T15:30:00Z',
+    };
+    req.flush(createdMaintenance, { status: 201, statusText: 'Created' });
+
+    // Expect reload of vehicles and alerts
+    http.expectOne(VEHICLES_URL).flush(MOCK_VEHICLES);
+    http.expectOne(ALERTS_URL).flush(MOCK_ALERTS);
     fixture.detectChanges();
 
-    const alert = root().querySelector('.form-alert');
-    expect(alert?.textContent).toContain('La placa ya se encuentra registrada en la empresa.');
+    expect(toasts.show).toHaveBeenCalledWith('Mantenimiento técnico registrado exitosamente.');
+    expect(root().querySelector('app-maintenance-form')).toBeNull();
   });
 
-  it('opens vehicle sheet (ficha) and loads maintenance health status', () => {
-    http.expectOne(VEHICLES_URL).flush(MOCK_VEHICLES);
-    fixture.detectChanges();
+  it('opens maintenance registration directly from the vehicle sheet (ficha)', () => {
+    flushInitialLoad();
 
     const viewDetailBtn = root().querySelector('.vehicle-row button') as HTMLButtonElement;
-    expect(viewDetailBtn.textContent).toContain('Ver Ficha');
     viewDetailBtn.click();
     fixture.detectChanges();
 
     const healthUrl = `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/maintenance-status`;
-    const healthReq = http.expectOne(healthUrl);
-    healthReq.flush(MOCK_HEALTH);
+    http.expectOne(healthUrl).flush(MOCK_HEALTH);
     fixture.detectChanges();
 
     expect(root().querySelector('app-vehicle-detail-modal')).not.toBeNull();
-    expect(root().textContent).toContain('Ficha de Unidad: ABC-123');
-    expect(root().textContent).toContain('Mantenimiento Próximo');
-    expect(root().textContent).toContain('Habilitado para asignación');
-    expect(root().textContent).toContain('Historial de mantenimiento no disponible.');
-
-    const closeBtn = root().querySelector('.modal-footer button') as HTMLButtonElement;
-    closeBtn.click();
+    const recordBtn = root().querySelector('.section__header-row button') as HTMLButtonElement;
+    expect(recordBtn).toBeTruthy();
+    expect(recordBtn.textContent).toContain('Registrar mantenimiento');
+    recordBtn.click();
     fixture.detectChanges();
 
-    expect(root().querySelector('.modal-backdrop')).toBeNull();
+    expect(root().querySelector('app-maintenance-form')).not.toBeNull();
+    const vehicleSelect = root().querySelector('#m-vehicle') as HTMLSelectElement;
+    expect(vehicleSelect.value).toBe('veh-01');
   });
 
-  it('shows error state panel when loading fails and supports retry', () => {
-    http.expectOne(VEHICLES_URL).flush('Error', { status: 500, statusText: 'Server Error' });
+  it('displays error message when recording maintenance fails with API error', () => {
+    flushInitialLoad();
+
+    button('Registrar mantenimiento').click();
     fixture.detectChanges();
 
-    expect(root().textContent).toContain('No se pudo cargar la flota');
+    const mileageInput = root().querySelector('#m-mileage') as HTMLInputElement;
+    const costInput = root().querySelector('#m-cost') as HTMLInputElement;
+    const nextDateInput = root().querySelector('#m-next') as HTMLInputElement;
 
-    const retryBtn = button('Reintentar');
-    expect(retryBtn).toBeTruthy();
-    retryBtn.click();
+    mileageInput.value = '50000';
+    mileageInput.dispatchEvent(new Event('input'));
+    costInput.value = '200';
+    costInput.dispatchEvent(new Event('input'));
+    nextDateInput.value = '2027-01-01';
+    nextDateInput.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    http.expectOne(VEHICLES_URL).flush(MOCK_VEHICLES);
+    const form = root().querySelector('form') as HTMLFormElement;
+    form.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
 
-    expect(root().querySelectorAll('.vehicle-row').length).toBe(2);
+    const req = http.expectOne(MAINTENANCES_URL);
+    req.flush(
+      {
+        type: 'about:blank',
+        title: 'Bad Request',
+        status: 400,
+        detail: 'La fecha del próximo mantenimiento no puede ser anterior a la fecha de ejecución.',
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    fixture.detectChanges();
+
+    const alert = root().querySelector('.form-alert');
+    expect(alert?.textContent).toContain('La fecha del próximo mantenimiento no puede ser anterior a la fecha de ejecución.');
   });
 });

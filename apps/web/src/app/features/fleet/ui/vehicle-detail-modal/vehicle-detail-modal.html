@@ -60,7 +60,17 @@
         </section>
 
         <section class="section">
-          <h3 class="section__title">Estado de Mantenimiento Preventivo</h3>
+          <div class="section__header-row">
+            <h3 class="section__title">Estado de Mantenimiento Preventivo</h3>
+            <button
+              uiButton
+              type="button"
+              (click)="recordMaintenanceRequested.emit(item.id)"
+            >
+              Registrar mantenimiento
+            </button>
+          </div>
+
           @if (healthLoading()) {
             <p class="notice">Consultando estado técnico del vehículo...</p>
           } @else if (health(); as healthStatus) {

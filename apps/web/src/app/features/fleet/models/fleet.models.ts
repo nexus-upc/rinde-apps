@@ -35,6 +35,46 @@ export interface VehicleHealthStatus {
   readonly availableForTrip: boolean;
 }
 
+/** Entidad de registro de mantenimiento ejecutado. */
+export interface Maintenance {
+  readonly id: string;
+  readonly vehicleId: string;
+  readonly maintenanceType: string;
+  readonly executionDate: string;
+  readonly mileage: number;
+  readonly cost: number;
+  readonly nextMaintenanceDate: string;
+  readonly notes: string | null;
+  readonly createdAt: string;
+}
+
+/** Carga útil para registrar un mantenimiento técnico. */
+export interface RecordMaintenancePayload {
+  readonly vehicleId: string;
+  readonly maintenanceType: string;
+  readonly executionDate: string;
+  readonly mileage: number;
+  readonly cost: number;
+  readonly nextMaintenanceDate: string;
+  readonly notes: string | null;
+}
+
+/** Alerta de mantenimiento preventivo de una unidad. */
+export interface MaintenanceAlert {
+  readonly vehicleId: string;
+  readonly plateNumber: string;
+  readonly state: MaintenanceState;
+  readonly nextMaintenanceDate: string;
+  readonly message: string;
+}
+
+/** Opciones de tipo de mantenimiento técnico. */
+export const MAINTENANCE_TYPES = [
+  { value: 'PREVENTIVE', label: 'Preventivo' },
+  { value: 'CORRECTIVE', label: 'Correctivo' },
+  { value: 'PREDICTIVE', label: 'Predictivo' },
+] as const;
+
 /** Etiquetas amigables para el estado operativo del vehículo. */
 export const VEHICLE_STATUS_LABELS: Record<string, string> = {
   AVAILABLE: 'Disponible',

@@ -2,9 +2,16 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { API_BASE_URL } from '@core/config/api-config';
 import { Observable } from 'rxjs';
-import { CreateVehiclePayload, Vehicle, VehicleHealthStatus } from '../models/fleet.models';
+import {
+  CreateVehiclePayload,
+  Maintenance,
+  MaintenanceAlert,
+  RecordMaintenancePayload,
+  Vehicle,
+  VehicleHealthStatus,
+} from '../models/fleet.models';
 
-/** Operaciones de Flota y Vehículos a través del API Gateway. */
+/** Operaciones de Flota, Vehículos y Mantenimiento a través del API Gateway. */
 @Injectable({ providedIn: 'root' })
 export class FleetApi {
   private readonly http = inject(HttpClient);
@@ -25,6 +32,24 @@ export class FleetApi {
   getVehicleHealth(id: string): Observable<VehicleHealthStatus> {
     return this.http.get<VehicleHealthStatus>(
       `${this.base}/vehicles/${encodeURIComponent(id)}/maintenance-status`,
+    );
+  }
+
+  getMaintenanceAlerts(): Observable<MaintenanceAlert[]> {
+    return this.http.get<MaintenanceAlert[]>(`${this.base}/maintenances/alerts`);
+  }
+
+  recordMaintenance(payload: RecordMaintenancePayload): Observable<Maintenance> {
+    return this.http.post<Maintenance>(`${this.base}/maintenances`, payload);
+  }
+
+  recordVehicleMaintenance(
+    vehicleId: string,
+    payload: RecordMaintenancePayload,
+  ): Observable<Maintenance> {
+    return this.http.post<Maintenance>(
+      `${this.base}/vehicles/${encodeURIComponent(vehicleId)}/maintenances`,
+      payload,
     );
   }
 }

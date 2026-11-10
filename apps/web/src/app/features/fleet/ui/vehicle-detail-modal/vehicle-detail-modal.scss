@@ -77,6 +77,13 @@
   gap: 12px;
 }
 
+.section__header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .section__title {
   margin: 0;
   font-size: 14px;
