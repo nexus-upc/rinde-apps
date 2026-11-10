@@ -33,7 +33,9 @@ import { NavLink } from '../../models/landing-content.models';
               </li>
             }
             <li class="menu__cta">
-              <a uiButton [href]="cta().href" (click)="close()">{{ cta().label }}</a>
+              <a uiButton class="landing-cta" [href]="cta().href" (click)="close()">{{
+                cta().label
+              }}</a>
             </li>
           </ul>
         </nav>
@@ -48,10 +50,28 @@ import { NavLink } from '../../models/landing-content.models';
       display: block;
     }
 
+    // Comparte el celeste de la portada, para que el encabezado y la portada se lean como una pieza.
+    // Al empezar a bajar pasa a blanco con una línea inferior.
     .header {
-      border-bottom: 1px solid var(--arc-border);
-      background: color-mix(in srgb, var(--arc-bg) 92%, transparent);
+      background: color-mix(in srgb, var(--landing-wash) 94%, transparent);
       backdrop-filter: blur(8px);
+    }
+
+    @supports (animation-timeline: scroll()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .header {
+          animation: header-solid linear both;
+          animation-timeline: scroll(root);
+          animation-range: 0 160px;
+        }
+      }
+    }
+
+    @keyframes header-solid {
+      to {
+        background-color: rgb(255 255 255 / 94%);
+        box-shadow: 0 1px 0 var(--arc-border);
+      }
     }
 
     .bar {
@@ -135,8 +155,8 @@ import { NavLink } from '../../models/landing-content.models';
       left: 0;
       display: none;
       padding: 8px 16px 16px;
-      border-bottom: 1px solid var(--arc-border);
-      background: var(--arc-bg);
+      border-bottom: 1px solid var(--landing-wash-deep);
+      background: var(--landing-wash);
     }
 
     .menu.is-open {
@@ -176,11 +196,16 @@ import { NavLink } from '../../models/landing-content.models';
 
     @media (hover: hover) {
       .menu__link:hover {
-        background: var(--arc-surface);
+        background: var(--landing-wash-deep);
       }
     }
 
+    // En escritorio: logo a la izquierda, secciones al centro y el botón oscuro a la derecha.
     @media (min-width: 768px) {
+      .bar {
+        height: 72px;
+      }
+
       .toggle {
         display: none;
       }
@@ -189,6 +214,7 @@ import { NavLink } from '../../models/landing-content.models';
       .menu.is-open {
         position: static;
         display: block;
+        flex: 1;
         padding: 0;
         border: 0;
         background: none;
@@ -197,11 +223,15 @@ import { NavLink } from '../../models/landing-content.models';
       .menu__list {
         flex-direction: row;
         align-items: center;
+        justify-content: center;
         gap: 4px;
       }
 
       .menu__cta {
-        margin: 0 0 0 12px;
+        display: flex;
+        flex: 1;
+        justify-content: flex-end;
+        margin: 0;
 
         a {
           display: inline-flex;
@@ -209,7 +239,14 @@ import { NavLink } from '../../models/landing-content.models';
         }
       }
 
+      // Hueco del mismo ancho que el botón, para que las secciones queden centradas en la barra.
+      .menu__list::before {
+        flex: 1;
+        content: '';
+      }
+
       .menu__link {
+        padding-inline: 12px;
         font-size: 15px;
       }
     }

@@ -1,7 +1,7 @@
 import { booleanAttribute, ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FeatureItem } from '../../models/landing-content.models';
 
-/** Lista de funcionalidades: ícono, título y descripción. En columna o en cuadrícula. */
+/** Lista compacta de funcionalidades: ícono en un círculo, título y descripción. */
 @Component({
   selector: 'app-feature-grid',
   template: `
@@ -11,8 +11,8 @@ import { FeatureItem } from '../../models/landing-content.models';
           <span class="feature__icon">
             <svg
               viewBox="0 0 24 24"
-              width="22"
-              height="22"
+              width="20"
+              height="20"
               fill="none"
               stroke="currentColor"
               stroke-width="1.8"
@@ -42,7 +42,7 @@ import { FeatureItem } from '../../models/landing-content.models';
     .grid {
       display: grid;
       grid-template-columns: minmax(0, 1fr);
-      gap: 16px;
+      gap: 22px;
       margin: 0;
       padding: 0;
       list-style: none;
@@ -50,12 +50,8 @@ import { FeatureItem } from '../../models/landing-content.models';
 
     .feature {
       display: flex;
-      gap: 16px;
+      gap: 14px;
       min-width: 0;
-      padding: 20px;
-      border: 1px solid var(--arc-border);
-      border-radius: var(--arc-radius-row);
-      background: var(--arc-card);
     }
 
     .feature__icon {
@@ -63,9 +59,9 @@ import { FeatureItem } from '../../models/landing-content.models';
       flex: none;
       align-items: center;
       justify-content: center;
-      width: 44px;
-      height: 44px;
-      border-radius: var(--arc-radius-control);
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       background: var(--arc-fill-soft);
       color: var(--arc-fill);
     }
@@ -76,33 +72,22 @@ import { FeatureItem } from '../../models/landing-content.models';
 
     .feature__title {
       font-size: 16px;
+      font-weight: 500;
       line-height: 24px;
       overflow-wrap: anywhere;
     }
 
     .feature__description {
-      margin-top: 4px;
       color: var(--arc-muted);
-      font-size: 16px;
-      line-height: 24px;
+      font-size: 15px;
+      line-height: 22px;
       overflow-wrap: anywhere;
     }
 
-    .grid--stack .feature {
-      padding: 0;
-      border: 0;
-      background: none;
-    }
-
-    @media (min-width: 640px) {
-      .grid:not(.grid--stack) {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    @media (min-width: 1024px) {
+    @media (min-width: 768px) {
       .grid:not(.grid--stack) {
         grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 32px;
       }
     }
   `,

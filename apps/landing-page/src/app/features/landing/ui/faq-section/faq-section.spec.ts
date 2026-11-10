@@ -3,7 +3,7 @@ import { FaqContent } from '../../models/landing-content.models';
 import { FaqSection } from './faq-section';
 
 const CONTENT: FaqContent = {
-  intro: { eyebrow: 'Preguntas', title: 'Título', lead: 'Introducción' },
+  intro: { title: 'Título', lead: 'Introducción' },
   items: [
     { id: 'one', question: 'Primera', answer: 'Respuesta uno' },
     { id: 'two', question: 'Segunda', answer: 'Respuesta dos' },

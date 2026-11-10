@@ -6,37 +6,53 @@
   line-height: 24px;
 }
 
+// Solicitud de demostración: el texto a la izquierda y el formulario en una tarjeta blanca.
 .demo {
-  padding-block: 56px;
+  padding-block: 64px;
   scroll-margin-top: 72px;
+  background: var(--landing-wash);
 }
 
 .demo__inner {
-  max-width: 760px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+.demo__text {
+  min-width: 0;
 }
 
 .demo__title {
-  font-size: 26px;
-  line-height: 32px;
-  overflow-wrap: anywhere;
+  max-width: 12ch;
 }
 
 .demo__lead {
-  margin-top: 12px;
+  max-width: 40ch;
+  margin-top: 16px;
   color: var(--arc-muted);
+  font-size: 17px;
+  line-height: 27px;
 }
 
-.demo__form {
-  margin-top: 24px;
+.demo__card {
+  min-width: 0;
+  padding: 24px 20px;
+  border-radius: var(--landing-radius-photo);
+  background: var(--arc-bg);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .demo {
-    padding-block: 80px;
+    padding-block: 96px;
   }
 
-  .demo__title {
-    font-size: 32px;
-    line-height: 38px;
+  .demo__inner {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 80px;
+  }
+
+  .demo__card {
+    padding: 32px;
   }
 }

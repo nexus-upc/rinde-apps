@@ -1,25 +1,28 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { UiButton } from '../../../../shared/ui/ui-button/ui-button';
 import { HeroContent } from '../../models/landing-content.models';
+import { HeroVisual } from '../hero-visual/hero-visual';
 
-/** Sección principal: propuesta de valor y llamado a la acción. */
+/** Portada: propuesta de valor a la izquierda y la app del conductor a la derecha. */
 @Component({
   selector: 'app-hero-section',
-  imports: [UiButton],
+  imports: [UiButton, HeroVisual],
   template: `
     <section id="inicio" aria-labelledby="inicio-title" class="hero">
-      <div class="landing-container hero__inner arc-entrance-stage">
-        <p class="hero__eyebrow">{{ content().eyebrow }}</p>
-        <h1 id="inicio-title" class="hero__title">{{ content().title }}</h1>
-        <p class="hero__subtitle">{{ content().subtitle }}</p>
-        <div class="hero__actions">
-          <a uiButton class="hero__cta" [href]="content().cta.href">{{ content().cta.label }}</a>
+      <div class="landing-container hero__inner">
+        <div class="hero__text">
+          <h1 id="inicio-title" class="hero__title">{{ content().title }}</h1>
+          <p class="hero__subtitle">{{ content().subtitle }}</p>
+          <div class="hero__actions">
+            <a uiButton class="landing-cta hero__cta" [href]="content().cta.href">
+              {{ content().cta.label }}
+            </a>
+            <a class="hero__secondary" [href]="content().secondary.href">
+              {{ content().secondary.label }}
+            </a>
+          </div>
         </div>
-        <ul class="hero__highlights">
-          @for (item of content().highlights; track item) {
-            <li>{{ item }}</li>
-          }
-        </ul>
+        <app-hero-visual [phone]="content().phone" [badge]="content().badge" />
       </div>
     </section>
   `,
@@ -29,54 +32,45 @@ import { HeroContent } from '../../models/landing-content.models';
     }
 
     .hero {
-      position: relative;
-      padding-block: 40px 48px;
+      overflow: hidden;
+      padding-block: 32px 0;
       scroll-margin-top: 72px;
-      background: linear-gradient(180deg, var(--arc-fill-soft), var(--arc-bg) 70%);
-
-      // Acento de marca: una franja fina con el degradado, única aparición en la página.
-      &::before {
-        position: absolute;
-        top: 0;
-        right: 0;
-        left: 0;
-        height: 3px;
-        background: var(--arc-brand-gradient);
-        content: '';
-      }
+      background: var(--landing-wash);
     }
 
     .hero__inner {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 16px;
-      max-width: 1120px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 36px;
     }
 
-    .hero__eyebrow {
-      color: var(--arc-fill);
-      font-size: 14px;
-      font-weight: 500;
-      line-height: 20px;
+    .hero__text {
+      min-width: 0;
     }
 
     .hero__title {
-      max-width: 760px;
-      font-size: 32px;
-      line-height: 38px;
+      max-width: 15ch;
+      font-size: 38px;
+      font-weight: 500;
+      line-height: 42px;
+      letter-spacing: -0.03em;
       overflow-wrap: anywhere;
     }
 
     .hero__subtitle {
-      max-width: 640px;
+      max-width: 44ch;
+      margin-top: 20px;
       color: var(--arc-muted);
-      font-size: 16px;
-      line-height: 26px;
+      font-size: 17px;
+      line-height: 27px;
     }
 
     .hero__actions {
-      margin-top: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px 24px;
+      margin-top: 28px;
     }
 
     .hero__cta {
@@ -85,37 +79,62 @@ import { HeroContent } from '../../models/landing-content.models';
       font-size: 16px;
     }
 
-    .hero__highlights {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 8px 0 0;
-      padding: 0;
-      list-style: none;
+    .hero__secondary {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      color: var(--arc-ink);
+      font-size: 16px;
+      font-weight: 500;
+      text-decoration: underline;
+      text-decoration-color: var(--arc-border-strong);
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 5px;
+    }
 
-      li {
-        padding: 4px 12px;
-        border: 1px solid var(--arc-border);
-        border-radius: var(--arc-radius-pill);
-        background: var(--arc-card);
-        color: var(--arc-muted);
-        font-size: 14px;
-        line-height: 20px;
+    @media (hover: hover) {
+      .hero__secondary:hover {
+        text-decoration-color: var(--arc-ink);
       }
     }
 
-    @media (min-width: 768px) {
+    // Al bajar, el texto de la portada se desvanece hacia arriba; el teléfono usa la misma línea.
+    @supports (animation-timeline: view()) {
       .hero {
-        padding-block: 96px 104px;
+        view-timeline-name: --hero;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .hero__text {
+          animation: hero-copy-out linear both;
+          animation-timeline: --hero;
+          animation-range: exit 0% exit 80%;
+        }
+      }
+    }
+
+    @keyframes hero-copy-out {
+      to {
+        opacity: 0.15;
+        transform: translateY(-60px);
+      }
+    }
+
+    @media (min-width: 900px) {
+      .hero {
+        padding-top: 24px;
       }
 
       .hero__inner {
-        gap: 20px;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        align-items: center;
+        gap: 24px;
+        min-height: 600px;
       }
 
       .hero__title {
-        font-size: 48px;
-        line-height: 54px;
+        font-size: 56px;
+        line-height: 60px;
       }
 
       .hero__subtitle {

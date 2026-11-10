@@ -1,36 +1,37 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { PhoneMockupContent } from '../../models/landing-content.models';
+import { DeviceStatus } from '../device-status/device-status';
 
-/** Maqueta de la pantalla "Registrar gasto" de la app Android, dibujada con HTML y CSS. */
+/** Pantalla "Registrar gasto" de la app Android, dentro de un marco de teléfono real. */
 @Component({
   selector: 'app-phone-mockup',
+  imports: [DeviceStatus],
   template: `
-    <div class="phone" role="img" [attr.aria-label]="content().ariaLabel">
-      <div class="phone__screen" aria-hidden="true">
-        <div class="bar">
-          <span class="bar__back"></span>
-          <span class="bar__title">{{ content().screenTitle }}</span>
+    <div class="device phone" role="img" [attr.aria-label]="content().ariaLabel">
+      <span class="device__btn device__btn--power"></span>
+      <span class="device__btn device__btn--volume"></span>
+      <div class="device__bezel">
+        <div class="device__screen screen" aria-hidden="true">
+          <app-device-status time="11:08" [signal]="1" [wifi]="false" [battery]="7" />
+          <div class="body">
+            <span class="bar">{{ content().screenTitle }}</span>
+            <span class="field">
+              <span class="field__label">{{ content().amountLabel }}</span>
+              <span class="field__value field__value--amount">{{ content().amount }}</span>
+            </span>
+            <span class="field">
+              <span class="field__label">{{ content().categoryLabel }}</span>
+              <span class="field__value">{{ content().category }}</span>
+            </span>
+            <span class="photo">
+              <span class="photo__thumb"></span>
+              <span class="photo__caption">{{ content().photoCaption }}</span>
+            </span>
+            <span class="status">{{ content().statusLabel }}</span>
+            <span class="action">{{ content().buttonLabel }}</span>
+          </div>
+          <span class="device__nav"></span>
         </div>
-        <div class="field">
-          <span class="field__label">{{ content().amountLabel }}</span>
-          <span class="field__value field__value--amount">{{ content().amount }}</span>
-        </div>
-        <div class="field">
-          <span class="field__label">{{ content().categoryLabel }}</span>
-          <span class="field__value">{{ content().category }}</span>
-        </div>
-        <div class="field">
-          <span class="field__label">{{ content().photoLabel }}</span>
-          <span class="photo">
-            <span class="photo__thumb"></span>
-            <span class="photo__caption">{{ content().photoCaption }}</span>
-          </span>
-        </div>
-        <span class="status">
-          <span class="status__dot"></span>
-          {{ content().statusLabel }}
-        </span>
-        <span class="action">{{ content().buttonLabel }}</span>
       </div>
     </div>
   `,
@@ -41,46 +42,29 @@ import { PhoneMockupContent } from '../../models/landing-content.models';
     }
 
     .phone {
-      width: 280px;
+      width: 278px;
       max-width: 100%;
       margin-inline: auto;
-      padding: 10px;
-      border-radius: 36px;
-      background: var(--arc-ink);
-      box-shadow: 0 20px 40px color-mix(in srgb, var(--arc-shadow) 22%, transparent);
     }
 
-    .phone__screen {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      min-height: 480px;
-      padding: 20px 16px;
-      border-radius: 28px;
-      background: var(--arc-bg);
-      color: var(--arc-ink);
+    .screen {
+      min-height: 540px;
       font-size: 14px;
       line-height: 20px;
     }
 
-    .bar {
+    .body {
       display: flex;
-      align-items: center;
-      gap: 10px;
+      flex: 1;
+      flex-direction: column;
+      gap: 14px;
+      padding: 8px 16px 0;
+    }
+
+    .bar {
       padding-bottom: 12px;
       border-bottom: 1px solid var(--arc-border);
-    }
-
-    .bar__back {
-      width: 10px;
-      height: 10px;
-      border-bottom: 2px solid var(--arc-muted);
-      border-left: 2px solid var(--arc-muted);
-      transform: rotate(45deg);
-    }
-
-    .bar__title {
-      font-size: 16px;
+      font-size: 17px;
       font-weight: 600;
     }
 
@@ -100,7 +84,6 @@ import { PhoneMockupContent } from '../../models/landing-content.models';
       padding: 10px 12px;
       border: 1px solid var(--arc-border-strong);
       border-radius: var(--arc-radius-control);
-      background: var(--arc-surface-soft);
     }
 
     .field__value--amount {
@@ -120,10 +103,10 @@ import { PhoneMockupContent } from '../../models/landing-content.models';
 
     .photo__thumb {
       flex: none;
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: 6px;
-      background: linear-gradient(160deg, var(--arc-fill-soft), var(--arc-border-strong));
+      background: #dbeafe;
     }
 
     .photo__caption {
@@ -131,33 +114,46 @@ import { PhoneMockupContent } from '../../models/landing-content.models';
     }
 
     .status {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
       align-self: flex-start;
       padding: 6px 12px;
       border-radius: var(--arc-radius-pill);
-      background: var(--arc-wait-bg);
-      color: var(--arc-wait);
+      background: var(--arc-fill-soft);
+      color: var(--arc-fill);
       font-size: 13px;
       font-weight: 500;
-    }
-
-    .status__dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--arc-wait);
     }
 
     .action {
       margin-top: auto;
       padding: 12px;
-      border-radius: var(--arc-radius-control);
-      background: var(--arc-fill);
+      border-radius: 10px;
+      background: var(--arc-ink);
       color: var(--arc-on-fill);
       font-weight: 500;
       text-align: center;
+    }
+
+    // Al entrar en pantalla, el teléfono se endereza.
+    @supports (animation-timeline: view()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .phone {
+          animation: phone-settle linear both;
+          animation-timeline: view();
+          animation-range: entry 0% cover 50%;
+        }
+      }
+    }
+
+    @keyframes phone-settle {
+      from {
+        opacity: 0.3;
+        transform: translateY(80px) rotate(-8deg);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

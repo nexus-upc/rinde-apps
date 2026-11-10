@@ -1,26 +1,37 @@
 import { TestBed } from '@angular/core/testing';
-import { HeroContent } from '../../models/landing-content.models';
+import { HERO_CONTENT } from '../../pages/landing-page/landing-content';
 import { HeroSection } from './hero-section';
 
-const CONTENT: HeroContent = {
-  eyebrow: 'Etiqueta',
-  title: 'Propuesta de valor',
-  subtitle: 'Subtítulo',
-  cta: { label: 'Solicitar demostración', href: '#demo' },
-  highlights: ['Viajes'],
-};
-
 describe('HeroSection', () => {
-  it('shows the value proposition as the page heading and points the call to action to #demo', () => {
+  function render(): HTMLElement {
     const fixture = TestBed.createComponent(HeroSection);
-    fixture.componentRef.setInput('content', CONTENT);
+    fixture.componentRef.setInput('content', HERO_CONTENT);
     fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const cta = host.querySelector('a');
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  it('is the inicio section and shows the value proposition as its only heading', () => {
+    const host = render();
 
     expect(host.querySelector('section')?.id).toBe('inicio');
-    expect(host.querySelector('h1')?.textContent?.trim()).toBe('Propuesta de valor');
+    expect(host.querySelectorAll('h1').length).toBe(1);
+    expect(host.querySelector('h1')?.textContent?.trim()).toBe(HERO_CONTENT.title);
+  });
+
+  it('points the first link to the demo form and offers a link to the plans', () => {
+    const host = render();
+    const cta = host.querySelector('a');
+
     expect(cta?.getAttribute('href')).toBe('#demo');
     expect(cta?.textContent?.trim()).toBe('Solicitar demostración');
+    expect(host.querySelector('a[href="#planes"]')).not.toBeNull();
+  });
+
+  it('gives the driver phone an accessible name and shows the offline badge', () => {
+    const host = render();
+    const phone = host.querySelector('[role="img"]');
+
+    expect(phone?.getAttribute('aria-label')?.trim()).toBeTruthy();
+    expect(host.querySelector('.badge__title')?.textContent?.trim()).toBe('Registre sin señal');
   });
 });

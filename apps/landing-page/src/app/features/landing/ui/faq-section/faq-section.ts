@@ -8,7 +8,7 @@ import { SectionIntro } from '../section-intro/section-intro';
   imports: [SectionIntro],
   template: `
     <section id="preguntas" aria-labelledby="preguntas-title" class="section">
-      <div class="landing-container">
+      <div class="landing-container layout">
         <app-section-intro [intro]="content().intro" titleId="preguntas-title" />
 
         <div class="faq">
@@ -24,7 +24,7 @@ import { SectionIntro } from '../section-intro/section-intro';
                   (click)="toggle(item.id)"
                 >
                   <span class="faq__question">{{ item.question }}</span>
-                  <span class="faq__chevron" aria-hidden="true"></span>
+                  <span class="faq__plus" aria-hidden="true"></span>
                 </button>
               </h3>
               <div
@@ -45,17 +45,21 @@ import { SectionIntro } from '../section-intro/section-intro';
   styles: `
     :host {
       display: block;
-      background: var(--arc-surface-soft);
     }
 
     .section {
-      padding-block: 56px;
+      padding-block: 64px;
       scroll-margin-top: 72px;
     }
 
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 32px;
+    }
+
     .faq {
-      max-width: 800px;
-      margin-top: 32px;
+      min-width: 0;
       border-top: 1px solid var(--arc-border);
     }
 
@@ -74,7 +78,7 @@ import { SectionIntro } from '../section-intro/section-intro';
       justify-content: space-between;
       gap: 16px;
       width: 100%;
-      min-height: 56px;
+      min-height: 60px;
       padding: 12px 0;
       border: 0;
       background: none;
@@ -90,36 +94,56 @@ import { SectionIntro } from '../section-intro/section-intro';
       overflow-wrap: anywhere;
     }
 
-    .faq__chevron {
+    // Signo más que gira hasta formar una equis con la respuesta abierta.
+    .faq__plus {
+      position: relative;
       flex: none;
-      width: 10px;
-      height: 10px;
+      width: 16px;
+      height: 16px;
       margin-right: 4px;
-      border-right: 2px solid var(--arc-muted);
-      border-bottom: 2px solid var(--arc-muted);
-      transform: rotate(45deg);
       transition: transform var(--arc-dur-base) var(--arc-ease-out);
+
+      &::before,
+      &::after {
+        position: absolute;
+        top: 7px;
+        left: 0;
+        width: 16px;
+        height: 2px;
+        border-radius: 1px;
+        background: var(--arc-ink);
+        content: '';
+      }
+
+      &::after {
+        transform: rotate(90deg);
+      }
     }
 
-    .is-open .faq__chevron {
-      transform: rotate(-135deg);
+    .is-open .faq__plus {
+      transform: rotate(45deg);
     }
 
     .faq__answer {
-      padding: 0 32px 16px 0;
+      padding: 0 32px 18px 0;
       color: var(--arc-muted);
       font-size: 16px;
       line-height: 24px;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 900px) {
       .section {
-        padding-block: 80px;
+        padding-block: 112px;
+      }
+
+      .layout {
+        grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+        gap: 64px;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .faq__chevron {
+      .faq__plus {
         transition: none;
       }
     }

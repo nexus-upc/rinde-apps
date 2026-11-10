@@ -10,36 +10,47 @@ describe('LandingPage', () => {
     });
   });
 
-  it('mounts the demo request form inside the demo section', () => {
+  function render(): HTMLElement {
     const fixture = TestBed.createComponent(LandingPage);
     fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
+    return fixture.nativeElement as HTMLElement;
+  }
 
-    expect(host.querySelector('section#demo app-demo-request-form form')).not.toBeNull();
+  it('mounts the demo request form inside the demo section', () => {
+    expect(render().querySelector('section#demo app-demo-request-form form')).not.toBeNull();
   });
 
   it('renders every section with its anchor id', () => {
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
+    const host = render();
 
-    for (const id of ['inicio', 'funcionalidades', 'conductores', 'planes', 'preguntas', 'demo']) {
+    for (const id of [
+      'inicio',
+      'conozca',
+      'funcionalidades',
+      'conductores',
+      'empezar',
+      'planes',
+      'demo',
+      'preguntas',
+    ]) {
       expect(host.querySelector(`section#${id}`), id).not.toBeNull();
     }
+  });
+
+  it('has a single h1 and the demo heading', () => {
+    const host = render();
+
     expect(host.querySelectorAll('h1').length).toBe(1);
     expect(host.querySelector('#demo-title')?.textContent?.trim()).toBe(
       'Solicite una demostración',
     );
   });
 
-  it('links the header and the footer to the same sections', () => {
-    const fixture = TestBed.createComponent(LandingPage);
-    fixture.detectChanges();
-    const host = fixture.nativeElement as HTMLElement;
-    const hrefs = (selector: string) =>
-      Array.from(host.querySelectorAll(`${selector} a`)).map((a) => a.getAttribute('href'));
+  it('links the header navigation to the demo form', () => {
+    const hrefs = Array.from(render().querySelectorAll('app-site-header nav a')).map((link) =>
+      link.getAttribute('href'),
+    );
 
-    expect(hrefs('footer')).toEqual(['#funcionalidades', '#conductores', '#planes', '#preguntas']);
-    expect(hrefs('app-site-header nav')).toContain('#demo');
+    expect(hrefs).toContain('#demo');
   });
 });

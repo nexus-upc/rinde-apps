@@ -29,13 +29,34 @@ El formulario de demostración envía `POST /api/v1/public/demo-requests` al gat
 
 | Historia | Dónde |
 |---|---|
-| US01 Propuesta de valor | `ui/hero-section` |
-| US02 Funcionalidades para operaciones | `ui/features-section` |
+| US01 Propuesta de valor | `ui/hero-section`, `ui/hero-visual` |
+| US02 Funcionalidades para operaciones | `ui/about-section`, `ui/features-section` |
 | US03 Funcionalidades para el conductor | `ui/driver-section`, `ui/phone-mockup` |
-| US04 Navegación por secciones | `ui/site-header` |
+| US04 Navegación por secciones | `ui/site-header`, `ui/site-footer` |
 | US05 Preguntas frecuentes | `ui/faq-section` |
 | US06 Solicitud de demostración | `ui/demo-request-form`, `state`, `data-access` |
 | US07 Diseño adaptable | Estilos de cada componente y `.landing-container` |
 
-Los planes muestran nombre y límite de unidades. Los precios quedan como "Precio mensual por definir"
-hasta que el equipo los fije.
+Los planes (Chasqui, Qhapaq y Apu) muestran nombre y límite de unidades. El precio queda como
+"Por definir" hasta que el equipo lo fije.
+
+## Diseño
+
+- Teléfonos: la interfaz Android es simulada; el marco (`.device` en `styles.scss`) imita un teléfono
+  Android real, con cámara perforada, botones, barra de estado (`ui/device-status`) y barra de gestos.
+- Animaciones ligadas al scroll con CSS `animation-timeline`: encabezado, portada, títulos, fotos,
+  planes, teléfono de conductores y pie. Solo en navegadores que lo soportan y sin movimiento reducido;
+  en los demás la página queda estática.
+
+## Imágenes
+
+Generadas con IA y convertidas a WebP en `public/images/`. Si falta un archivo, `ui/photo-slot`
+muestra un recuadro neutro con la misma proporción.
+
+| Archivo | Dónde |
+|---|---|
+| `about-office.webp` | Lo que hoy está repartido |
+| `ops-trips.webp`, `ops-expenses.webp`, `ops-settlements.webp` | Funcionalidades |
+| `route-banner.webp` | Banner entre secciones |
+| `steps-driver.webp` | Cómo empezar |
+| `footer-andes.webp` | Pie (WebP animado en bucle) |

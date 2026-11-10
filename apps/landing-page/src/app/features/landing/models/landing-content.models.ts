@@ -5,17 +5,57 @@ export interface NavLink {
 }
 
 export interface SectionIntro {
-  readonly eyebrow: string;
   readonly title: string;
   readonly lead: string;
 }
 
+/** Foto generada aparte; mientras el archivo no exista se muestra un recuadro neutro. */
+export interface Photo {
+  readonly src: string;
+  readonly alt: string;
+  /** Proporción CSS, por ejemplo '4 / 3'. */
+  readonly ratio: string;
+  /** Encuadre (object-position) cuando el centro de la foto no es lo importante. */
+  readonly position?: string;
+  /** Filtro de color para que la foto entone con la página. */
+  readonly tinted?: boolean;
+}
+
+export interface TripScreenExpense {
+  readonly label: string;
+  readonly amount: string;
+  readonly state: string;
+  readonly pending?: boolean;
+}
+
+/** Pantalla "Viaje en curso" de la app del conductor, dibujada en la portada. */
+export interface HeroPhoneContent {
+  readonly ariaLabel: string;
+  readonly screenTitle: string;
+  readonly status: string;
+  readonly origin: string;
+  readonly destination: string;
+  readonly departure: string;
+  readonly vehicle: string;
+  readonly advanceLabel: string;
+  readonly advance: string;
+  readonly expensesLabel: string;
+  readonly expenses: readonly TripScreenExpense[];
+  readonly action: string;
+}
+
+export interface HeroBadgeContent {
+  readonly title: string;
+  readonly caption: string;
+}
+
 export interface HeroContent {
-  readonly eyebrow: string;
   readonly title: string;
   readonly subtitle: string;
   readonly cta: NavLink;
-  readonly highlights: readonly string[];
+  readonly secondary: NavLink;
+  readonly phone: HeroPhoneContent;
+  readonly badge: HeroBadgeContent;
 }
 
 export interface FeatureItem {
@@ -26,8 +66,19 @@ export interface FeatureItem {
   readonly iconPaths: readonly string[];
 }
 
+export interface AboutContent {
+  readonly intro: SectionIntro;
+  readonly photo: Photo;
+  readonly points: readonly FeatureItem[];
+}
+
+export interface ShowcaseItem extends FeatureItem {
+  readonly photo: Photo;
+}
+
 export interface FeaturesContent {
   readonly intro: SectionIntro;
+  readonly showcase: readonly ShowcaseItem[];
   readonly items: readonly FeatureItem[];
 }
 
@@ -50,15 +101,25 @@ export interface DriverContent {
   readonly mockup: PhoneMockupContent;
 }
 
+export interface StepsContent {
+  readonly intro: SectionIntro;
+  readonly steps: readonly string[];
+  readonly photo: Photo;
+}
+
+export type PlanTone = 'light' | 'medium' | 'deep';
+
 export interface PlanCard {
   readonly id: string;
   readonly name: string;
   readonly tagline: string;
   readonly unitLimit: number;
+  /** Cuántos camiones dibuja el ícono: crece con la capacidad. */
+  readonly trucks: number;
+  readonly tone: PlanTone;
   readonly priceLabel: string;
+  readonly priceNote: string;
   readonly highlights: readonly string[];
-  readonly featured?: boolean;
-  readonly badge?: string;
 }
 
 export interface PlansContent {
@@ -66,8 +127,7 @@ export interface PlansContent {
   readonly plans: readonly PlanCard[];
   readonly cardCta: string;
   readonly cardCtaHref: string;
-  readonly modelTitle: string;
-  readonly modelPoints: readonly string[];
+  readonly notes: readonly string[];
 }
 
 export interface FaqItem {
@@ -86,7 +146,15 @@ export interface DemoContent {
   readonly lead: string;
 }
 
+export interface FooterColumn {
+  readonly title: string;
+  readonly links: readonly NavLink[];
+}
+
 export interface FooterContent {
   readonly tagline: string;
+  readonly columns: readonly FooterColumn[];
   readonly signature: string;
+  readonly disclaimer: string;
+  readonly art: Photo;
 }

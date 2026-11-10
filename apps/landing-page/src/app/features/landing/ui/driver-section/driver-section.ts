@@ -4,7 +4,7 @@ import { FeatureGrid } from '../feature-grid/feature-grid';
 import { PhoneMockup } from '../phone-mockup/phone-mockup';
 import { SectionIntro } from '../section-intro/section-intro';
 
-/** Funcionalidades de la app Android para conductores, junto a una maqueta de su pantalla. */
+/** Funcionalidades de la app Android para conductores, junto a la pantalla Registrar gasto. */
 @Component({
   selector: 'app-driver-section',
   imports: [SectionIntro, FeatureGrid, PhoneMockup],
@@ -24,11 +24,10 @@ import { SectionIntro } from '../section-intro/section-intro';
   styles: `
     :host {
       display: block;
-      background: var(--arc-surface-soft);
     }
 
     .section {
-      padding-block: 56px;
+      padding-block: 64px;
       scroll-margin-top: 72px;
     }
 
@@ -40,21 +39,28 @@ import { SectionIntro } from '../section-intro/section-intro';
     }
 
     .features {
-      margin-top: 28px;
+      margin-top: 32px;
     }
 
+    .layout__text,
     .layout__visual {
       min-width: 0;
     }
 
+    .layout__visual {
+      padding-block: 48px;
+      border-radius: var(--landing-radius-photo);
+      background: var(--landing-wash);
+    }
+
     @media (min-width: 900px) {
       .section {
-        padding-block: 80px;
+        padding-block: 112px;
       }
 
       .layout {
-        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-        gap: 64px;
+        grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+        gap: 80px;
       }
     }
   `,

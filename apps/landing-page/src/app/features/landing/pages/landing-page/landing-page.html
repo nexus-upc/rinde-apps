@@ -2,16 +2,24 @@
 
 <main>
   <app-hero-section [content]="hero" />
+  <app-about-section [content]="about" />
   <app-features-section [content]="features" />
+
+  <div class="landing-container">
+    <app-photo-slot [photo]="routePhoto" />
+  </div>
+
   <app-driver-section [content]="driver" />
+  <app-steps-section [content]="steps" />
   <app-plans-section [content]="plans" />
-  <app-faq-section [content]="faq" />
 
   <section id="demo" class="demo" aria-labelledby="demo-title">
     <div class="landing-container demo__inner">
-      <h2 id="demo-title" class="demo__title">{{ demo.title }}</h2>
-      <p class="demo__lead">{{ demo.lead }}</p>
-      <div class="demo__form">
+      <div class="demo__text">
+        <h2 id="demo-title" class="landing-title scroll-rise demo__title">{{ demo.title }}</h2>
+        <p class="demo__lead">{{ demo.lead }}</p>
+      </div>
+      <div class="demo__card">
         <app-demo-request-form
           [pending]="store.pending()"
           [sent]="store.sent()"
@@ -23,6 +31,8 @@
       </div>
     </div>
   </section>
+
+  <app-faq-section [content]="faq" />
 </main>
 
-<app-site-footer [content]="footer" [links]="links" />
+<app-site-footer [content]="footer" />

@@ -96,7 +96,181 @@ h3 {
 // 16 px en teléfono). Se declara una vez aquí para no repetirlo en los estilos de cada componente.
 .landing-container {
   width: 100%;
-  max-width: 1120px;
+  max-width: 1160px;
   margin-inline: auto;
   padding-inline: 16px;
+}
+
+// Colores propios de la landing, derivados del azul de marca. Los planes se oscurecen con la
+// capacidad: celeste (hasta 5 unidades), lavanda (hasta 15) e índigo (hasta 30).
+:root {
+  --landing-wash: #e3f0fd;
+  --landing-wash-deep: #cfe4fb;
+  --landing-plan-1: #a9e1f9;
+  --landing-plan-1-bar: #79cdf2;
+  --landing-plan-2: #c3cbfd;
+  --landing-plan-2-bar: #9eabf8;
+  --landing-plan-3: #3d37c8;
+  --landing-plan-3-bar: #2b26a1;
+  --landing-radius-photo: 4px;
+}
+
+// Títulos de sección: peso 500 y tracking cerrado, como en la portada. Suben al entrar en pantalla.
+.landing-title {
+  font-size: 30px;
+  font-weight: 500;
+  line-height: 36px;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 768px) {
+  .landing-title {
+    font-size: 40px;
+    line-height: 46px;
+  }
+}
+
+// Botón oscuro de la landing (encabezado, portada y planes).
+.landing-cta.ui-button {
+  min-height: 44px;
+  padding-inline: 20px;
+  border-color: var(--arc-ink);
+  background: var(--arc-ink);
+  color: var(--arc-on-fill);
+}
+
+// Marco de teléfono Android: borde metálico, bisel negro, cámara perforada, botones laterales,
+// barra de estado y barra de gestos. La interfaz de adentro la dibuja cada componente.
+.device {
+  position: relative;
+  padding: 3px;
+  border-radius: 50px;
+  background: linear-gradient(150deg, #4b515b 0%, #1b1e23 30%, #2f343c 62%, #121418 100%);
+  box-shadow:
+    0 0 0 1px #0b0c0f,
+    0 44px 70px -24px rgb(15 23 42 / 50%);
+}
+
+.device__btn {
+  position: absolute;
+  right: -4px;
+  width: 4px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(90deg, #1b1e23, #454b55);
+
+  &--power {
+    top: 150px;
+    height: 58px;
+  }
+
+  &--volume {
+    top: 232px;
+    height: 104px;
+  }
+}
+
+.device__bezel {
+  padding: 8px;
+  border-radius: 47px;
+  background: #050608;
+}
+
+.device__screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 39px;
+  background: var(--arc-bg);
+  color: var(--arc-ink);
+}
+
+.device__punch {
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  width: 13px;
+  height: 13px;
+  margin-left: -6.5px;
+  border-radius: 50%;
+  background: #0b0d10;
+  box-shadow: inset 0 0 0 2px #1d2128;
+}
+
+.device__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 38px;
+  padding: 0 22px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.device__icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.device__nav {
+  align-self: center;
+  width: 104px;
+  height: 4px;
+  margin: 10px 0 8px;
+  border-radius: 4px;
+  background: var(--arc-ink);
+  opacity: 0.85;
+}
+
+// Animaciones ligadas al scroll: la página se transforma mientras se recorre. Solo donde el
+// navegador las soporta y sin movimiento reducido; en otro caso todo queda quieto en su sitio.
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .scroll-rise {
+      animation: landing-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 10% cover 30%;
+    }
+
+    .scroll-photo {
+      animation: landing-photo-open linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 45%;
+    }
+  }
+}
+
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes landing-photo-open {
+  from {
+    clip-path: inset(16% 12% 16% 12% round 28px);
+    transform: scale(1.14);
+  }
+
+  to {
+    clip-path: inset(0 round var(--landing-radius-photo));
+    transform: none;
+  }
+}
+
+@media (hover: hover) {
+  .landing-cta.ui-button:hover {
+    border-color: var(--arc-fill);
+    background: var(--arc-fill);
+    box-shadow: none;
+  }
 }
