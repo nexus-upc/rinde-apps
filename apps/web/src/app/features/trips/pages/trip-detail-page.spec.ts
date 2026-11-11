@@ -157,4 +157,19 @@ describe('TripDetailPage', () => {
     expect(root().textContent).toContain('Aviso de Mantenimiento');
     expect(root().textContent).toContain('DUE_SOON');
   });
+
+  it('displays navigation links to trip expenses and settlements', () => {
+    flushInitialData();
+
+    const expensesLink = root().querySelector(
+      'a[href="/expenses/trip-1"]',
+    ) as HTMLAnchorElement | null;
+    const settlementsLink = root().querySelector(
+      'a[href^="/settlements"]',
+    ) as HTMLAnchorElement | null;
+
+    expect(expensesLink).not.toBeNull();
+    expect(settlementsLink).not.toBeNull();
+    expect(settlementsLink?.getAttribute('href')).toBe('/settlements?tripId=trip-1');
+  });
 });
