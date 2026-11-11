@@ -1,0 +1,95 @@
+<section class="settlement-card" aria-labelledby="settlement-title">
+  <header class="settlement-card__header">
+    <div>
+      <div class="settlement-card__title-row">
+        <h2 id="settlement-title" class="settlement-card__title">Resumen de liquidación</h2>
+        <span
+          class="status-pill"
+          [class.status-pill--open]="settlement().status === 'OPEN'"
+          [class.status-pill--closed]="settlement().status === 'CLOSED'"
+        >
+          {{ statusLabel(settlement().status) }}
+        </span>
+      </div>
+      <p class="settlement-card__meta">
+        Liquidación <span class="mono">{{ settlement().id }}</span> · Actualizada el
+        {{ settlement().updatedAt | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </div>
+
+    <div class="settlement-card__actions">
+      <button
+        uiButton
+        variant="secondary"
+        type="button"
+        [loading]="recalculating()"
+        [disabled]="busy() || settlement().status === 'CLOSED'"
+        (click)="recalculate.emit()"
+      >
+        Recalcular
+      </button>
+
+      <button
+        uiButton
+        variant="secondary"
+        type="button"
+        [loading]="exporting()"
+        [disabled]="busy()"
+        (click)="exportCsv.emit()"
+      >
+        Exportar CSV
+      </button>
+
+      <button
+        uiButton
+        variant="primary"
+        type="button"
+        [disabled]="busy() || settlement().status === 'CLOSED'"
+        (click)="requestClose.emit()"
+      >
+        Cerrar liquidación
+      </button>
+    </div>
+  </header>
+
+  @if (actionError(); as message) {
+    <p class="form-alert" role="alert">{{ message }}</p>
+  }
+
+  <div class="settlement-card__metrics">
+    <article class="metric-box">
+      <span class="metric-box__label">Total de anticipos</span>
+      <strong class="metric-box__value">
+        {{
+          settlement().advanceAmount
+            | currency:settlement().advanceCurrency:'symbol':'1.2-2'
+        }}
+      </strong>
+    </article>
+
+    <article class="metric-box">
+      <span class="metric-box__label">Total de gastos aprobados</span>
+      <strong class="metric-box__value">
+        {{
+          settlement().expenseTotalAmount
+            | currency:settlement().expenseTotalCurrency:'symbol':'1.2-2'
+        }}
+      </strong>
+    </article>
+
+    <article class="metric-box metric-box--highlight">
+      <span class="metric-box__label">Balance de anticipos</span>
+      <strong class="metric-box__value">
+        {{
+          settlement().advanceBalance
+            | currency:settlement().advanceCurrency:'symbol':'1.2-2'
+        }}
+      </strong>
+    </article>
+  </div>
+
+  <footer class="settlement-card__footer">
+    <span>Conductor ID: <span class="mono">{{ settlement().driverId }}</span></span>
+    <span>Apertura: {{ settlement().createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
+  </footer>
+</section>

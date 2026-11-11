@@ -1,0 +1,82 @@
+@if (open() && settlement(); as item) {
+  <div class="modal-backdrop" (click)="cancelled.emit()">
+    <div
+      class="modal-dialog arc-entrance-stage"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="close-settlement-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="modal-header">
+        <div>
+          <h2 id="close-settlement-title" class="modal-title">Confirmar cierre de liquidación</h2>
+          <p class="modal-subtitle">Esta acción cerrará la liquidación de forma definitiva.</p>
+        </div>
+        <button
+          type="button"
+          class="close-btn"
+          [disabled]="pending()"
+          (click)="cancelled.emit()"
+          aria-label="Cerrar diálogo"
+        >
+          &times;
+        </button>
+      </header>
+
+      <div class="modal-body">
+        @if (error(); as message) {
+          <p class="form-alert" role="alert">{{ message }}</p>
+        }
+
+        @if (pendingExpenseCount() > 0) {
+          <div class="warning-note" role="status">
+            Hay {{ pendingExpenseCount() }} gasto(s) sin revisar. Si continúas antes de aprobarlos u
+            observarlos, el servidor rechazará el cierre.
+          </div>
+        }
+
+        <div class="summary-rows">
+          <div class="summary-row">
+            <span>Total de anticipos</span>
+            <strong>
+              {{ item.advanceAmount | currency:item.advanceCurrency:'symbol':'1.2-2' }}
+            </strong>
+          </div>
+          <div class="summary-row">
+            <span>Total de gastos aprobados</span>
+            <strong>
+              {{ item.expenseTotalAmount | currency:item.expenseTotalCurrency:'symbol':'1.2-2' }}
+            </strong>
+          </div>
+          <div class="summary-row summary-row--highlight">
+            <span>Balance de anticipos</span>
+            <strong>
+              {{ item.advanceBalance | currency:item.advanceCurrency:'symbol':'1.2-2' }}
+            </strong>
+          </div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          [disabled]="pending()"
+          (click)="cancelled.emit()"
+        >
+          Cancelar
+        </button>
+        <button
+          uiButton
+          variant="primary"
+          type="button"
+          [loading]="pending()"
+          (click)="confirmed.emit()"
+        >
+          Confirmar cierre
+        </button>
+      </footer>
+    </div>
+  </div>
+}

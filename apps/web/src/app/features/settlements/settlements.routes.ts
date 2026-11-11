@@ -6,4 +6,9 @@ export const SETTLEMENTS_ROUTES: Routes = [
     loadComponent: () =>
       import('./pages/settlements-page/settlements-page').then((module) => module.SettlementsPage),
   },
+  {
+    path: ':tripId',
+    loadComponent: () =>
+      import('./pages/settlements-page/settlements-page').then((module) => module.SettlementsPage),
+  },
 ];
