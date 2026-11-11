@@ -6,4 +6,9 @@ export const INCIDENTS_ROUTES: Routes = [
     loadComponent: () =>
       import('./pages/incidents-page/incidents-page').then((module) => module.IncidentsPage),
   },
+  {
+    path: ':id',
+    loadComponent: () =>
+      import('./pages/incidents-page/incidents-page').then((module) => module.IncidentsPage),
+  },
 ];
