@@ -59,32 +59,44 @@
   <div class="settlement-card__metrics">
     <article class="metric-box">
       <span class="metric-box__label">Total de anticipos</span>
-      <strong class="metric-box__value">
-        {{
-          settlement().advanceAmount
-            | currency:settlement().advanceCurrency:'symbol':'1.2-2'
-        }}
-      </strong>
+      @if (settlement().advanceAmount !== null) {
+        <strong class="metric-box__value">
+          {{
+            settlement().advanceAmount
+              | currency:(settlement().advanceCurrency || 'PEN'):'symbol':'1.2-2'
+          }}
+        </strong>
+      } @else {
+        <strong class="metric-box__value metric-box__value--pending">Sin calcular</strong>
+      }
     </article>
 
     <article class="metric-box">
       <span class="metric-box__label">Total de gastos aprobados</span>
-      <strong class="metric-box__value">
-        {{
-          settlement().expenseTotalAmount
-            | currency:settlement().expenseTotalCurrency:'symbol':'1.2-2'
-        }}
-      </strong>
+      @if (settlement().expenseTotalAmount !== null) {
+        <strong class="metric-box__value">
+          {{
+            settlement().expenseTotalAmount
+              | currency:(settlement().expenseTotalCurrency || 'PEN'):'symbol':'1.2-2'
+          }}
+        </strong>
+      } @else {
+        <strong class="metric-box__value metric-box__value--pending">Sin calcular</strong>
+      }
     </article>
 
     <article class="metric-box metric-box--highlight">
       <span class="metric-box__label">Balance de anticipos</span>
-      <strong class="metric-box__value">
-        {{
-          settlement().advanceBalance
-            | currency:settlement().advanceCurrency:'symbol':'1.2-2'
-        }}
-      </strong>
+      @if (settlement().advanceBalance !== null) {
+        <strong class="metric-box__value">
+          {{
+            settlement().advanceBalance
+              | currency:(settlement().advanceCurrency || 'PEN'):'symbol':'1.2-2'
+          }}
+        </strong>
+      } @else {
+        <strong class="metric-box__value metric-box__value--pending">Pendiente de recálculo</strong>
+      }
     </article>
   </div>
 

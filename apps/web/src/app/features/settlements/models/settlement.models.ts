@@ -58,11 +58,11 @@ export interface Settlement {
   readonly tripId: string;
   readonly driverId: string;
   readonly status: SettlementStatus;
-  readonly advanceAmount: number;
-  readonly advanceCurrency: string;
-  readonly expenseTotalAmount: number;
-  readonly expenseTotalCurrency: string;
-  readonly advanceBalance: number;
+  readonly advanceAmount: number | null;
+  readonly advanceCurrency: string | null;
+  readonly expenseTotalAmount: number | null;
+  readonly expenseTotalCurrency: string | null;
+  readonly advanceBalance: number | null;
   readonly createdAt: string;
   readonly updatedAt: string;
   readonly pendingExpenseCount?: number;

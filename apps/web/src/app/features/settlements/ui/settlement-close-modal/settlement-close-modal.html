@@ -39,19 +39,40 @@
           <div class="summary-row">
             <span>Total de anticipos</span>
             <strong>
-              {{ item.advanceAmount | currency:item.advanceCurrency:'symbol':'1.2-2' }}
+              @if (item.advanceAmount !== null) {
+                {{
+                  item.advanceAmount
+                    | currency:(item.advanceCurrency || 'PEN'):'symbol':'1.2-2'
+                }}
+              } @else {
+                Sin calcular
+              }
             </strong>
           </div>
           <div class="summary-row">
             <span>Total de gastos aprobados</span>
             <strong>
-              {{ item.expenseTotalAmount | currency:item.expenseTotalCurrency:'symbol':'1.2-2' }}
+              @if (item.expenseTotalAmount !== null) {
+                {{
+                  item.expenseTotalAmount
+                    | currency:(item.expenseTotalCurrency || 'PEN'):'symbol':'1.2-2'
+                }}
+              } @else {
+                Sin calcular
+              }
             </strong>
           </div>
           <div class="summary-row summary-row--highlight">
             <span>Balance de anticipos</span>
             <strong>
-              {{ item.advanceBalance | currency:item.advanceCurrency:'symbol':'1.2-2' }}
+              @if (item.advanceBalance !== null) {
+                {{
+                  item.advanceBalance
+                    | currency:(item.advanceCurrency || 'PEN'):'symbol':'1.2-2'
+                }}
+              } @else {
+                Pendiente de recálculo
+              }
             </strong>
           </div>
         </div>

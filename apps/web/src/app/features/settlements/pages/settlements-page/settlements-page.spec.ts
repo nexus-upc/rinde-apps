@@ -312,4 +312,22 @@ describe('SettlementsPage', () => {
       clickSpy.mockRestore();
     }
   });
+
+  it('displays pending labels when settlement amounts are null before first recalculation', () => {
+    fixture.detectChanges();
+    flushTripRequests({
+      settlement: {
+        ...MOCK_SETTLEMENT,
+        advanceAmount: null,
+        advanceCurrency: null,
+        expenseTotalAmount: null,
+        expenseTotalCurrency: null,
+        advanceBalance: null,
+      },
+      expenses: [],
+    });
+
+    expect(root().textContent).toContain('Sin calcular');
+    expect(root().textContent).toContain('Pendiente de recálculo');
+  });
 });
