@@ -1,20 +1,104 @@
-.marker {
+.settlements-page {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 120px);
+  gap: 20px;
+
+  &__header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 
-.marker__body {
+.trip-selector-card {
   display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px 20px;
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-card);
+
+  &__controls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    align-items: end;
+  }
 }
 
-p {
-  margin: 0;
+.trip-id-search {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.mono {
+  font-family: var(--arc-font-mono);
+  font-size: 13px;
+}
+
+.alert-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: var(--arc-radius-row);
+  font-size: 14px;
+
+  &--warning {
+    border: 1px solid #fde68a;
+    background: #fffbeb;
+    color: #92400e;
+  }
+
+  &__text {
+    max-width: 72ch;
+  }
+}
+
+.settlement-pending-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  border: 1px dashed var(--arc-border-strong);
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-surface-soft);
+
+  h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--arc-ink);
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--arc-muted);
+  }
+}
+
+.advances-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (min-width: 960px) {
+    grid-template-columns: 380px 1fr;
+  }
+}
+
+.idle-card {
+  padding: 48px 20px;
+  border: 1px dashed var(--arc-border-strong);
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-surface-soft);
+  text-align: center;
   color: var(--arc-muted);
   font-size: 14px;
-  line-height: 20px;
-  text-align: center;
 }

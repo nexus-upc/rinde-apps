@@ -1,0 +1,125 @@
+.settlement-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-card);
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  &__title-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--arc-ink);
+  }
+
+  &__meta {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--arc-muted);
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 14px;
+  }
+
+  &__footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--arc-border);
+    font-size: 12px;
+    color: var(--arc-muted);
+  }
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: var(--arc-radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+
+  &--open {
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
+  }
+
+  &--closed {
+    background: var(--arc-success-bg);
+    color: var(--arc-success);
+  }
+}
+
+.metric-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-control);
+  background: var(--arc-surface-soft);
+
+  &__label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--arc-muted);
+  }
+
+  &__value {
+    font-size: 24px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--arc-ink);
+
+    &--pending {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--arc-muted);
+    }
+  }
+
+  &--highlight {
+    background: var(--arc-fill-soft);
+    border-color: var(--arc-focus-ring);
+
+    .metric-box__value {
+      color: var(--arc-fill);
+    }
+  }
+}
+
+.mono {
+  font-family: var(--arc-font-mono);
+}

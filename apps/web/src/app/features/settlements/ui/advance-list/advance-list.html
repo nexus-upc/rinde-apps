@@ -1,0 +1,42 @@
+<section class="advance-list" aria-labelledby="advance-list-title">
+  <header class="advance-list__header">
+    <div>
+      <h2 id="advance-list-title" class="advance-list__title">Anticipos entregados</h2>
+      <p class="advance-list__subtitle">Historial de desembolsos asociados al viaje seleccionado.</p>
+    </div>
+    <span class="advance-list__count">{{ advances().length }}</span>
+  </header>
+
+  @if (advances().length === 0) {
+    <div class="advance-list__empty">
+      <p>No hay anticipos registrados para este viaje.</p>
+    </div>
+  } @else {
+    <div class="advance-list__table-wrap">
+      <table class="advance-table">
+        <thead>
+          <tr>
+            <th>Fecha de registro</th>
+            <th>Método</th>
+            <th>Monto</th>
+            <th>Registrado por</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (advance of advances(); track advance.id) {
+            <tr>
+              <td>{{ advance.registeredAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <span class="method-pill">{{ methodLabel(advance.deliveryMethod) }}</span>
+              </td>
+              <td class="amount-cell">
+                <strong>{{ advance.amount | currency:advance.currency:'symbol':'1.2-2' }}</strong>
+              </td>
+              <td class="mono">{{ advance.registeredBy }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>
