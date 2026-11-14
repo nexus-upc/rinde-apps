@@ -1,20 +1,30 @@
-.marker {
+.incidents-page {
   display: flex;
   flex-direction: column;
-  min-height: calc(100dvh - 120px);
+  gap: 20px;
 }
 
-.marker__body {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
+.filters-card {
+  padding: 18px 20px;
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-card);
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    align-items: end;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
 }
 
-p {
-  margin: 0;
-  color: var(--arc-muted);
-  font-size: 14px;
-  line-height: 20px;
-  text-align: center;
+.mono {
+  font-family: var(--arc-font-mono);
+  font-size: 13px;
 }
