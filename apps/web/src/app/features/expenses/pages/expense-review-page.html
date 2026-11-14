@@ -1,11 +1,23 @@
 <div class="expense-review-page">
   <app-page-header
-    title="Revisión de Gastos Operativos (US24)"
-    description="Auditoría, aprobación y observación de comprobantes de viaje."
+    title="Revisión y Resumen de Gastos"
+    description="Auditoría, aprobación, observación y resumen por estado de comprobantes del viaje."
   >
-    <button uiButton variant="secondary" type="button" (click)="goBack()">
-      Volver a Viajes
-    </button>
+    <div class="header-actions">
+      @if (store.tripId()) {
+        <a
+          uiButton
+          variant="secondary"
+          [routerLink]="['/settlements']"
+          [queryParams]="{ tripId: store.tripId() }"
+        >
+          Ver liquidación
+        </a>
+      }
+      <button uiButton variant="secondary" type="button" (click)="goBack()">
+        Volver a Viajes
+      </button>
+    </div>
   </app-page-header>
 
   <section class="trip-search-bar">
@@ -46,32 +58,7 @@
       (action)="retry()"
     />
   } @else if (store.state() === 'ready') {
-    <section class="metrics-grid">
-      <div class="metric-card">
-        <span class="metric-title">Total Comprobantes</span>
-        <span class="metric-value">{{ store.totalExpenses() }}</span>
-      </div>
-
-      <div class="metric-card metric-card--pending">
-        <span class="metric-title">Pendientes (Por revisar)</span>
-        <span class="metric-value">{{ store.pendingExpenses().length }}</span>
-      </div>
-
-      <div class="metric-card metric-card--approved">
-        <span class="metric-title">Aprobados</span>
-        <span class="metric-value">{{ store.approvedExpenses().length }}</span>
-      </div>
-
-      <div class="metric-card metric-card--observed">
-        <span class="metric-title">Observados</span>
-        <span class="metric-value">{{ store.observedExpenses().length }}</span>
-      </div>
-
-      <div class="metric-card metric-card--total">
-        <span class="metric-title">Monto Total Reportado</span>
-        <span class="metric-value">{{ store.totalAmount() | currency:'PEN':'symbol':'1.2-2' }}</span>
-      </div>
-    </section>
+    <app-expense-trip-summary [summary]="store.tripSummary()" />
 
     <section class="table-section">
       <app-expense-table

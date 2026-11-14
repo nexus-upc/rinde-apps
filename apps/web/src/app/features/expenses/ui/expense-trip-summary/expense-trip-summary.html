@@ -1,0 +1,37 @@
+<section class="summary-grid" aria-label="Resumen de gastos del viaje">
+  <article class="summary-card">
+    <span class="summary-card__title">Total comprobantes</span>
+    <strong class="summary-card__value">{{ summary().totalCount }}</strong>
+  </article>
+
+  <article class="summary-card summary-card--registered">
+    <span class="summary-card__title">Registrados</span>
+    <strong class="summary-card__value">{{ summary().registeredCount }}</strong>
+  </article>
+
+  <article class="summary-card summary-card--pending-support">
+    <span class="summary-card__title">Pendientes de soporte</span>
+    <strong class="summary-card__value">{{ summary().pendingSupportCount }}</strong>
+  </article>
+
+  <article class="summary-card summary-card--approved">
+    <span class="summary-card__title">Aprobados</span>
+    <strong class="summary-card__value">{{ summary().approvedCount }}</strong>
+  </article>
+
+  <article class="summary-card summary-card--observed">
+    <span class="summary-card__title">Observados</span>
+    <strong class="summary-card__value">{{ summary().observedCount }}</strong>
+  </article>
+
+  <article class="summary-card summary-card--approved-total">
+    <span class="summary-card__title">Total aprobado</span>
+    <div class="summary-card__totals">
+      @for (item of summary().approvedTotals; track item.currency) {
+        <strong class="summary-card__value">
+          {{ item.amount | currency:item.currency:'symbol':'1.2-2' }}
+        </strong>
+      }
+    </div>
+  </article>
+</section>
