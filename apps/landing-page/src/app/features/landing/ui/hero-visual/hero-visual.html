@@ -1,0 +1,72 @@
+<div class="stage">
+  <div class="stage__inner">
+    <div class="device phone" role="img" [attr.aria-label]="phone().ariaLabel">
+      <span class="device__btn device__btn--power"></span>
+      <span class="device__btn device__btn--volume"></span>
+      <div class="device__bezel">
+        <div class="device__screen screen" aria-hidden="true">
+          <app-device-status time="05:42" />
+          <div class="screen__body">
+            <div class="screen__top">
+              <span class="screen__title">{{ phone().screenTitle }}</span>
+              <span class="pill">{{ phone().status }}</span>
+            </div>
+
+            <div class="route">
+              <span class="route__rail"></span>
+              <div class="route__stop">
+                <strong>{{ phone().origin }}</strong>
+                <span>{{ phone().departure }}</span>
+              </div>
+              <div class="route__stop">
+                <strong>{{ phone().destination }}</strong>
+                <span>{{ phone().vehicle }}</span>
+              </div>
+            </div>
+
+            <div class="advance">
+              <span>{{ phone().advanceLabel }}</span>
+              <strong>{{ phone().advance }}</strong>
+            </div>
+
+            <span class="screen__label">{{ phone().expensesLabel }}</span>
+            <ul class="expenses">
+              @for (expense of phone().expenses; track expense.label) {
+                <li class="expense" [class.is-pending]="expense.pending">
+                  <span class="expense__text">
+                    <span class="expense__name">{{ expense.label }}</span>
+                    <span class="expense__state">{{ expense.state }}</span>
+                  </span>
+                  <span class="expense__amount">{{ expense.amount }}</span>
+                </li>
+              }
+            </ul>
+
+            <span class="screen__action">{{ phone().action }}</span>
+          </div>
+          <span class="device__nav"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="badge">
+      <svg
+        viewBox="0 0 24 24"
+        width="40"
+        height="40"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path d="M21 12a9 9 0 0 0-15.5-6.2L3 8M3 3v5h5" />
+        <path d="M3 12a9 9 0 0 0 15.5 6.2L21 16M21 21v-5h-5" />
+      </svg>
+      <p class="badge__title">{{ badge().title }}</p>
+      <p class="badge__caption">{{ badge().caption }}</p>
+    </div>
+  </div>
+</div>

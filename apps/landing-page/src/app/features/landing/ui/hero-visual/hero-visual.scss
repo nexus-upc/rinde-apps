@@ -1,0 +1,277 @@
+// El escenario mide 520 x 560 y se escala entero en pantallas angostas, para que el teléfono y la
+// tarjeta conserven su composición sin desbordar el ancho.
+:host {
+  --k: 0.66;
+  display: block;
+  min-width: 0;
+}
+
+.stage {
+  position: relative;
+  height: calc(560px * var(--k));
+}
+
+.stage__inner {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 520px;
+  height: 560px;
+  transform: translateX(-50%) scale(var(--k));
+  transform-origin: top center;
+}
+
+.phone {
+  position: absolute;
+  top: 14px;
+  left: 186px;
+  width: 298px;
+  transform: rotate(16deg);
+}
+
+.screen {
+  height: 590px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.screen__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+  padding: 8px 18px 0;
+}
+
+.screen__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.screen__title {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 26px;
+}
+
+.pill {
+  padding: 3px 10px;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-success-bg);
+  color: var(--arc-success);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.route {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  padding: 14px 14px 14px 34px;
+  border-radius: 14px;
+  background: var(--arc-surface-soft);
+}
+
+// Recorrido: un punto de salida, una línea y un punto de llegada.
+.route__rail {
+  position: absolute;
+  top: 20px;
+  bottom: 38px;
+  left: 16px;
+  width: 2px;
+  background: var(--arc-border-strong);
+
+  &::before,
+  &::after {
+    position: absolute;
+    left: -4px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    content: '';
+  }
+
+  &::before {
+    top: -2px;
+    border: 2px solid var(--arc-fill);
+    background: var(--arc-bg);
+  }
+
+  &::after {
+    bottom: -2px;
+    background: var(--arc-fill);
+  }
+}
+
+.route__stop {
+  display: grid;
+  gap: 2px;
+
+  strong {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  span {
+    color: var(--arc-subtle);
+    font-size: 12px;
+  }
+}
+
+.advance {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--arc-fill-soft);
+  color: var(--arc-fill);
+
+  strong {
+    font-size: 16px;
+    font-weight: 600;
+  }
+}
+
+.screen__label {
+  margin-top: 4px;
+  color: var(--arc-subtle);
+  font-size: 12px;
+}
+
+.expenses {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.expense {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--arc-border);
+  border-radius: 12px;
+}
+
+.expense__text {
+  display: grid;
+}
+
+.expense__name {
+  font-weight: 500;
+}
+
+.expense__state {
+  color: var(--arc-success);
+  font-size: 12px;
+}
+
+.is-pending .expense__state {
+  color: var(--arc-fill);
+}
+
+.expense__amount {
+  font-weight: 600;
+}
+
+.screen__action {
+  margin-top: auto;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--arc-ink);
+  color: var(--arc-on-fill);
+  font-weight: 500;
+  text-align: center;
+}
+
+// Tarjeta superpuesta: el mensaje que más distingue a la app del conductor.
+.badge {
+  position: absolute;
+  top: 168px;
+  left: 6px;
+  display: flex;
+  flex-direction: column;
+  width: 236px;
+  min-height: 236px;
+  padding: 24px;
+  border-radius: 6px;
+  background: var(--arc-fill);
+  color: var(--arc-on-fill);
+  box-shadow: 0 24px 40px -16px color-mix(in srgb, var(--arc-fill) 60%, transparent);
+  transform: rotate(-4deg);
+}
+
+.badge__title {
+  margin-top: auto;
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 32px;
+  letter-spacing: -0.02em;
+}
+
+.badge__caption {
+  margin-top: 10px;
+  color: var(--arc-on-band-muted);
+  font-size: 15px;
+  line-height: 21px;
+}
+
+// Al salir de la portada, el teléfono sube girando y la tarjeta cae en sentido contrario.
+// --hero es la línea de tiempo que declara la sección de la portada.
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .phone {
+      animation: phone-drift linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 100%;
+    }
+
+    .badge {
+      animation: badge-drift linear both;
+      animation-timeline: --hero;
+      animation-range: exit 0% exit 100%;
+    }
+  }
+}
+
+@keyframes phone-drift {
+  from {
+    transform: rotate(16deg);
+  }
+
+  to {
+    transform: translate(40px, -140px) rotate(30deg);
+  }
+}
+
+@keyframes badge-drift {
+  from {
+    transform: rotate(-4deg);
+  }
+
+  to {
+    transform: translate(-30px, 80px) rotate(-14deg);
+  }
+}
+
+@media (min-width: 420px) {
+  :host {
+    --k: 0.72;
+  }
+}
+
+@media (min-width: 600px) {
+  :host {
+    --k: 0.86;
+  }
+}
+
+@media (min-width: 1024px) {
+  :host {
+    --k: 1;
+  }
+}

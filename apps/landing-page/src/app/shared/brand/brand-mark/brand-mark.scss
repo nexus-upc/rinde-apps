@@ -1,0 +1,28 @@
+:host {
+  display: inline-flex;
+  color: var(--arc-ink);
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.brand-mark__logo {
+  display: block;
+  flex: none;
+}
+
+// Paradas del degradado de marca: indigo/600, azul/700 y celeste/500.
+.brand-mark__stop-start {
+  stop-color: var(--arc-brand-start);
+}
+
+.brand-mark__stop-middle {
+  stop-color: var(--arc-fill);
+}
+
+.brand-mark__stop-end {
+  stop-color: var(--arc-brand-end);
+}
