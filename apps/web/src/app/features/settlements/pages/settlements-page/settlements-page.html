@@ -1,6 +1,152 @@
-<section class="marker" aria-labelledby="settlements-title">
-  <app-page-header title="Liquidaciones" titleId="settlements-title" />
-  <div class="marker__body">
-    <p>Pantalla en construcción (Sprint 3)</p>
-  </div>
+<section class="settlements-page" aria-labelledby="settlements-title">
+  <app-page-header
+    title="Liquidaciones y anticipos"
+    titleId="settlements-title"
+    description="Registro de anticipos previos al viaje, balance de gastos aprobados, cierre y exportación CSV."
+  >
+    <div class="settlements-page__header-actions">
+      @if (store.tripId()) {
+        <a uiButton variant="secondary" [routerLink]="['/expenses', store.tripId()]">
+          Ver gastos del viaje
+        </a>
+        <a uiButton variant="secondary" [routerLink]="['/trips', store.tripId()]">
+          Detalle del viaje
+        </a>
+      }
+    </div>
+  </app-page-header>
+
+  <section class="trip-selector-card" aria-label="Selección de viaje">
+    <div class="trip-selector-card__controls">
+      <div class="field">
+        <label class="field__label" for="settlement-trip-select">Seleccionar viaje</label>
+        <select
+          id="settlement-trip-select"
+          class="field__select"
+          [ngModel]="store.tripId()"
+          (ngModelChange)="selectTripFromList($event)"
+        >
+          <option value="">-- Elige un viaje --</option>
+          @for (trip of store.trips(); track trip.id) {
+            <option [value]="trip.id">
+              {{ trip.code }} · {{ trip.origin }} → {{ trip.destination }} ({{
+                tripStatusLabel(trip.status)
+              }})
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="settlement-trip-id-input">O consultar por ID de viaje</label>
+        <div class="trip-id-search">
+          <input
+            id="settlement-trip-id-input"
+            type="text"
+            class="field__input mono"
+            placeholder="UUID del viaje"
+            [ngModel]="inputTripId()"
+            (ngModelChange)="inputTripId.set($event)"
+            (keyup.enter)="searchByTripId()"
+          />
+          <button
+            uiButton
+            variant="primary"
+            type="button"
+            [disabled]="!inputTripId().trim() || store.state() === 'loading'"
+            (click)="searchByTripId()"
+          >
+            Consultar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    @if (store.tripsAction.error(); as tripsError) {
+      <p class="form-alert" role="alert">{{ tripsError }}</p>
+    }
+  </section>
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <app-state-panel
+        title="Cargando anticipos y liquidación"
+        message="Consultando los desembolsos, comprobantes pendientes y balance del viaje..."
+      />
+    }
+    @case ('error') {
+      <app-state-panel
+        [error]="true"
+        title="Error al consultar la liquidación del viaje"
+        [message]="store.error()"
+        actionLabel="Reintentar"
+        (action)="retryTrip()"
+      />
+    }
+    @case ('ready') {
+      @if (store.showPendingExpensesBanner()) {
+        <div class="alert-banner alert-banner--warning" role="alert">
+          <div class="alert-banner__text">
+            <strong>Gastos pendientes de revisión:</strong>
+            Existen {{ store.pendingExpenseCount() }} gasto(s) en estado Registrado o Pendiente de
+            soporte. Apruébalos u obsérvalos antes de cerrar la liquidación.
+          </div>
+          <a uiButton variant="secondary" [routerLink]="['/expenses', store.tripId()]">
+            Revisar gastos
+          </a>
+        </div>
+      }
+
+      @if (store.settlement(); as settlement) {
+        <app-settlement-summary
+          [settlement]="settlement"
+          [busy]="store.settlementActionBusy()"
+          [recalculating]="store.recalculateAction.pending()"
+          [exporting]="store.exportAction.pending()"
+          [actionError]="store.settlementActionError()"
+          (recalculate)="store.recalculateSettlement()"
+          (requestClose)="store.openCloseModal()"
+          (exportCsv)="store.exportCsv()"
+        />
+      } @else {
+        <section class="settlement-pending-card" aria-label="Estado de liquidación">
+          <h2>Liquidación aún no generada</h2>
+          <p>
+            {{ store.settlementNotFoundMessage() || 'No existe liquidación para este viaje.' }}
+            La liquidación se genera automáticamente cuando el viaje finaliza su ruta.
+          </p>
+        </section>
+      }
+
+      <div class="advances-grid">
+        <app-advance-form
+          [pending]="store.registerAdvanceAction.pending()"
+          [error]="store.registerAdvanceAction.error()"
+          [tripStatus]="store.selectedTrip()?.status ?? null"
+          [resetCounter]="store.advanceResetCounter()"
+          (submitted)="store.registerAdvance($event)"
+        />
+
+        <app-advance-list [advances]="store.advances()" />
+      </div>
+    }
+    @default {
+      <div class="idle-card">
+        <p>
+          Selecciona un viaje o ingresa su identificador para gestionar sus anticipos y revisar su
+          liquidación.
+        </p>
+      </div>
+    }
+  }
+
+  <app-settlement-close-modal
+    [open]="store.confirmCloseOpen()"
+    [settlement]="store.settlement()"
+    [pendingExpenseCount]="store.pendingExpenseCount()"
+    [pending]="store.closeAction.pending()"
+    [error]="store.closeAction.error()"
+    (cancelled)="store.dismissCloseModal()"
+    (confirmed)="store.confirmCloseSettlement()"
+  />
 </section>

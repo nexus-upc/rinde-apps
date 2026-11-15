@@ -1,0 +1,109 @@
+.advance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-card);
+
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--arc-ink);
+  }
+
+  &__subtitle {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--arc-muted);
+  }
+
+  &__count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: var(--arc-radius-pill);
+    background: var(--arc-surface);
+    color: var(--arc-muted);
+    font-size: 13px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__empty {
+    padding: 28px 16px;
+    border: 1px dashed var(--arc-border-strong);
+    border-radius: var(--arc-radius-control);
+    text-align: center;
+    color: var(--arc-muted);
+    font-size: 14px;
+  }
+
+  &__table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--arc-border);
+    border-radius: var(--arc-radius-control);
+  }
+}
+
+.advance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: left;
+
+  th {
+    padding: 10px 14px;
+    background: var(--arc-surface-soft);
+    border-bottom: 1px solid var(--arc-border);
+    color: var(--arc-muted);
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--arc-border);
+    vertical-align: middle;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+  }
+}
+
+.method-pill {
+  display: inline-flex;
+  padding: 2px 10px;
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-surface);
+  color: var(--arc-ink);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.amount-cell {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.mono {
+  font-family: var(--arc-font-mono);
+  font-size: 12px;
+  color: var(--arc-muted);
+}
