@@ -1,6 +1,144 @@
-<section class="marker" aria-labelledby="incidents-title">
-  <app-page-header title="Incidencias" titleId="incidents-title" />
-  <div class="marker__body">
-    <p>Pantalla en construcción (Sprint 3)</p>
-  </div>
+<section class="incidents-page" aria-labelledby="incidents-title">
+  <app-page-header
+    title="Incidencias"
+    titleId="incidents-title"
+    description="Seguimiento, atención y cierre documentado de incidencias reportadas en ruta."
+    [count]="store.state() === 'ready' ? store.countLabel() : ''"
+  >
+    <button
+      uiButton
+      variant="secondary"
+      type="button"
+      [disabled]="store.state() === 'loading'"
+      (click)="store.loadIncidents()"
+    >
+      Actualizar
+    </button>
+  </app-page-header>
+
+  <form class="filters-card" (submit)="applyFilters($event)" novalidate aria-label="Filtros de incidencias">
+    <div class="filters-card__grid">
+      <div class="field">
+        <label class="field__label" for="incident-status-filter">Estado</label>
+        <select
+          id="incident-status-filter"
+          name="statusFilter"
+          class="field__select"
+          [value]="statusInput()"
+          (change)="onStatusSelected($event)"
+        >
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="incident-trip-filter">Viaje (opcional)</label>
+        <input
+          id="incident-trip-filter"
+          name="tripIdFilter"
+          type="text"
+          class="field__input mono"
+          list="incident-trips-options"
+          placeholder="Todos los viajes o UUID"
+          [value]="tripIdInput()"
+          (input)="onTripIdInput($event)"
+        />
+        <datalist id="incident-trips-options">
+          @for (trip of store.trips(); track trip.id) {
+            <option [value]="trip.id">{{ trip.code }} · {{ trip.origin }} → {{ trip.destination }}</option>
+          }
+        </datalist>
+      </div>
+
+      <div class="field">
+        <label class="field__label" for="incident-vehicle-filter">Vehículo (opcional)</label>
+        <input
+          id="incident-vehicle-filter"
+          name="vehicleIdFilter"
+          type="text"
+          class="field__input mono"
+          list="incident-vehicles-options"
+          placeholder="Todos los vehículos o UUID"
+          [value]="vehicleIdInput()"
+          (input)="onVehicleIdInput($event)"
+        />
+        <datalist id="incident-vehicles-options">
+          @for (vehicle of store.vehicles(); track vehicle.id) {
+            <option [value]="vehicle.id">
+              {{ vehicle.plateNumber }} · {{ vehicle.brand }} {{ vehicle.model }}
+            </option>
+          }
+        </datalist>
+      </div>
+
+      <div class="filters-card__actions">
+        <button uiButton variant="primary" type="submit" [disabled]="store.state() === 'loading'">
+          Filtrar
+        </button>
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          [disabled]="store.state() === 'loading'"
+          (click)="clearFilters()"
+        >
+          Limpiar
+        </button>
+      </div>
+    </div>
+  </form>
+
+  @if (store.statusAction.error(); as statusError) {
+    <p class="form-alert" role="alert">{{ statusError }}</p>
+  }
+
+  @switch (store.state()) {
+    @case ('loading') {
+      <app-state-panel
+        title="Cargando incidencias"
+        message="Consultando los reportes operativos registrados para la empresa..."
+      />
+    }
+    @case ('error') {
+      <app-state-panel
+        [error]="true"
+        title="Error al cargar incidencias"
+        [message]="store.error() ?? 'Revisa tu conexión e inténtalo otra vez.'"
+        actionLabel="Reintentar"
+        (action)="store.loadIncidents()"
+      />
+    }
+    @case ('ready') {
+      <app-incident-list
+        [incidents]="store.incidents()"
+        [tripLabels]="store.tripLabels()"
+        [vehicleLabels]="store.vehicleLabels()"
+        [busy]="store.statusAction.pending() || store.closeAction.pending()"
+        (selectIncident)="onSelectIncident($event)"
+        (moveToInProgress)="store.moveToInProgress($event)"
+        (requestClose)="store.openCloseModal($event)"
+      />
+    }
+  }
+
+  <app-incident-detail-modal
+    [incident]="store.selectedIncident()"
+    [tripLabels]="store.tripLabels()"
+    [vehicleLabels]="store.vehicleLabels()"
+    [busy]="store.statusAction.pending() || store.closeAction.pending()"
+    [error]="store.detailAction.error() ?? store.statusAction.error()"
+    (closeModal)="store.closeDetail()"
+    (moveToInProgress)="store.moveToInProgress($event)"
+    (requestClose)="store.openCloseModal($event)"
+  />
+
+  <app-incident-close-modal
+    [incident]="store.closingIncident()"
+    [pending]="store.closeAction.pending()"
+    [error]="store.closeAction.error()"
+    (cancelled)="store.dismissCloseModal()"
+    (confirmed)="store.confirmCloseIncident($event)"
+  />
 </section>

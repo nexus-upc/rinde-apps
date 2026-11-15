@@ -1,0 +1,76 @@
+@if (incident(); as item) {
+  <div class="modal-backdrop" (click)="cancelled.emit()">
+    <form
+      class="modal-dialog arc-entrance-stage"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="incident-close-title"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      (click)="$event.stopPropagation()"
+      novalidate
+    >
+      <header class="modal-header">
+        <div>
+          <h2 id="incident-close-title" class="modal-title">Cerrar incidencia</h2>
+          <p class="modal-subtitle">Describe la acción correctiva tomada para registrar el cierre.</p>
+        </div>
+        <button
+          type="button"
+          class="close-btn"
+          [disabled]="pending()"
+          (click)="cancelled.emit()"
+          aria-label="Cancelar cierre"
+        >
+          &times;
+        </button>
+      </header>
+
+      <div class="modal-body">
+        @if (error(); as message) {
+          <p class="form-alert" role="alert">{{ message }}</p>
+        }
+
+        <div class="incident-context">
+          <span class="incident-context__label">Descripción reportada</span>
+          <p class="incident-context__value">{{ item.description }}</p>
+        </div>
+
+        <div class="field">
+          <label class="field__label" for="incident-close-action">Acción de resolución</label>
+          <textarea
+            appAutoFocus
+            id="incident-close-action"
+            class="action-textarea"
+            rows="4"
+            formControlName="action"
+            placeholder="Ejemplo: Se envió grúa auxiliar y se reubicó la carga en unidad alterna..."
+            [class.field__input--invalid]="isActionInvalid()"
+            [attr.aria-invalid]="isActionInvalid() || null"
+            [attr.aria-describedby]="isActionInvalid() ? 'incident-close-action-error' : null"
+          ></textarea>
+          @if (isActionInvalid()) {
+            <p id="incident-close-action-error" class="field__error">
+              La acción de resolución es obligatoria para cerrar la incidencia.
+            </p>
+          }
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          [disabled]="pending()"
+          (click)="cancelled.emit()"
+        >
+          Cancelar
+        </button>
+        <button uiButton variant="primary" type="submit" [loading]="pending()">
+          Confirmar cierre
+        </button>
+      </footer>
+    </form>
+  </div>
+}

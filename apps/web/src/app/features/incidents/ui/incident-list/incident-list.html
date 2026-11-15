@@ -1,0 +1,98 @@
+<div class="incident-list-wrap">
+  @if (incidents().length === 0) {
+    <div class="incident-empty">
+      <p>No se encontraron incidencias con los filtros aplicados.</p>
+    </div>
+  } @else {
+    <table class="incident-table">
+      <thead>
+        <tr>
+          <th>Reportada</th>
+          <th>Tipo</th>
+          <th>Descripción</th>
+          <th>Viaje / Vehículo</th>
+          <th>Evidencia</th>
+          <th>Estado</th>
+          <th class="actions-col">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of incidents(); track item.id) {
+          <tr>
+            <td class="date-cell">{{ item.reportedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="type-pill">{{ typeLabel(item.type) }}</span>
+            </td>
+            <td class="desc-cell">
+              <p class="desc-text">{{ item.description }}</p>
+              <span class="reported-by">Reportó: {{ item.reportedBy }}</span>
+            </td>
+            <td class="refs-cell">
+              <div>{{ tripDisplay(item.tripId) }}</div>
+              <div class="ref-sub">{{ vehicleDisplay(item.vehicleId) }}</div>
+            </td>
+            <td>
+              @if (item.evidenceUrl && isSafeUrl(item.evidenceUrl)) {
+                <a
+                  class="evidence-link"
+                  [href]="item.evidenceUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Ver enlace ↗
+                </a>
+              } @else if (item.evidenceUrl) {
+                <span class="evidence-raw">{{ item.evidenceUrl }}</span>
+              } @else {
+                <span class="muted">Sin enlace</span>
+              }
+            </td>
+            <td>
+              <span
+                class="status-pill"
+                [class.status-pill--open]="item.status === 'OPEN'"
+                [class.status-pill--progress]="item.status === 'IN_PROGRESS'"
+                [class.status-pill--closed]="item.status === 'CLOSED'"
+              >
+                {{ statusLabel(item.status) }}
+              </span>
+            </td>
+            <td class="actions-cell">
+              <button
+                uiButton
+                variant="secondary"
+                type="button"
+                [disabled]="busy()"
+                (click)="selectIncident.emit(item)"
+              >
+                Ver detalle
+              </button>
+              @if (item.status === 'OPEN') {
+                <button
+                  uiButton
+                  variant="secondary"
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="moveToInProgress.emit(item.id)"
+                >
+                  En atención
+                </button>
+              }
+              @if (item.status !== 'CLOSED') {
+                <button
+                  uiButton
+                  variant="primary"
+                  type="button"
+                  [disabled]="busy()"
+                  (click)="requestClose.emit(item)"
+                >
+                  Cerrar
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
