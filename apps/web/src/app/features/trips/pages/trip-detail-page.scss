@@ -15,11 +15,52 @@
   }
 
   &__main {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
     min-width: 0;
   }
 
   &__aside {
     min-width: 0;
+  }
+}
+
+.trip-links-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-card);
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    max-width: 52ch;
+
+    h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--arc-ink);
+    }
+
+    p {
+      margin: 0;
+      font-size: 13px;
+      color: var(--arc-muted);
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 }
 

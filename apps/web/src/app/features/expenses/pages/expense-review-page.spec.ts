@@ -212,4 +212,69 @@ describe('ExpenseReviewPage', () => {
     expect(native.textContent).toContain('No fue posible cargar el comprobante.');
     expect(createObjectUrl).not.toHaveBeenCalled();
   });
+
+  it('debe calcular conteos por estado (incluyendo PENDING_SUPPORT) y total aprobado', () => {
+    fixture.detectChanges();
+
+    const mixedExpenses: Expense[] = [
+      ...MOCK_EXPENSES,
+      {
+        id: 'exp-3',
+        tenantId: 'tenant-1',
+        tripId: 'trip-100',
+        driverId: 'drv-1',
+        category: 'FOOD',
+        amount: 42.5,
+        currency: 'PEN',
+        expenseDate: '2026-10-28',
+        status: 'PENDING_SUPPORT',
+        idempotencyKey: 'EXP-103',
+        observationReason: null,
+        isLocked: false,
+        evidence: null,
+        createdAt: '2026-10-28T13:00:00Z',
+      },
+      {
+        id: 'exp-4',
+        tenantId: 'tenant-1',
+        tripId: 'trip-100',
+        driverId: 'drv-1',
+        category: 'OTHER',
+        amount: 80.0,
+        currency: 'PEN',
+        expenseDate: '2026-10-28',
+        status: 'OBSERVED',
+        idempotencyKey: 'EXP-104',
+        observationReason: 'Sin sustento',
+        isLocked: false,
+        evidence: null,
+        createdAt: '2026-10-28T13:15:00Z',
+      },
+    ];
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(mixedExpenses);
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement as HTMLElement;
+    const summaryText = native.querySelector('.summary-grid')?.textContent ?? '';
+    expect(summaryText).toContain('Total comprobantes4');
+    expect(summaryText).toContain('Registrados1');
+    expect(summaryText).toContain('Pendientes de soporte1');
+    expect(summaryText).toContain('Aprobados1');
+    expect(summaryText).toContain('Observados1');
+    expect(summaryText).toContain('15.00');
+    expect(summaryText).not.toContain('388.00');
+
+    component.onApprove('exp-1');
+    http.expectOne(`${BASE}/expenses/exp-1/status`).flush({
+      ...MOCK_EXPENSES[0]!,
+      status: 'APPROVED',
+    });
+    fixture.detectChanges();
+
+    const updatedSummary = native.querySelector('.summary-grid')?.textContent ?? '';
+    expect(updatedSummary).toContain('Registrados0');
+    expect(updatedSummary).toContain('Aprobados2');
+    expect(updatedSummary).toContain('265.50');
+  });
 });

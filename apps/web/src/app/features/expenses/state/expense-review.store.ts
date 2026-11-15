@@ -7,6 +7,8 @@ import { ExpenseApi } from '../data-access/expense-api';
 import {
   EvidenceLoadState,
   Expense,
+  ExpenseCurrencyTotal,
+  ExpenseTripSummaryData,
   UpdateExpenseStatusPayload,
 } from '../models/expense.models';
 
@@ -44,6 +46,12 @@ export class ExpenseReviewStore {
   }
 
   readonly totalExpenses = computed(() => this.expensesState().length);
+  readonly registeredExpenses = computed(() =>
+    this.expensesState().filter((e) => e.status === 'REGISTERED'),
+  );
+  readonly pendingSupportExpenses = computed(() =>
+    this.expensesState().filter((e) => e.status === 'PENDING_SUPPORT'),
+  );
   readonly approvedExpenses = computed(() =>
     this.expensesState().filter((e) => e.status === 'APPROVED'),
   );
@@ -51,11 +59,43 @@ export class ExpenseReviewStore {
     this.expensesState().filter((e) => e.status === 'OBSERVED'),
   );
   readonly pendingExpenses = computed(() =>
-    this.expensesState().filter((e) => e.status === 'REGISTERED'),
+    this.expensesState().filter(
+      (e) => e.status === 'REGISTERED' || e.status === 'PENDING_SUPPORT',
+    ),
   );
   readonly totalAmount = computed(() =>
     this.expensesState().reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
   );
+  readonly approvedAmount = computed(() =>
+    this.approvedExpenses().reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
+  );
+  readonly tripSummary = computed<ExpenseTripSummaryData>(() => {
+    const items = this.expensesState();
+    const totalsByCurrency = new Map<string, number>();
+
+    for (const item of items) {
+      if (item.status !== 'APPROVED') continue;
+      const currency = item.currency || 'PEN';
+      totalsByCurrency.set(
+        currency,
+        (totalsByCurrency.get(currency) ?? 0) + (Number(item.amount) || 0),
+      );
+    }
+
+    const approvedTotals: ExpenseCurrencyTotal[] =
+      totalsByCurrency.size > 0
+        ? Array.from(totalsByCurrency, ([currency, amount]) => ({ currency, amount }))
+        : [{ currency: items[0]?.currency ?? 'PEN', amount: 0 }];
+
+    return {
+      totalCount: items.length,
+      registeredCount: this.registeredExpenses().length,
+      pendingSupportCount: this.pendingSupportExpenses().length,
+      approvedCount: this.approvedExpenses().length,
+      observedCount: this.observedExpenses().length,
+      approvedTotals,
+    };
+  });
 
   load(tripId: string): void {
     if (!tripId) return;
