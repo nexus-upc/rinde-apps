@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": true,
   "packageManager": "npm@11.19.0",
-  "workspaces": ["apps/web"],
+  "workspaces": ["apps/web", "apps/landing-page"],
   "scripts": {
     "start": "npm run start --workspace=rinde-web --",
     "build": "npm run build --workspace=rinde-web",
