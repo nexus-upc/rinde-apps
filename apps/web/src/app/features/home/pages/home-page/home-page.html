@@ -53,6 +53,89 @@
         </div>
       </section>
 
+      <section class="home__metrics" aria-labelledby="home-metrics">
+        <div class="home__section-head">
+          <h2 id="home-metrics">Métricas del período</h2>
+          <div class="home__period">
+            <label class="home__date-label">
+              <span>Desde</span>
+              <input
+                type="date"
+                class="home__date-input"
+                [value]="store.periodFrom()"
+                (change)="onFromChange($event)"
+              />
+            </label>
+            <label class="home__date-label">
+              <span>Hasta</span>
+              <input
+                type="date"
+                class="home__date-input"
+                [value]="store.periodTo()"
+                (change)="onToChange($event)"
+              />
+            </label>
+          </div>
+        </div>
+        @switch (store.metricsState()) {
+          @case ('loading') {
+            <div class="home__metrics-loading" role="status">
+              <span class="home__skeleton"></span>
+              <span class="visually-hidden">Cargando métricas</span>
+            </div>
+          }
+          @case ('ready') {
+            @if (store.metrics(); as m) {
+              <div class="home__kpi-grid">
+                <div class="home__kpi-card home__kpi-card--wide">
+                  <span class="home__kpi-label">Viajes del período <span class="home__kpi-total">{{ m.totalTrips }} en total</span></span>
+                  <dl class="home__kpi-trips">
+                    <div>
+                      <dd>{{ m.scheduledTrips }}</dd>
+                      <dt>Programados</dt>
+                    </div>
+                    <div>
+                      <dd>{{ m.assignedTrips }}</dd>
+                      <dt>Asignados</dt>
+                    </div>
+                    <div>
+                      <dd>{{ m.inRouteTrips }}</dd>
+                      <dt>En ruta</dt>
+                    </div>
+                    <div>
+                      <dd>{{ m.finishedTrips }}</dd>
+                      <dt>Finalizados</dt>
+                    </div>
+                    <div>
+                      <dd>{{ m.settledTrips }}</dd>
+                      <dt>Liquidados</dt>
+                    </div>
+                  </dl>
+                </div>
+                <a class="home__kpi-card home__kpi-card--link" routerLink="/expenses">
+                  <span class="home__kpi-label">Gastos aprobados</span>
+                  <strong class="home__kpi-value">{{ m.approvedExpenses }}</strong>
+                  @for (entry of expenseTotals(m); track entry.currency) {
+                    <span class="home__kpi-hint">{{ entry.currency }} {{ entry.total | number:'1.2-2' }}</span>
+                  }
+                </a>
+                <div class="home__kpi-card">
+                  <span class="home__kpi-label">Liquidaciones pendientes</span>
+                  <strong class="home__kpi-value">{{ m.pendingSettlements }}</strong>
+                </div>
+                <div class="home__kpi-card" [class.is-partial]="m.incidents.source === 'UNAVAILABLE'">
+                  <span class="home__kpi-label">Incidentes abiertos</span>
+                  <strong class="home__kpi-value">{{ m.incidents.openCount ?? '—' }}</strong>
+                  @if (m.incidents.source === 'UNAVAILABLE') {
+                    <span class="home__kpi-hint">Servicio no disponible</span>
+                  }
+                </div>
+              </div>
+            }
+          }
+        }
+      </section>
+
       <div class="home__grid">
         <section class="home__agenda" aria-labelledby="home-agenda">
           <div class="home__section-head">
@@ -63,7 +146,7 @@
             <a routerLink="/trips">Ver en Viajes</a>
           </div>
           @for (trip of store.agenda(); track trip.id) {
-            <div class="home__row">
+            <a class="home__row" [routerLink]="['/trips', trip.id]">
               <span class="home__mono">{{ day(trip) }}</span>
               <span class="home__route">
                 <span>{{ route(trip) }}</span>
@@ -75,7 +158,7 @@
               <span class="home__status" [attr.data-status]="trip.status">
                 <span aria-hidden="true"></span>{{ status(trip) }}
               </span>
-            </div>
+            </a>
           } @empty {
             <p class="home__empty">Aún no hay viajes programados para tu empresa.</p>
           }

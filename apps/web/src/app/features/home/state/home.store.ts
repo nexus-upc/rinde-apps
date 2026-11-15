@@ -1,9 +1,9 @@
 import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { problemMessage } from '@core/http/problem-message';
-import { catchError, forkJoin, of } from 'rxjs';
+import { EMPTY, catchError, forkJoin, of, switchMap } from 'rxjs';
 import { HomeApi } from '../data-access/home-api';
-import { TripSummary, WeekDay } from '../models/home.models';
+import { DashboardMetrics, TripSummary, WeekDay } from '../models/home.models';
 
 const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const PENDING = new Set(['SCHEDULED', 'ASSIGNED']);
@@ -18,6 +18,10 @@ export function isoDay(date: Date): string {
 
 function mondayOf(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() - ((date.getDay() + 6) % 7));
+}
+
+function firstOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
 }
 
 function byDeparture(trips: readonly TripSummary[]): TripSummary[] {
@@ -35,9 +39,18 @@ export class HomeStore {
   private readonly platesState = signal<ReadonlyMap<string, string>>(new Map());
   private readonly driversState = signal<ReadonlyMap<string, string>>(new Map());
   private readonly todayState = signal(new Date());
+  private readonly periodFromState = signal(isoDay(firstOfMonth(new Date())));
+  private readonly periodToState = signal(isoDay(new Date()));
+  private readonly refreshTrigger = signal(0);
+  private readonly metricsLoadState = signal<'loading' | 'ready' | 'error'>('loading');
+  private readonly metricsData = signal<DashboardMetrics | null>(null);
   readonly state = this.loadState.asReadonly();
   readonly error = this.errorState.asReadonly();
   readonly trips = this.tripsState.asReadonly();
+  readonly periodFrom = this.periodFromState.asReadonly();
+  readonly periodTo = this.periodToState.asReadonly();
+  readonly metricsState = this.metricsLoadState.asReadonly();
+  readonly metrics = this.metricsData.asReadonly();
 
   readonly today = computed(() => isoDay(this.todayState()));
   readonly inRoute = computed(() => this.tripsState().filter((trip) => trip.status === 'IN_ROUTE'));
@@ -97,6 +110,36 @@ export class HomeStore {
       inRoute: inWeek.filter((trip) => trip.status === 'IN_ROUTE').length,
     };
   });
+
+  constructor() {
+    toObservable(computed(() => ({ from: this.periodFromState(), to: this.periodToState(), _r: this.refreshTrigger() })))
+      .pipe(
+        switchMap(({ from, to }) => {
+          this.metricsLoadState.set('loading');
+          return this.api.metrics(from, to).pipe(
+            catchError(() => {
+              this.metricsLoadState.set('error');
+              return EMPTY;
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((data) => {
+        this.metricsData.set(data);
+        this.metricsLoadState.set('ready');
+      });
+  }
+
+  setPeriod(from: string, to: string): void {
+    this.periodFromState.set(from);
+    this.periodToState.set(to);
+  }
+
+  refresh(): void {
+    this.load();
+    this.refreshTrigger.update((n) => n + 1);
+  }
 
   /** Placa y conductor de un viaje, con los nombres de Fleet cuando se pudieron consultar. */
   assignment(trip: TripSummary): string | null {

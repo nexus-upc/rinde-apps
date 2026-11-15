@@ -9,6 +9,23 @@ import { HomePage } from './home-page';
 
 const BASE = `${environment.apiBaseUrl}/api/v1`;
 const TRIPS_URL = `${BASE}/trips`;
+const METRICS_RESPONSE = {
+  period: { from: '2026-11-01', to: '2026-11-13' },
+  totalTrips: 0,
+  scheduledTrips: 0,
+  assignedTrips: 0,
+  inRouteTrips: 0,
+  finishedTrips: 0,
+  settledTrips: 0,
+  totalExpenses: 0,
+  approvedExpenses: 0,
+  pendingExpenses: 0,
+  observedExpenses: 0,
+  approvedExpenseTotals: {},
+  pendingSettlements: 0,
+  incidents: { openCount: 0, source: 'AVAILABLE' },
+  partial: false,
+};
 
 function trip(code: string, status: TripSummary['status'], offset: number): TripSummary {
   const date = new Date();
@@ -41,8 +58,10 @@ describe('HomePage', () => {
   });
   afterEach(() => http.verify());
 
-  /** Responde los viajes; Fleet devuelve la unidad y el conductor de los viajes asignados. */
+  /** Responde los viajes; Fleet devuelve la unidad y el conductor de los viajes asignados.
+   *  Maneja la request de métricas si está pendiente (no se re-emite al reintentar viajes). */
   function respond(trips: TripSummary[] | null, status = 200) {
+    http.match((req) => req.url.includes('/dashboard/metrics')).forEach((req) => req.flush(METRICS_RESPONSE));
     http.expectOne(`${BASE}/vehicles`).flush([{ id: 'vehicle', plateNumber: 'ABC-123' }]);
     http.expectOne(`${BASE}/drivers`).flush([{ id: 'driver', fullName: 'Luis Quispe' }]);
     if (status === 200) http.expectOne(TRIPS_URL).flush(trips);

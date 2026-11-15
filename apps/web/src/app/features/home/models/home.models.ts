@@ -32,3 +32,25 @@ export interface FleetDriver {
   readonly id: string;
   readonly fullName: string;
 }
+
+/** Métricas agregadas del período; devueltas por GET /api/v1/dashboard/metrics?from=&to=. */
+export interface DashboardMetrics {
+  readonly period: { readonly from: string; readonly to: string };
+  readonly totalTrips: number;
+  readonly scheduledTrips: number;
+  readonly assignedTrips: number;
+  readonly inRouteTrips: number;
+  readonly finishedTrips: number;
+  readonly settledTrips: number;
+  readonly totalExpenses: number;
+  readonly approvedExpenses: number;
+  readonly pendingExpenses: number;
+  readonly observedExpenses: number;
+  readonly approvedExpenseTotals: Record<string, number>;
+  readonly pendingSettlements: number;
+  readonly incidents: {
+    readonly openCount: number | null;
+    readonly source: 'AVAILABLE' | 'UNAVAILABLE';
+  };
+  readonly partial: boolean;
+}
