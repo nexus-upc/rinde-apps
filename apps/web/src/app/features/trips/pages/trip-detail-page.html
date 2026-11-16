@@ -36,6 +36,29 @@
           [vehicle]="store.assignedVehicle()"
           [driver]="store.assignedDriver()"
         />
+
+        <section class="trip-links-card" aria-label="Accesos relacionados del viaje">
+          <div class="trip-links-card__text">
+            <h2>Gestión económica del viaje</h2>
+            <p>
+              Revisa los comprobantes registrados o consulta los anticipos y la liquidación
+              correspondiente a este viaje.
+            </p>
+          </div>
+          <div class="trip-links-card__actions">
+            <a uiButton variant="secondary" [routerLink]="['/expenses', trip.id]">
+              Gastos del viaje
+            </a>
+            <a
+              uiButton
+              variant="secondary"
+              [routerLink]="['/settlements']"
+              [queryParams]="{ tripId: trip.id }"
+            >
+              Liquidación y anticipos
+            </a>
+          </div>
+        </section>
       </div>
 
       @if (store.canAssign()) {

@@ -1,4 +1,9 @@
-export type ExpenseStatus = 'REGISTERED' | 'APPROVED' | 'OBSERVED' | 'LOCKED';
+export type ExpenseStatus =
+  | 'REGISTERED'
+  | 'PENDING_SUPPORT'
+  | 'APPROVED'
+  | 'OBSERVED'
+  | 'LOCKED';
 
 export type ExpenseCategory =
   | 'FUEL'
@@ -10,6 +15,7 @@ export type ExpenseCategory =
 
 export const EXPENSE_STATUS_LABELS: Record<ExpenseStatus, string> = {
   REGISTERED: 'Registrado',
+  PENDING_SUPPORT: 'Pendiente de soporte',
   APPROVED: 'Aprobado',
   OBSERVED: 'Observado',
   LOCKED: 'Bloqueado',
@@ -24,10 +30,16 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   OTHER: 'Otros',
 };
 
+/** Estado de la descarga del archivo de un comprobante. */
+export type EvidenceLoadState = 'idle' | 'loading' | 'ready' | 'error';
+
 export interface Evidence {
   id: string;
-  imageUrl: string;
+  fileName: string;
+  contentType: string;
   fileSizeBytes: number;
+  /** Ruta autenticada del archivo; null en comprobantes anteriores al almacenamiento. */
+  contentUrl: string | null;
   uploadedAt: string;
 }
 
@@ -52,4 +64,18 @@ export interface Expense {
 export interface UpdateExpenseStatusPayload {
   status: 'APPROVED' | 'OBSERVED';
   reason?: string | null;
+}
+
+export interface ExpenseCurrencyTotal {
+  readonly currency: string;
+  readonly amount: number;
+}
+
+export interface ExpenseTripSummaryData {
+  readonly totalCount: number;
+  readonly registeredCount: number;
+  readonly pendingSupportCount: number;
+  readonly approvedCount: number;
+  readonly observedCount: number;
+  readonly approvedTotals: readonly ExpenseCurrencyTotal[];
 }

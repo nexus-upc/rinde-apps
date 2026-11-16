@@ -1,0 +1,150 @@
+@if (incident(); as item) {
+  <div class="modal-backdrop" (click)="closeModal.emit()">
+    <div
+      class="modal-dialog arc-entrance-stage"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="incident-detail-title"
+      (click)="$event.stopPropagation()"
+    >
+      <header class="modal-header">
+        <div>
+          <div class="modal-title-row">
+            <h2 id="incident-detail-title" class="modal-title">
+              Incidencia: {{ typeLabel(item.type) }}
+            </h2>
+            <span
+              class="status-pill"
+              [class.status-pill--open]="item.status === 'OPEN'"
+              [class.status-pill--progress]="item.status === 'IN_PROGRESS'"
+              [class.status-pill--closed]="item.status === 'CLOSED'"
+            >
+              {{ statusLabel(item.status) }}
+            </span>
+          </div>
+          <span class="modal-subtitle mono">ID: {{ item.id }}</span>
+        </div>
+        <button
+          type="button"
+          class="close-btn"
+          [disabled]="busy()"
+          (click)="closeModal.emit()"
+          aria-label="Cerrar detalle"
+        >
+          &times;
+        </button>
+      </header>
+
+      <div class="modal-body">
+        @if (error(); as message) {
+          <p class="form-alert" role="alert">{{ message }}</p>
+        }
+
+        <div class="details-grid">
+          <div class="detail-card">
+            <span class="detail-label">Viaje</span>
+            <span class="detail-value">{{ tripDisplay(item.tripId) }}</span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Vehículo</span>
+            <span class="detail-value">{{ vehicleDisplay(item.vehicleId) }}</span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Reportado por</span>
+            <span class="detail-value">{{ item.reportedBy }}</span>
+          </div>
+
+          <div class="detail-card">
+            <span class="detail-label">Fecha de reporte</span>
+            <span class="detail-value">{{ item.reportedAt | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+          </div>
+        </div>
+
+        <section class="section">
+          <h3 class="section__title">Descripción del incidente</h3>
+          <p class="description-box">{{ item.description }}</p>
+        </section>
+
+        <section class="section">
+          <h3 class="section__title">Enlace de evidencia</h3>
+          @if (item.evidenceUrl && isSafeUrl(item.evidenceUrl)) {
+            <div class="evidence-card">
+              <a
+                class="evidence-anchor"
+                [href]="item.evidenceUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {{ item.evidenceUrl }} ↗
+              </a>
+            </div>
+          } @else if (item.evidenceUrl) {
+            <div class="evidence-card">
+              <span class="mono">{{ item.evidenceUrl }}</span>
+            </div>
+          } @else {
+            <p class="empty-note">Sin enlace de evidencia registrado.</p>
+          }
+        </section>
+
+        @if (item.resolution; as res) {
+          <section class="resolution-card" aria-label="Resolución de la incidencia">
+            <h3 class="resolution-card__title">Resolución y cierre</h3>
+            <div class="details-grid">
+              <div class="detail-card">
+                <span class="detail-label">Cerrado por</span>
+                <span class="detail-value">{{ res.closedBy }}</span>
+              </div>
+              <div class="detail-card">
+                <span class="detail-label">Fecha de cierre</span>
+                <span class="detail-value">{{ res.closedAt | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+              </div>
+            </div>
+            <div class="detail-card">
+              <span class="detail-label">Acción ejecutada</span>
+              <span class="detail-value">{{ res.action }}</span>
+            </div>
+          </section>
+        }
+      </div>
+
+      <footer class="modal-footer">
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          [disabled]="busy()"
+          (click)="closeModal.emit()"
+        >
+          Cerrar ventana
+        </button>
+
+        @if (item.status === 'OPEN') {
+          <button
+            uiButton
+            variant="secondary"
+            type="button"
+            [disabled]="busy()"
+            (click)="moveToInProgress.emit(item.id)"
+          >
+            Pasar a En atención
+          </button>
+        }
+
+        @if (item.status !== 'CLOSED') {
+          <button
+            uiButton
+            variant="primary"
+            type="button"
+            [disabled]="busy()"
+            (click)="requestClose.emit(item)"
+          >
+            Cerrar incidencia
+          </button>
+        }
+      </footer>
+    </div>
+  </div>
+}

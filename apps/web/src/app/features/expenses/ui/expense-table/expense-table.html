@@ -33,6 +33,7 @@
               <span
                 class="status-badge"
                 [class.status-registered]="item.status === 'REGISTERED'"
+                [class.status-pending-support]="item.status === 'PENDING_SUPPORT'"
                 [class.status-approved]="item.status === 'APPROVED'"
                 [class.status-observed]="item.status === 'OBSERVED'"
                 [class.status-locked]="item.status === 'LOCKED'"

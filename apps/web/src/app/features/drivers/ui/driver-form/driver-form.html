@@ -1,0 +1,158 @@
+<form
+  class="driver-form arc-entrance-stage"
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  novalidate
+  aria-labelledby="driver-form-title"
+>
+  <h2 id="driver-form-title" class="driver-form__title">Registrar nuevo conductor</h2>
+  <p class="driver-form__lead">
+    Ingrese los datos de identidad, licencia de conducir y asocie opcionalmente la cuenta de usuario de la plataforma.
+  </p>
+
+  @if (error(); as message) {
+    <p class="form-alert" role="alert">{{ message }}</p>
+  }
+
+  <div class="driver-form__grid">
+    <div class="field field--full">
+      <label class="field__label" for="driver-account">Vincular cuenta de usuario (Rol DRIVER)</label>
+      <select
+        id="driver-account"
+        class="field__select"
+        formControlName="userId"
+        (change)="onAccountSelected($event)"
+      >
+        <option value="">Sin vincular cuenta de usuario (opcional)</option>
+        @for (account of accounts(); track account.id) {
+          <option [value]="account.id">
+            {{ account.fullName }} &bull; {{ account.email }} (Cuenta Activa)
+          </option>
+        }
+      </select>
+      <p class="field__hint">
+        Selecciona una cuenta registrada en la empresa para permitirle acceso a la aplicación móvil.
+      </p>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="driver-name">Nombres y apellidos completos</label>
+      <input
+        appAutoFocus
+        id="driver-name"
+        class="field__input"
+        formControlName="fullName"
+        maxlength="150"
+        placeholder="Ej. Luis Quispe Mamani"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('fullName')"
+        [attr.aria-invalid]="isInvalid('fullName') || null"
+        [attr.aria-describedby]="isInvalid('fullName') ? 'driver-name-error' : null"
+      />
+      @if (isInvalid('fullName')) {
+        <p id="driver-name-error" class="field__error">Los nombres del conductor son obligatorios.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="driver-doc-type">Tipo de documento</label>
+      <select
+        id="driver-doc-type"
+        class="field__select"
+        formControlName="documentType"
+      >
+        @for (type of documentTypes; track type) {
+          <option [value]="type">{{ type }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="driver-doc-number">Número de documento</label>
+      <input
+        id="driver-doc-number"
+        class="field__input"
+        formControlName="documentNumber"
+        maxlength="20"
+        placeholder="Ej. 71234567"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('documentNumber')"
+        [attr.aria-invalid]="isInvalid('documentNumber') || null"
+        [attr.aria-describedby]="isInvalid('documentNumber') ? 'driver-doc-number-error' : null"
+      />
+      @if (isInvalid('documentNumber')) {
+        <p id="driver-doc-number-error" class="field__error">Ingrese un número de documento válido.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="driver-license">Número de licencia (brevete)</label>
+      <input
+        id="driver-license"
+        class="field__input"
+        formControlName="licenseNumber"
+        maxlength="20"
+        placeholder="Ej. Q12345678"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('licenseNumber')"
+        [attr.aria-invalid]="isInvalid('licenseNumber') || null"
+        [attr.aria-describedby]="isInvalid('licenseNumber') ? 'driver-license-error' : null"
+      />
+      @if (isInvalid('licenseNumber')) {
+        <p id="driver-license-error" class="field__error">El número de licencia es obligatorio.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="driver-category">Categoría de brevete</label>
+      <select
+        id="driver-category"
+        class="field__select"
+        formControlName="licenseCategory"
+      >
+        @for (cat of licenseCategories; track cat) {
+          <option [value]="cat">{{ cat }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="driver-expiration">Fecha de vencimiento de licencia</label>
+      <input
+        id="driver-expiration"
+        class="field__input"
+        type="date"
+        formControlName="licenseExpirationDate"
+        [class.field__input--invalid]="isInvalid('licenseExpirationDate')"
+        [attr.aria-invalid]="isInvalid('licenseExpirationDate') || null"
+        [attr.aria-describedby]="isInvalid('licenseExpirationDate') ? 'driver-expiration-error' : null"
+      />
+      @if (isInvalid('licenseExpirationDate')) {
+        <p id="driver-expiration-error" class="field__error">La fecha de vencimiento es obligatoria.</p>
+      }
+    </div>
+  </div>
+
+  <footer class="driver-form__actions">
+    <button
+      uiButton
+      variant="secondary"
+      type="button"
+      [disabled]="pending()"
+      (click)="cancelled.emit()"
+    >
+      Cancelar
+    </button>
+    <button
+      uiButton
+      type="submit"
+      [disabled]="pending()"
+    >
+      @if (pending()) {
+        Registrando...
+      } @else {
+        Registrar conductor
+      }
+    </button>
+  </footer>
+</form>

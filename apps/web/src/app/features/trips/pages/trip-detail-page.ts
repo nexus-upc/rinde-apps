@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
@@ -11,7 +11,7 @@ import { TripInfo } from '../ui/trip-info/trip-info';
 @Component({
   selector: 'app-trip-detail-page',
   providers: [TripDetailStore],
-  imports: [PageHeader, StatePanel, UiButton, TripInfo, TripAssignmentForm],
+  imports: [RouterLink, PageHeader, StatePanel, UiButton, TripInfo, TripAssignmentForm],
   templateUrl: './trip-detail-page.html',
   styleUrl: './trip-detail-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,7 +1,11 @@
+import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
-import { TripStatus, TripSummary } from '../../models/home.models';
+import { fromEvent } from 'rxjs';
+import { filter } from 'rxjs/operators';
+import { DashboardMetrics, TripStatus, TripSummary } from '../../models/home.models';
 import { HomeStore } from '../../state/home.store';
 
 const STATUS_LABELS: Record<TripStatus, string> = {
@@ -23,7 +27,7 @@ const longFormat = new Intl.DateTimeFormat('es-PE', {
 @Component({
   selector: 'app-home-page',
   providers: [HomeStore],
-  imports: [RouterLink, StatePanel],
+  imports: [RouterLink, StatePanel, DecimalPipe],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +59,12 @@ export class HomePage {
 
   constructor() {
     this.store.load();
+    fromEvent(document, 'visibilitychange')
+      .pipe(
+        filter(() => document.visibilityState === 'visible'),
+        takeUntilDestroyed(),
+      )
+      .subscribe(() => this.store.refresh());
   }
 
   protected countLabel(count: number): string {
@@ -75,6 +85,20 @@ export class HomePage {
 
   protected unit(trip: TripSummary): string {
     return this.store.assignment(trip) ?? 'Sin asignar';
+  }
+
+  protected expenseTotals(m: DashboardMetrics): { currency: string; total: number }[] {
+    return Object.entries(m.approvedExpenseTotals).map(([currency, total]) => ({ currency, total }));
+  }
+
+  protected onFromChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    if (val) this.store.setPeriod(val, this.store.periodTo());
+  }
+
+  protected onToChange(event: Event): void {
+    const val = (event.target as HTMLInputElement).value;
+    if (val) this.store.setPeriod(this.store.periodFrom(), val);
   }
 }
 

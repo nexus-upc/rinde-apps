@@ -1,0 +1,58 @@
+// La landing lee a 16 px; el tamaño global de la aplicación (14 px) se reserva para el espacio de trabajo.
+:host {
+  display: block;
+  overflow-x: clip;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+// Solicitud de demostración: el texto a la izquierda y el formulario en una tarjeta blanca.
+.demo {
+  padding-block: 64px;
+  scroll-margin-top: 72px;
+  background: var(--landing-wash);
+}
+
+.demo__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+.demo__text {
+  min-width: 0;
+}
+
+.demo__title {
+  max-width: 12ch;
+}
+
+.demo__lead {
+  max-width: 40ch;
+  margin-top: 16px;
+  color: var(--arc-muted);
+  font-size: 17px;
+  line-height: 27px;
+}
+
+.demo__card {
+  min-width: 0;
+  padding: 24px 20px;
+  border-radius: var(--landing-radius-photo);
+  background: var(--arc-bg);
+}
+
+@media (min-width: 900px) {
+  .demo {
+    padding-block: 96px;
+  }
+
+  .demo__inner {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: 80px;
+  }
+
+  .demo__card {
+    padding: 32px;
+  }
+}

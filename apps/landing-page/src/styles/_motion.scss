@@ -1,0 +1,124 @@
+// Movimiento de Arcadia (Zephyr): duraciones, curvas y la respuesta de un control al tocarlo.
+:root {
+  --arc-dur-instant: 0.12s;
+  --arc-dur-fast: 0.18s;
+  --arc-dur-base: 0.26s;
+  --arc-dur-slow: 0.4s;
+  --arc-ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+  --arc-ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+  --arc-ease-entrance: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --arc-press-scale: 0.97;
+}
+
+// Con movimiento reducido cambian colores y opacidad, pero nada se desplaza ni se escala.
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --arc-press-scale: 1;
+  }
+}
+
+.arc-tap {
+  transition:
+    background-color var(--arc-dur-fast) var(--arc-ease-out),
+    border-color var(--arc-dur-fast) var(--arc-ease-out),
+    color var(--arc-dur-fast) var(--arc-ease-out),
+    box-shadow var(--arc-dur-fast) var(--arc-ease-out),
+    transform var(--arc-dur-fast) var(--arc-ease-out);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+// Presionar responde más rápido que soltar, para que el control se sienta pegado al dedo.
+.arc-tap:active:not(:disabled) {
+  transform: scale(var(--arc-press-scale));
+  transition-duration: var(--arc-dur-instant);
+}
+
+// Un paso llega desde abajo y desenfocado; las palabras de su título suben una tras otra.
+@keyframes arc-entrance-stage {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes arc-entrance-word {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@keyframes arc-stage-leave {
+  from {
+    opacity: 1;
+    filter: none;
+  }
+  to {
+    opacity: 0;
+    filter: blur(4px);
+  }
+}
+
+// Las piezas de un paso entran escalonadas; backwards conserva el estado inicial durante el
+// retardo y libera el filtro al terminar.
+.arc-entrance-stage > * {
+  animation: arc-entrance-stage 520ms var(--arc-ease-entrance) backwards;
+}
+
+.arc-entrance-stage > :nth-child(2) {
+  animation-delay: 50ms;
+}
+
+.arc-entrance-stage > :nth-child(3) {
+  animation-delay: 100ms;
+}
+
+.arc-entrance-stage > :nth-child(4) {
+  animation-delay: 150ms;
+}
+
+.arc-entrance-stage > :nth-child(n + 5) {
+  animation-delay: 200ms;
+}
+
+// El paso que sale se desvanece en el mismo lugar mientras entra el siguiente.
+.arc-stage-leave {
+  pointer-events: none;
+  animation: arc-stage-leave 220ms var(--arc-ease-out) forwards;
+}
+
+// El paso que sale queda encima, sin ocupar alto, hasta terminar de desvanecerse.
+.arc-stage-out-of-flow {
+  position: absolute;
+  right: 0;
+  left: 0;
+}
+
+.arc-entrance-word {
+  display: inline-block;
+  animation: arc-entrance-word 600ms var(--arc-ease-entrance) backwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arc-entrance-stage > *,
+  .arc-entrance-word {
+    animation: none;
+  }
+
+  .arc-stage-leave {
+    display: none;
+  }
+}

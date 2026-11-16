@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { adminGuard } from '@core/auth/admin.guard';
 import { authGuard } from '@core/auth/auth.guard';
+import { operationsGuard } from '@core/auth/operations.guard';
 import { platformGuard } from '@core/auth/platform.guard';
 
 export const routes: Routes = [
@@ -72,6 +73,32 @@ export const routes: Routes = [
           import('./features/expenses/expenses.routes').then(
             (module) => module.EXPENSES_ROUTES,
           ),
+      },
+      {
+        path: 'fleet',
+        canActivate: [operationsGuard],
+        loadChildren: () =>
+          import('./features/fleet/fleet.routes').then((module) => module.FLEET_ROUTES),
+      },
+      {
+        path: 'drivers',
+        canActivate: [operationsGuard],
+        loadChildren: () =>
+          import('./features/drivers/drivers.routes').then((module) => module.DRIVERS_ROUTES),
+      },
+      {
+        path: 'settlements',
+        canActivate: [operationsGuard],
+        loadChildren: () =>
+          import('./features/settlements/settlements.routes').then(
+            (module) => module.SETTLEMENTS_ROUTES,
+          ),
+      },
+      {
+        path: 'incidents',
+        canActivate: [operationsGuard],
+        loadChildren: () =>
+          import('./features/incidents/incidents.routes').then((module) => module.INCIDENTS_ROUTES),
       },
       { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],

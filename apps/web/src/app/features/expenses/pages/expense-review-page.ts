@@ -1,7 +1,6 @@
-import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
@@ -9,17 +8,19 @@ import { Expense } from '../models/expense.models';
 import { ExpenseReviewStore } from '../state/expense-review.store';
 import { ExpenseReviewModal } from '../ui/expense-review-modal/expense-review-modal';
 import { ExpenseTable } from '../ui/expense-table/expense-table';
+import { ExpenseTripSummary } from '../ui/expense-trip-summary/expense-trip-summary';
 
-/** Página contenedora para la revisión y aprobación de gastos de un viaje (US24). */
+/** Página contenedora para la revisión y aprobación de gastos de un viaje (US23 y US24). */
 @Component({
   selector: 'app-expense-review-page',
   providers: [ExpenseReviewStore],
   imports: [
     FormsModule,
-    CurrencyPipe,
+    RouterLink,
     PageHeader,
     StatePanel,
     UiButton,
+    ExpenseTripSummary,
     ExpenseTable,
     ExpenseReviewModal,
   ],
@@ -35,10 +36,12 @@ export class ExpenseReviewPage implements OnInit {
   protected readonly inputTripId = signal('');
 
   ngOnInit(): void {
-    const tripIdFromParam = this.route.snapshot.paramMap.get('tripId');
-    if (tripIdFromParam) {
-      this.inputTripId.set(tripIdFromParam);
-      this.store.load(tripIdFromParam);
+    const tripIdFromRoute =
+      this.route.snapshot.paramMap?.get('tripId') ??
+      this.route.snapshot.queryParamMap?.get('tripId');
+    if (tripIdFromRoute) {
+      this.inputTripId.set(tripIdFromRoute);
+      this.store.load(tripIdFromRoute);
     }
   }
 

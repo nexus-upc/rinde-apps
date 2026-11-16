@@ -1,0 +1,134 @@
+<form
+  class="vehicle-form arc-entrance-stage"
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  novalidate
+  aria-labelledby="vehicle-form-title"
+>
+  <h2 id="vehicle-form-title" class="vehicle-form__title">Registrar nuevo vehículo</h2>
+  <p class="vehicle-form__lead">
+    Ingrese los datos de la unidad de transporte para incorporarla a la flota activa de la empresa.
+  </p>
+
+  @if (error(); as message) {
+    <p class="form-alert" role="alert">{{ message }}</p>
+  }
+
+  <div class="vehicle-form__grid">
+    <div class="field">
+      <label class="field__label" for="vehicle-plate">Placa de rodaje</label>
+      <input
+        appAutoFocus
+        id="vehicle-plate"
+        class="field__input"
+        formControlName="plateNumber"
+        maxlength="10"
+        placeholder="ABC-123"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('plateNumber')"
+        [attr.aria-invalid]="isInvalid('plateNumber') || null"
+        [attr.aria-describedby]="isInvalid('plateNumber') ? 'vehicle-plate-error' : null"
+      />
+      @if (isInvalid('plateNumber')) {
+        <p id="vehicle-plate-error" class="field__error">Ingrese una placa válida (mínimo 3 caracteres).</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="vehicle-brand">Marca</label>
+      <input
+        id="vehicle-brand"
+        class="field__input"
+        formControlName="brand"
+        maxlength="50"
+        placeholder="Ej. Volvo, Scania, Mercedes-Benz"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('brand')"
+        [attr.aria-invalid]="isInvalid('brand') || null"
+        [attr.aria-describedby]="isInvalid('brand') ? 'vehicle-brand-error' : null"
+      />
+      @if (isInvalid('brand')) {
+        <p id="vehicle-brand-error" class="field__error">La marca es obligatoria.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="vehicle-model">Modelo</label>
+      <input
+        id="vehicle-model"
+        class="field__input"
+        formControlName="model"
+        maxlength="50"
+        placeholder="Ej. FH 540, R450, Actros"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('model')"
+        [attr.aria-invalid]="isInvalid('model') || null"
+        [attr.aria-describedby]="isInvalid('model') ? 'vehicle-model-error' : null"
+      />
+      @if (isInvalid('model')) {
+        <p id="vehicle-model-error" class="field__error">El modelo es obligatorio.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="vehicle-year">Año de fabricación</label>
+      <input
+        id="vehicle-year"
+        class="field__input"
+        type="number"
+        formControlName="modelYear"
+        min="1990"
+        placeholder="2022"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('modelYear')"
+        [attr.aria-invalid]="isInvalid('modelYear') || null"
+        [attr.aria-describedby]="isInvalid('modelYear') ? 'vehicle-year-error' : null"
+      />
+      @if (isInvalid('modelYear')) {
+        <p id="vehicle-year-error" class="field__error">Ingrese un año válido.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="vehicle-capacity">Capacidad de carga (kg)</label>
+      <input
+        id="vehicle-capacity"
+        class="field__input"
+        type="number"
+        formControlName="payloadCapacityKg"
+        min="1"
+        placeholder="18500"
+        autocomplete="off"
+        [class.field__input--invalid]="isInvalid('payloadCapacityKg')"
+        [attr.aria-invalid]="isInvalid('payloadCapacityKg') || null"
+        [attr.aria-describedby]="isInvalid('payloadCapacityKg') ? 'vehicle-capacity-error' : null"
+      />
+      @if (isInvalid('payloadCapacityKg')) {
+        <p id="vehicle-capacity-error" class="field__error">La capacidad debe ser un número positivo.</p>
+      }
+    </div>
+  </div>
+
+  <footer class="vehicle-form__actions">
+    <button
+      uiButton
+      variant="secondary"
+      type="button"
+      [disabled]="pending()"
+      (click)="cancelled.emit()"
+    >
+      Cancelar
+    </button>
+    <button
+      uiButton
+      type="submit"
+      [disabled]="pending()"
+    >
+      @if (pending()) {
+        Registrando...
+      } @else {
+        Registrar vehículo
+      }
+    </button>
+  </footer>
+</form>

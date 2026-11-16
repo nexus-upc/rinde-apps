@@ -7,6 +7,7 @@ import { Expense } from '../models/expense.models';
 import { ExpenseReviewPage } from './expense-review-page';
 
 const BASE = `${environment.apiBaseUrl}/api/v1`;
+const EVIDENCE_URL = `${environment.apiBaseUrl}/api/v1/expenses/exp-1/evidences/evi-1/content`;
 
 const MOCK_EXPENSES: Expense[] = [
   {
@@ -24,8 +25,10 @@ const MOCK_EXPENSES: Expense[] = [
     isLocked: false,
     evidence: {
       id: 'evi-1',
-      imageUrl: 'http://localhost:8080/files/ticket_primax.jpg',
+      fileName: 'ticket_primax.jpg',
+      contentType: 'image/jpeg',
       fileSizeBytes: 1048576,
+      contentUrl: '/api/v1/expenses/exp-1/evidences/evi-1/content',
       uploadedAt: '2026-10-28T12:00:00Z',
     },
     createdAt: '2026-10-28T12:00:00Z',
@@ -52,8 +55,16 @@ describe('ExpenseReviewPage', () => {
   let fixture: ComponentFixture<ExpenseReviewPage>;
   let component: ExpenseReviewPage;
   let http: HttpTestingController;
+  // jsdom no implementa las URL de objeto; se simulan para verificar su creación y liberación.
+  const createObjectUrl = vi.fn(() => 'blob:rinde-evidence-1');
+  const revokeObjectUrl = vi.fn();
 
   beforeEach(async () => {
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectUrl });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectUrl });
+    createObjectUrl.mockClear();
+    revokeObjectUrl.mockClear();
+
     await TestBed.configureTestingModule({
       imports: [ExpenseReviewPage],
       providers: [
@@ -150,5 +161,120 @@ describe('ExpenseReviewPage', () => {
 
     const native = fixture.nativeElement as HTMLElement;
     expect(native.textContent).toContain('Observado');
+  });
+
+  it('debe descargar el comprobante con la ruta autenticada y mostrarlo como imagen', () => {
+    fixture.detectChanges();
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(MOCK_EXPENSES);
+    fixture.detectChanges();
+
+    component.onReviewExpense(MOCK_EXPENSES[0]!);
+    fixture.detectChanges();
+
+    const reqContent = http.expectOne(EVIDENCE_URL);
+    expect(reqContent.request.method).toBe('GET');
+    expect(reqContent.request.responseType).toBe('blob');
+    reqContent.flush(new Blob(['jpeg'], { type: 'image/jpeg' }));
+    fixture.detectChanges();
+
+    expect(createObjectUrl).toHaveBeenCalledTimes(1);
+    const img = (fixture.nativeElement as HTMLElement).querySelector('.evidence-preview img');
+    expect(img?.getAttribute('src')).toBe('blob:rinde-evidence-1');
+  });
+
+  it('debe liberar la URL del comprobante al destruir la página', () => {
+    fixture.detectChanges();
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(MOCK_EXPENSES);
+    component.onReviewExpense(MOCK_EXPENSES[0]!);
+    http.expectOne(EVIDENCE_URL).flush(new Blob(['jpeg'], { type: 'image/jpeg' }));
+
+    fixture.destroy();
+
+    expect(revokeObjectUrl).toHaveBeenCalledWith('blob:rinde-evidence-1');
+  });
+
+  it('debe avisar si el archivo del comprobante no se puede descargar', () => {
+    fixture.detectChanges();
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(MOCK_EXPENSES);
+    component.onReviewExpense(MOCK_EXPENSES[0]!);
+    http
+      .expectOne(EVIDENCE_URL)
+      .flush(new Blob(['{}'], { type: 'application/problem+json' }), {
+        status: 404,
+        statusText: 'Not Found',
+      });
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement as HTMLElement;
+    expect(native.textContent).toContain('No fue posible cargar el comprobante.');
+    expect(createObjectUrl).not.toHaveBeenCalled();
+  });
+
+  it('debe calcular conteos por estado (incluyendo PENDING_SUPPORT) y total aprobado', () => {
+    fixture.detectChanges();
+
+    const mixedExpenses: Expense[] = [
+      ...MOCK_EXPENSES,
+      {
+        id: 'exp-3',
+        tenantId: 'tenant-1',
+        tripId: 'trip-100',
+        driverId: 'drv-1',
+        category: 'FOOD',
+        amount: 42.5,
+        currency: 'PEN',
+        expenseDate: '2026-10-28',
+        status: 'PENDING_SUPPORT',
+        idempotencyKey: 'EXP-103',
+        observationReason: null,
+        isLocked: false,
+        evidence: null,
+        createdAt: '2026-10-28T13:00:00Z',
+      },
+      {
+        id: 'exp-4',
+        tenantId: 'tenant-1',
+        tripId: 'trip-100',
+        driverId: 'drv-1',
+        category: 'OTHER',
+        amount: 80.0,
+        currency: 'PEN',
+        expenseDate: '2026-10-28',
+        status: 'OBSERVED',
+        idempotencyKey: 'EXP-104',
+        observationReason: 'Sin sustento',
+        isLocked: false,
+        evidence: null,
+        createdAt: '2026-10-28T13:15:00Z',
+      },
+    ];
+
+    http.expectOne(`${BASE}/trips/trip-100/expenses`).flush(mixedExpenses);
+    fixture.detectChanges();
+
+    const native = fixture.nativeElement as HTMLElement;
+    const summaryText = native.querySelector('.summary-grid')?.textContent ?? '';
+    expect(summaryText).toContain('Total comprobantes4');
+    expect(summaryText).toContain('Registrados1');
+    expect(summaryText).toContain('Pendientes de soporte1');
+    expect(summaryText).toContain('Aprobados1');
+    expect(summaryText).toContain('Observados1');
+    expect(summaryText).toContain('15.00');
+    expect(summaryText).not.toContain('388.00');
+
+    component.onApprove('exp-1');
+    http.expectOne(`${BASE}/expenses/exp-1/status`).flush({
+      ...MOCK_EXPENSES[0]!,
+      status: 'APPROVED',
+    });
+    fixture.detectChanges();
+
+    const updatedSummary = native.querySelector('.summary-grid')?.textContent ?? '';
+    expect(updatedSummary).toContain('Registrados0');
+    expect(updatedSummary).toContain('Aprobados2');
+    expect(updatedSummary).toContain('265.50');
   });
 });

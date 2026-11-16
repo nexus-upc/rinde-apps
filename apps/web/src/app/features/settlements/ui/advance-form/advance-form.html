@@ -1,0 +1,77 @@
+<form class="advance-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="advance-form__header">
+    <div>
+      <h2 class="advance-form__title">Registrar anticipo</h2>
+      <p class="advance-form__lead">
+        Entrega de viáticos al conductor antes de iniciar la ruta.
+      </p>
+    </div>
+  </div>
+
+  @if (showPreTripHint()) {
+    <p class="advance-form__hint" role="note">
+      Este viaje ya inició ruta o finalizó; el servidor rechazará nuevos anticipos si ya no
+      corresponde registrarlos.
+    </p>
+  }
+
+  @if (error(); as message) {
+    <p class="form-alert" role="alert">{{ message }}</p>
+  }
+
+  <div class="advance-form__grid">
+    <div class="field">
+      <label class="field__label" for="advance-amount">Monto</label>
+      <input
+        id="advance-amount"
+        class="field__input"
+        type="number"
+        step="0.01"
+        min="0.01"
+        formControlName="amount"
+        placeholder="350.00"
+        [class.field__input--invalid]="isInvalid('amount')"
+        [attr.aria-invalid]="isInvalid('amount') || null"
+        [attr.aria-describedby]="isInvalid('amount') ? 'advance-amount-error' : null"
+      />
+      @if (isInvalid('amount')) {
+        <p id="advance-amount-error" class="field__error">
+          Ingresa un monto mayor a 0.
+        </p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="advance-currency">Moneda</label>
+      <select
+        id="advance-currency"
+        class="field__select"
+        formControlName="currency"
+        [class.field__input--invalid]="isInvalid('currency')"
+      >
+        <option value="PEN">PEN (Soles)</option>
+        <option value="USD">USD (Dólares)</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="advance-delivery">Método de entrega</label>
+      <select
+        id="advance-delivery"
+        class="field__select"
+        formControlName="deliveryMethod"
+        [class.field__input--invalid]="isInvalid('deliveryMethod')"
+      >
+        @for (method of deliveryMethods; track method.value) {
+          <option [value]="method.value">{{ method.label }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="advance-form__actions">
+    <button uiButton variant="primary" type="submit" [loading]="pending()">
+      Registrar anticipo
+    </button>
+  </div>
+</form>

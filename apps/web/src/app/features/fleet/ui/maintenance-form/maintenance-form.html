@@ -1,0 +1,154 @@
+<form
+  class="maintenance-form arc-entrance-stage"
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  novalidate
+  aria-labelledby="maintenance-form-title"
+>
+  <h2 id="maintenance-form-title" class="maintenance-form__title">Registrar mantenimiento técnico</h2>
+  <p class="maintenance-form__lead">
+    Ingrese la información del servicio técnico preventivo o correctivo ejecutado en la unidad vehicular.
+  </p>
+
+  @if (error(); as message) {
+    <p class="form-alert" role="alert">{{ message }}</p>
+  }
+
+  @if (sequenceError; as msg) {
+    <p class="form-alert" role="alert">{{ msg }}</p>
+  }
+
+  <div class="maintenance-form__grid">
+    <div class="field">
+      <label class="field__label" for="m-vehicle">Unidad vehicular</label>
+      <select
+        id="m-vehicle"
+        class="field__select"
+        formControlName="vehicleId"
+      >
+        <option value="" disabled>Seleccione un vehículo</option>
+        @for (vehicle of vehicles(); track vehicle.id) {
+          <option [value]="vehicle.id">
+            {{ vehicle.plateNumber }} &bull; {{ vehicle.brand }} {{ vehicle.model }}
+          </option>
+        }
+      </select>
+      @if (isInvalid('vehicleId')) {
+        <p class="field__error">Debe seleccionar una unidad.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="m-type">Tipo de mantenimiento</label>
+      <select
+        id="m-type"
+        class="field__select"
+        formControlName="maintenanceType"
+      >
+        @for (opt of maintenanceTypes; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="m-execution">Fecha de ejecución</label>
+      <input
+        id="m-execution"
+        class="field__input"
+        type="date"
+        formControlName="executionDate"
+        [class.field__input--invalid]="isInvalid('executionDate')"
+        [attr.aria-invalid]="isInvalid('executionDate') || null"
+      />
+      @if (isInvalid('executionDate')) {
+        <p class="field__error">La fecha de ejecución es obligatoria.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="m-mileage">Kilometraje actual (km)</label>
+      <input
+        id="m-mileage"
+        class="field__input"
+        type="number"
+        formControlName="mileage"
+        min="0"
+        placeholder="Ej. 125000"
+        [class.field__input--invalid]="isInvalid('mileage')"
+        [attr.aria-invalid]="isInvalid('mileage') || null"
+      />
+      @if (isInvalid('mileage')) {
+        <p class="field__error">Ingrese el kilometraje del vehículo.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="m-cost">Costo del servicio (S/)</label>
+      <input
+        id="m-cost"
+        class="field__input"
+        type="number"
+        step="0.01"
+        formControlName="cost"
+        min="0"
+        placeholder="Ej. 350.00"
+        [class.field__input--invalid]="isInvalid('cost')"
+        [attr.aria-invalid]="isInvalid('cost') || null"
+      />
+      @if (isInvalid('cost')) {
+        <p class="field__error">El costo no puede ser negativo.</p>
+      }
+    </div>
+
+    <div class="field">
+      <label class="field__label" for="m-next">Próximo mantenimiento programado</label>
+      <input
+        id="m-next"
+        class="field__input"
+        type="date"
+        formControlName="nextMaintenanceDate"
+        [class.field__input--invalid]="isInvalid('nextMaintenanceDate')"
+        [attr.aria-invalid]="isInvalid('nextMaintenanceDate') || null"
+      />
+      @if (isInvalid('nextMaintenanceDate')) {
+        <p class="field__error">La fecha del próximo mantenimiento es obligatoria.</p>
+      }
+    </div>
+
+    <div class="field field--full">
+      <label class="field__label" for="m-notes">Observaciones técnicas / Notas de taller</label>
+      <textarea
+        id="m-notes"
+        class="field__input field__input--textarea"
+        formControlName="notes"
+        maxlength="500"
+        rows="2"
+        placeholder="Ej. Cambio de aceite, filtros de aire y revisión de zapatas de frenos."
+      ></textarea>
+    </div>
+  </div>
+
+  <footer class="maintenance-form__actions">
+    <button
+      uiButton
+      variant="secondary"
+      type="button"
+      [disabled]="pending()"
+      (click)="cancelled.emit()"
+    >
+      Cancelar
+    </button>
+    <button
+      uiButton
+      type="submit"
+      [disabled]="pending()"
+    >
+      @if (pending()) {
+        Guardando...
+      } @else {
+        Registrar mantenimiento
+      }
+    </button>
+  </footer>
+</form>

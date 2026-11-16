@@ -8,6 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { OPERATION_ROLES } from '@core/auth/auth.models';
 import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@core/feedback/toast.service';
 import { SessionProfileStore } from '@features/iam/state/session-profile.store';
@@ -30,10 +31,10 @@ interface NavGroup {
 const OPERATION: NavGroup = {
   label: 'Operación',
   items: [
-    { label: 'Flota', icon: 'fleet' },
-    { label: 'Conductores', icon: 'person' },
-    { label: 'Liquidaciones', icon: 'settlements' },
-    { label: 'Incidencias', icon: 'incidents' },
+    { label: 'Flota', icon: 'fleet', path: '/fleet' },
+    { label: 'Conductores', icon: 'person', path: '/drivers' },
+    { label: 'Liquidaciones', icon: 'settlements', path: '/settlements' },
+    { label: 'Incidencias', icon: 'incidents', path: '/incidents' },
   ],
 };
 
@@ -72,10 +73,12 @@ export class ShellLayout {
         { label: 'Gastos', icon: 'expenses', path: '/expenses' },
       ],
     };
-    if (this.user()?.role !== 'ADMINISTRATOR') return [today, OPERATION];
+    const role = this.user()?.role ?? '';
+    const operation = OPERATION_ROLES.includes(role) ? [OPERATION] : [];
+    if (role !== 'ADMINISTRATOR') return [today, ...operation];
     return [
       today,
-      OPERATION,
+      ...operation,
       {
         label: 'Empresa',
         items: [
