@@ -7,6 +7,9 @@ interface RindeRemoteClient {
     suspend fun signIn(email: String, password: String): String
     suspend fun trips(): List<Trip>
     suspend fun trip(id: String): Trip
+    suspend fun vehicle(id: String): VehicleSummary
+    suspend fun tripAdvances(tripId: String): List<TripAdvance>
+    suspend fun tripSettlement(tripId: String): Settlement?
     suspend fun changeTripStatus(id: String, action: String): Trip
     suspend fun expenses(tripId: String): List<Expense>
     suspend fun syncExpenses(items: List<SyncExpenseRequest>): SyncExpensesResponse

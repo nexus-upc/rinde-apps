@@ -9,6 +9,8 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import com.nexus.rinde.mobile.data.local.QueueItemStatus
+import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -22,7 +24,41 @@ val EXPENSE_CATEGORIES = linkedMapOf(
     "OTHER" to "Otro",
 )
 
-fun categoryLabel(category: String): String = EXPENSE_CATEGORIES[category] ?: category
+val INCIDENT_TYPES = linkedMapOf(
+    "BREAKDOWN" to "Avería",
+    "DELAY" to "Retraso",
+    "OTHER" to "Otro",
+)
+
+fun categoryLabel(category: String): String = EXPENSE_CATEGORIES[category] ?: "Otro"
+
+fun incidentTypeLabel(type: String): String = INCIDENT_TYPES[type] ?: "Otro"
+
+fun deliveryMethodLabel(method: String): String = when (method) {
+    "CASH" -> "Efectivo"
+    "TRANSFER" -> "Transferencia"
+    else -> "Otro medio"
+}
+
+fun settlementStatusLabel(status: String): String = when (status) {
+    "OPEN" -> "Liquidación abierta"
+    "CLOSED" -> "Liquidación cerrada"
+    else -> "Sin liquidación generada"
+}
+
+fun vehicleStatusLabel(status: String): String = when (status) {
+    "AVAILABLE" -> "Disponible"
+    "IN_TRIP" -> "En viaje"
+    "IN_MAINTENANCE" -> "En mantenimiento"
+    else -> "Operativo"
+}
+
+fun incidentStatusLabel(status: String): String = when (status) {
+    "OPEN" -> "Abierta"
+    "IN_PROGRESS" -> "En atención"
+    "CLOSED" -> "Cerrada"
+    else -> "Reportada"
+}
 
 fun backendStatusLabel(status: String): String = when (status) {
     "SCHEDULED" -> "Programado"
@@ -35,7 +71,10 @@ fun backendStatusLabel(status: String): String = when (status) {
     "APPROVED" -> "Aprobado"
     "OBSERVED" -> "Observado"
     "LOCKED" -> "Bloqueado"
-    else -> status
+    "OPEN" -> "Abierta"
+    "IN_PROGRESS" -> "En atención"
+    "CLOSED" -> "Cerrada"
+    else -> "En proceso"
 }
 
 fun queueStatusLabel(
@@ -51,10 +90,16 @@ fun queueStatusLabel(
     QueueItemStatus.PHOTO_PENDING -> when {
         isSyncing -> "Subiendo foto"
         !isOnline -> "Foto en espera de señal"
-        else -> "Subiendo foto"
+        else -> "Foto pendiente"
     }
     QueueItemStatus.REJECTED -> "Error al enviar"
     QueueItemStatus.SYNCED -> "Sincronizado"
+}
+
+fun formatMoney(currency: String, amount: BigDecimal): String {
+    val code = currency.ifBlank { "PEN" }
+    val scaled = amount.setScale(2, RoundingMode.HALF_UP).toPlainString()
+    return "$code $scaled"
 }
 
 fun localTime(value: String): String = runCatching {

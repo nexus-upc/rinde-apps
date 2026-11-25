@@ -377,6 +377,13 @@ private fun RindeAppRoot() {
                         } else {
                             TripDetailScreen(
                                 trip = selectedTrip,
+                                vehicle = tripsState.vehicle,
+                                loadingFinancials = tripsState.loadingFinancials,
+                                advances = tripsState.advances,
+                                advancesError = tripsState.advancesError,
+                                settlementNotFound = tripsState.settlementNotFound,
+                                settlementError = tripsState.settlementError,
+                                financialSummary = tripsState.financialSummary,
                                 busy = tripsState.busy,
                                 isOnline = isOnline,
                                 expenseError = tripsState.expenseError,

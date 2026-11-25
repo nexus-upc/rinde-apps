@@ -51,6 +51,17 @@ class RindeApi(
     override suspend fun trip(id: String): Trip =
         Trip.from(JSONObject(request("GET", "/api/v1/trips/$id")))
 
+    override suspend fun vehicle(id: String): VehicleSummary =
+        VehicleSummary.from(JSONObject(request("GET", "/api/v1/vehicles/$id")))
+
+    override suspend fun tripAdvances(tripId: String): List<TripAdvance> =
+        JSONArray(request("GET", "/api/v1/trips/$tripId/advances")).let { array ->
+            (0 until array.length()).map { index -> TripAdvance.from(array.getJSONObject(index)) }
+        }
+
+    override suspend fun tripSettlement(tripId: String): Settlement? =
+        Settlement.from(JSONObject(request("GET", "/api/v1/trips/$tripId/settlement")))
+
     override suspend fun changeTripStatus(id: String, action: String): Trip =
         Trip.from(JSONObject(request("POST", "/api/v1/trips/$id/$action", "{}")))
 
@@ -155,9 +166,11 @@ class RindeApi(
         val detail = runCatching { JSONObject(responseBody).text("detail") }.getOrDefault("")
         return detail.ifBlank {
             when (status) {
+                400 -> "Los datos enviados no son válidos."
                 401 -> "Tu sesión venció. Vuelve a ingresar."
                 403 -> "Tu cuenta no tiene permiso para esta operación."
                 404 -> "El registro no está disponible. Actualiza el viaje."
+                409 -> "La operación no está permitida para el estado actual."
                 else -> "No pudimos completar la operación. Actualiza e inténtalo de nuevo."
             }
         }
