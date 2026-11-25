@@ -12,6 +12,8 @@ import com.nexus.rinde.mobile.data.remote.ApiException
 import com.nexus.rinde.mobile.data.remote.ReportIncidentRequest
 import com.nexus.rinde.mobile.data.remote.RindeRemoteClient
 import com.nexus.rinde.mobile.data.remote.SyncExpenseRequest
+import com.nexus.rinde.mobile.data.repository.PushDeviceRepository
+import com.nexus.rinde.mobile.data.repository.PushSyncOutcome
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,6 +55,7 @@ class OfflineSyncEngine(
     private val queueStore: QueueStore,
     private val remoteFactory: (SessionData) -> RindeRemoteClient,
     private val deletePhoto: (String?) -> Unit,
+    private val pushDeviceRepository: PushDeviceRepository? = null,
     private val clock: () -> Long = { System.currentTimeMillis() },
 ) {
     private val mutex = Mutex()
@@ -68,6 +71,10 @@ class OfflineSyncEngine(
         val remote = remoteFactory(session)
 
         try {
+            if (pushDeviceRepository?.syncRegistrationIfNeeded(session) == PushSyncOutcome.SESSION_EXPIRED) {
+                return@withLock SyncResult.SessionExpired
+            }
+
             val expenseStep = syncPendingExpenses(remote, session.userId, manual)
             if (expenseStep.sessionExpired) return@withLock SyncResult.SessionExpired
 

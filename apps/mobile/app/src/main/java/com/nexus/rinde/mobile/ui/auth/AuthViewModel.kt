@@ -83,7 +83,7 @@ class AuthViewModel(
 
     fun onSessionExpired() {
         val currentEmail = mutable.value.session?.email.orEmpty()
-        sessionRepository.signOutKeepingQueue()
+        sessionRepository.clearExpiredSessionKeepingQueue()
         mutable.value = AuthUiState(
             restoring = false,
             prefillEmail = currentEmail,
@@ -97,8 +97,15 @@ class AuthViewModel(
     }
 
     fun confirmSignOut() {
-        sessionRepository.signOutKeepingQueue()
-        mutable.value = AuthUiState(restoring = false)
+        if (mutable.value.busy) return
+        mutable.update { it.copy(busy = true, error = "", notice = "") }
+        viewModelScope.launch {
+            try {
+                sessionRepository.signOutKeepingQueue()
+            } finally {
+                mutable.value = AuthUiState(restoring = false)
+            }
+        }
     }
 
     class Factory(

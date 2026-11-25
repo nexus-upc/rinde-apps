@@ -27,4 +27,6 @@ interface RindeRemoteClient {
         contentType: String = "image/jpeg",
     ): Incident
     suspend fun downloadEvidenceBytes(contentUrl: String): ByteArray
+    suspend fun registerDevice(request: RegisterDeviceRequest)
+    suspend fun removeDevice(token: String)
 }
