@@ -1,31 +1,39 @@
 package com.nexus.rinde.mobile
 
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,26 +45,34 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.nexus.rinde.mobile.data.local.QueueItemStatus
-import com.nexus.rinde.mobile.data.remote.Trip
-import com.nexus.rinde.mobile.data.repository.TripExpenseDisplayItem
 import com.nexus.rinde.mobile.ui.auth.AuthViewModel
 import com.nexus.rinde.mobile.ui.auth.SignInScreen
 import com.nexus.rinde.mobile.ui.common.NoticeText
-import com.nexus.rinde.mobile.ui.common.backendStatusLabel
-import com.nexus.rinde.mobile.ui.common.categoryLabel
-import com.nexus.rinde.mobile.ui.common.localTime
-import com.nexus.rinde.mobile.ui.common.queueStatusLabel
+import com.nexus.rinde.mobile.ui.expense.ExpenseFormScreen
+import com.nexus.rinde.mobile.ui.expense.ExpenseFormViewModel
+import com.nexus.rinde.mobile.ui.queue.QueueScreen
+import com.nexus.rinde.mobile.ui.queue.QueueViewModel
 import com.nexus.rinde.mobile.ui.theme.RindeTheme
+import com.nexus.rinde.mobile.ui.trips.TripDetailScreen
 import com.nexus.rinde.mobile.ui.trips.TripsListScreen
 import com.nexus.rinde.mobile.ui.trips.TripsViewModel
 import kotlinx.coroutines.launch
+import java.io.File
+
+private enum class MobileTab {
+    TRIPS,
+    EXPENSE,
+    QUEUE,
+}
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +89,9 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RindeAppRoot() {
-    val container = (LocalContext.current.applicationContext as RindeApplication).container
+    val context = LocalContext.current
+    val container = (context.applicationContext as RindeApplication).container
+
     val authModel: AuthViewModel = viewModel(
         factory = AuthViewModel.Factory(container.sessionRepository),
     )
@@ -85,26 +103,133 @@ private fun RindeAppRoot() {
             onSessionExpired = authModel::onSessionExpired,
         ),
     )
+    val formModel: ExpenseFormViewModel = viewModel(
+        factory = ExpenseFormViewModel.Factory(
+            expenseRepository = container.expenseRepository,
+            photoStore = container.photoStore,
+        ),
+    )
+    val queueModel: QueueViewModel = viewModel(
+        factory = QueueViewModel.Factory(
+            expenseRepository = container.expenseRepository,
+            syncEngine = container.syncEngine,
+            onSessionExpired = authModel::onSessionExpired,
+            onSyncedCompleted = tripsModel::refreshOpenTripExpenses,
+        ),
+    )
+
     val authState by authModel.state.collectAsStateWithLifecycle()
     val tripsState by tripsModel.state.collectAsStateWithLifecycle()
+    val formState by formModel.state.collectAsStateWithLifecycle()
+    val queueState by queueModel.state.collectAsStateWithLifecycle()
     val isOnline by container.networkMonitor.isOnline.collectAsStateWithLifecycle()
+
     val scope = rememberCoroutineScope()
+    var activeTab by rememberSaveable { mutableStateOf(MobileTab.TRIPS) }
     var confirmAction by remember { mutableStateOf("") }
     var confirmSignOutPending by remember { mutableIntStateOf(-1) }
+    var attachTargetExpenseId by remember { mutableStateOf<String?>(null) }
+    var pendingCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
+    var pendingCameraCacheFile by remember { mutableStateOf<File?>(null) }
+    var pendingCameraTargetExpenseId by remember { mutableStateOf<String?>(null) }
     val scroll = rememberScrollState()
+
+    val handlePickedImage: (android.net.Uri, String?, File?, String?) -> Unit =
+        { uri, suggestedName, cacheFile, remoteExpenseId ->
+            if (remoteExpenseId == null) {
+                formModel.attachPhotoFromUri(uri, suggestedName, cacheFile)
+            } else {
+                scope.launch {
+                    try {
+                        val photo = container.photoStore.compressFromUri(uri, suggestedName)
+                        tripsModel.attachPhotoToExistingExpense(remoteExpenseId, photo)
+                    } catch (_: Exception) {
+                        tripsModel.notifyMessage("No pudimos procesar la foto seleccionada.")
+                    } finally {
+                        container.photoStore.deleteCacheFile(cacheFile)
+                    }
+                }
+            }
+        }
+
+    val takePictureLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+    ) { captured ->
+        val uri = pendingCameraUri
+        val cacheFile = pendingCameraCacheFile
+        val targetId = pendingCameraTargetExpenseId
+        pendingCameraUri = null
+        pendingCameraCacheFile = null
+        pendingCameraTargetExpenseId = null
+        if (captured && uri != null) {
+            handlePickedImage(uri, "foto-comprobante.jpg", cacheFile, targetId)
+        } else {
+            container.photoStore.deleteCacheFile(cacheFile)
+        }
+    }
+
+    val pickGalleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+    ) { uri ->
+        val targetId = pendingCameraTargetExpenseId
+        pendingCameraTargetExpenseId = null
+        if (uri != null) {
+            handlePickedImage(uri, null, null, targetId)
+        }
+    }
+
+    fun launchCamera(targetRemoteExpenseId: String?) {
+        val (file, uri) = container.photoStore.createCameraCaptureTarget()
+        pendingCameraCacheFile = file
+        pendingCameraUri = uri
+        pendingCameraTargetExpenseId = targetRemoteExpenseId
+        takePictureLauncher.launch(uri)
+    }
+
+    fun launchGallery(targetRemoteExpenseId: String?) {
+        pendingCameraTargetExpenseId = targetRemoteExpenseId
+        pickGalleryLauncher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+        )
+    }
 
     LaunchedEffect(authState.session) {
         tripsModel.bindSession(authState.session)
+        queueModel.bindSession(authState.session)
+        if (authState.session != null && isOnline) {
+            queueModel.triggerSync(manual = false)
+        }
+        if (authState.session == null) {
+            activeTab = MobileTab.TRIPS
+        }
     }
 
-    LaunchedEffect(authState.error, tripsState.error) {
-        if (authState.error.isNotBlank() || tripsState.error.isNotBlank()) {
+    LaunchedEffect(isOnline, authState.session) {
+        if (isOnline && authState.session != null) {
+            queueModel.triggerSync(manual = false)
+            tripsModel.loadTrips()
+        }
+    }
+
+    LaunchedEffect(authState.error, tripsState.error, formState.error, queueState.error) {
+        if (authState.error.isNotBlank() ||
+            tripsState.error.isNotBlank() ||
+            formState.error.isNotBlank() ||
+            queueState.error.isNotBlank()
+        ) {
             scroll.animateScrollTo(0)
         }
     }
 
-    BackHandler(enabled = tripsState.selectedTrip != null && !tripsState.busy) {
-        tripsModel.backToTrips()
+    val canNavigateBack = authState.signedIn && !tripsState.busy && (
+        activeTab != MobileTab.TRIPS || tripsState.selectedTrip != null
+        )
+
+    BackHandler(enabled = canNavigateBack) {
+        when {
+            activeTab != MobileTab.TRIPS -> activeTab = MobileTab.TRIPS
+            tripsState.selectedTrip != null -> tripsModel.backToTrips()
+        }
     }
 
     Scaffold(
@@ -112,26 +237,39 @@ private fun RindeAppRoot() {
             TopAppBar(
                 title = {
                     Text(
-                        if (!authState.signedIn) {
-                            "Rinde"
-                        } else {
-                            tripsState.selectedTrip?.code ?: "Mis viajes"
+                        when {
+                            !authState.signedIn -> "Rinde"
+                            activeTab == MobileTab.EXPENSE ->
+                                if (formState.isEditing) "Corregir gasto" else "Registrar gasto"
+                            activeTab == MobileTab.QUEUE -> "Cola sin conexión"
+                            else -> tripsState.selectedTrip?.code ?: "Mis viajes"
                         },
                     )
                 },
                 navigationIcon = {
-                    if (tripsState.selectedTrip != null) {
+                    if (canNavigateBack) {
                         IconButton(
-                            onClick = tripsModel::backToTrips,
-                            enabled = !tripsState.busy,
+                            onClick = {
+                                if (activeTab != MobileTab.TRIPS) {
+                                    activeTab = MobileTab.TRIPS
+                                } else {
+                                    tripsModel.backToTrips()
+                                }
+                            },
                         ) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver a mis viajes")
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")
                         }
                     }
                 },
                 actions = {
                     if (authState.signedIn) {
-                        IconButton(onClick = tripsModel::loadTrips, enabled = !tripsState.busy) {
+                        IconButton(
+                            onClick = {
+                                tripsModel.loadTrips()
+                                if (isOnline) queueModel.triggerSync(manual = false)
+                            },
+                            enabled = !tripsState.busy,
+                        ) {
                             Icon(Icons.Default.Refresh, "Actualizar datos")
                         }
                         TextButton(
@@ -152,25 +290,68 @@ private fun RindeAppRoot() {
                 },
             )
         },
+        bottomBar = {
+            if (authState.signedIn) {
+                val tripTabLabel = if (tripsState.selectedTrip != null) "Viaje" else "Viajes"
+                val expenseTabVisible =
+                    tripsState.selectedTrip?.status == "IN_ROUTE" || formState.isEditing
+                val queueTabLabel = if (queueState.pendingCount > 0) {
+                    "Cola (${queueState.pendingCount})"
+                } else {
+                    "Cola"
+                }
+
+                NavigationBar {
+                    NavigationBarItem(
+                        selected = activeTab == MobileTab.TRIPS,
+                        onClick = { activeTab = MobileTab.TRIPS },
+                        icon = { Icon(Icons.Default.Place, tripTabLabel) },
+                        label = { Text(tripTabLabel) },
+                    )
+                    if (expenseTabVisible) {
+                        NavigationBarItem(
+                            selected = activeTab == MobileTab.EXPENSE,
+                            onClick = {
+                                val trip = tripsState.selectedTrip
+                                if (trip != null && !formState.isEditing) {
+                                    formModel.prepareNew(trip)
+                                }
+                                activeTab = MobileTab.EXPENSE
+                            },
+                            icon = { Icon(Icons.Default.Add, "Gasto") },
+                            label = { Text("Gasto") },
+                        )
+                    }
+                    NavigationBarItem(
+                        selected = activeTab == MobileTab.QUEUE,
+                        onClick = { activeTab = MobileTab.QUEUE },
+                        icon = { Icon(Icons.AutoMirrored.Filled.List, queueTabLabel) },
+                        label = { Text(queueTabLabel) },
+                    )
+                }
+            }
+        },
     ) { insets ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(insets)
+                .imePadding()
                 .verticalScroll(scroll)
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            if (authState.restoring || authState.busy || tripsState.busy) {
+            if (authState.restoring || authState.busy || tripsState.busy || queueState.busy) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
-            if (!isOnline && authState.signedIn) {
-                NoticeText("Sin señal. Los datos mostrados pueden corresponder a la última consulta.", error = false)
+            if (!isOnline && authState.signedIn && activeTab == MobileTab.TRIPS) {
+                NoticeText("Sin señal. Los gastos nuevos se guardarán en tu cola local.")
             }
+
             val topError = authState.error.ifBlank { tripsState.error }
             if (topError.isNotEmpty()) NoticeText(topError, error = true)
             val topMessage = authState.notice.ifBlank { tripsState.message }
-            if (topMessage.isNotEmpty()) NoticeText(topMessage)
+            if (topMessage.isNotEmpty() && activeTab == MobileTab.TRIPS) NoticeText(topMessage)
 
             if (authState.restoring) {
                 Text("Verificando sesión...")
@@ -180,25 +361,94 @@ private fun RindeAppRoot() {
                     prefillEmail = authState.prefillEmail,
                     onSubmit = authModel::signIn,
                 )
-            } else if (tripsState.selectedTrip == null) {
-                TripsListScreen(
-                    email = authState.session?.email.orEmpty(),
-                    trips = tripsState.trips,
-                    busy = tripsState.busy,
-                    fromCache = tripsState.tripsFromCache,
-                    onRefresh = tripsModel::loadTrips,
-                    onOpenTrip = tripsModel::openTrip,
-                )
             } else {
-                val trip = tripsState.selectedTrip!!
-                TripDetailBasicSection(
-                    trip = trip,
-                    busy = tripsState.busy,
-                    isOnline = isOnline,
-                    expenseError = tripsState.expenseError,
-                    expenses = tripsState.displayExpenses,
-                    onRequestStatusChange = { confirmAction = it },
-                )
+                when (activeTab) {
+                    MobileTab.TRIPS -> {
+                        val selectedTrip = tripsState.selectedTrip
+                        if (selectedTrip == null) {
+                            TripsListScreen(
+                                email = authState.session?.email.orEmpty(),
+                                trips = tripsState.trips,
+                                busy = tripsState.busy,
+                                fromCache = tripsState.tripsFromCache,
+                                onRefresh = tripsModel::loadTrips,
+                                onOpenTrip = tripsModel::openTrip,
+                            )
+                        } else {
+                            TripDetailScreen(
+                                trip = selectedTrip,
+                                busy = tripsState.busy,
+                                isOnline = isOnline,
+                                expenseError = tripsState.expenseError,
+                                expenses = tripsState.displayExpenses,
+                                onRequestStatusChange = { confirmAction = it },
+                                onOpenExpenseForm = {
+                                    formModel.prepareNew(selectedTrip)
+                                    activeTab = MobileTab.EXPENSE
+                                },
+                                onAttachPhotoToExpense = { remoteId ->
+                                    attachTargetExpenseId = remoteId
+                                },
+                                onViewEvidence = tripsModel::viewEvidence,
+                            )
+                        }
+                    }
+
+                    MobileTab.EXPENSE -> {
+                        val session = authState.session
+                        ExpenseFormScreen(
+                            state = formState,
+                            isOnline = isOnline,
+                            onCategoryChange = formModel::onCategoryChange,
+                            onAmountChange = formModel::onAmountChange,
+                            onDateChange = formModel::onDateChange,
+                            onTakePhoto = { launchCamera(targetRemoteExpenseId = null) },
+                            onPickGallery = { launchGallery(targetRemoteExpenseId = null) },
+                            onRemovePhoto = formModel::removePhoto,
+                            onSave = {
+                                if (session != null) {
+                                    formModel.save(
+                                        session = session,
+                                        trip = tripsState.selectedTrip,
+                                        isOnline = isOnline,
+                                    ) { feedback, shouldSync ->
+                                        tripsModel.notifyMessage(feedback)
+                                        if (shouldSync) {
+                                            queueModel.triggerSync(manual = false)
+                                        }
+                                        activeTab = if (tripsState.selectedTrip != null) {
+                                            MobileTab.TRIPS
+                                        } else {
+                                            MobileTab.QUEUE
+                                        }
+                                    }
+                                }
+                            },
+                            onCancel = {
+                                formModel.resetForm(tripsState.selectedTrip)
+                                activeTab = if (tripsState.selectedTrip != null) {
+                                    MobileTab.TRIPS
+                                } else {
+                                    MobileTab.QUEUE
+                                }
+                            },
+                        )
+                    }
+
+                    MobileTab.QUEUE -> {
+                        QueueScreen(
+                            state = queueState,
+                            isOnline = isOnline,
+                            onRetryAll = { queueModel.triggerSync(manual = true) },
+                            onRetrySingle = queueModel::retrySingle,
+                            onEditRejected = { rejectedItem ->
+                                formModel.prepareEdit(rejectedItem)
+                                activeTab = MobileTab.EXPENSE
+                            },
+                            onDiscard = queueModel::discard,
+                        )
+                    }
+                }
             }
             Spacer(Modifier.height(16.dp))
         }
@@ -260,78 +510,78 @@ private fun RindeAppRoot() {
             },
         )
     }
-}
 
-@Composable
-private fun TripDetailBasicSection(
-    trip: Trip,
-    busy: Boolean,
-    isOnline: Boolean,
-    expenseError: String,
-    expenses: List<TripExpenseDisplayItem>,
-    onRequestStatusChange: (String) -> Unit,
-) {
-    Text(
-        backendStatusLabel(trip.status),
-        style = MaterialTheme.typography.labelLarge,
-        color = MaterialTheme.colorScheme.primary,
-    )
-    Text("${trip.origin} a ${trip.destination}", style = MaterialTheme.typography.headlineMedium)
-    Text("Salida: ${trip.departureDate}", style = MaterialTheme.typography.bodyLarge)
-    if (trip.cargo.isNotBlank()) {
-        Text("Carga", style = MaterialTheme.typography.titleMedium)
-        Text(trip.cargo)
-    }
-    if (trip.weight.isNotBlank()) Text("Peso: ${trip.weight} kg")
-    if (trip.startedAt.isNotBlank()) Text("Inicio: ${localTime(trip.startedAt)}")
-    if (trip.finishedAt.isNotBlank()) Text("Finalización: ${localTime(trip.finishedAt)}")
-
-    when (trip.status) {
-        "ASSIGNED" -> Button(
-            onClick = { onRequestStatusChange("start") },
-            enabled = !busy,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Iniciar viaje")
-        }
-        "IN_ROUTE" -> OutlinedButton(
-            onClick = { onRequestStatusChange("finish") },
-            enabled = !busy,
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Text("Finalizar viaje")
-        }
+    val pendingAttachId = attachTargetExpenseId
+    if (pendingAttachId != null) {
+        AlertDialog(
+            onDismissRequest = { attachTargetExpenseId = null },
+            title = { Text("Adjuntar comprobante") },
+            text = { Text("Elige cómo agregar la foto del comprobante para este gasto.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        attachTargetExpenseId = null
+                        launchCamera(targetRemoteExpenseId = pendingAttachId)
+                    },
+                ) {
+                    Text("Tomar foto")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        attachTargetExpenseId = null
+                        launchGallery(targetRemoteExpenseId = pendingAttachId)
+                    },
+                ) {
+                    Text("Elegir de galería")
+                }
+            },
+        )
     }
 
-    Text("Gastos del viaje", style = MaterialTheme.typography.titleLarge)
-    if (expenseError.isNotEmpty()) {
-        NoticeText(expenseError, error = true)
-    }
-    if (expenses.isEmpty() && expenseError.isEmpty()) {
-        Text("Todavía no hay gastos registrados.")
-    } else {
-        expenses.forEach { item ->
-            val statusText = when {
-                item.queueStatus != null && item.queueStatus != QueueItemStatus.SYNCED ->
-                    queueStatusLabel(item.queueStatus, isOnline, item.isSyncingNow)
-                item.backendStatus.isNotBlank() -> backendStatusLabel(item.backendStatus)
-                else -> "Registrado"
-            }
-            ListItem(
-                headlineContent = {
-                    Text("${item.currency} ${item.amount} / ${categoryLabel(item.category)}")
-                },
-                supportingContent = {
-                    Column {
-                        Text("${item.date} / $statusText")
-                        if (item.observationReason.isNotBlank()) {
-                            Text("Motivo: ${item.observationReason}")
-                        } else if (item.queueError.isNotBlank()) {
-                            Text("Detalle: ${item.queueError}")
+    if (tripsState.viewingEvidenceTitle.isNotBlank()) {
+        AlertDialog(
+            onDismissRequest = tripsModel::dismissEvidenceDialog,
+            title = { Text("Comprobante (${tripsState.viewingEvidenceTitle})") },
+            text = {
+                if (tripsState.loadingEvidence) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        LinearProgressIndicator(Modifier.fillMaxWidth())
+                        Text("Cargando comprobante...")
+                    }
+                } else {
+                    val bitmap = remember(
+                        tripsState.viewingEvidenceLocalPath,
+                        tripsState.viewingEvidenceBytes,
+                    ) {
+                        val path = tripsState.viewingEvidenceLocalPath
+                        val bytes = tripsState.viewingEvidenceBytes
+                        when {
+                            !path.isNullOrBlank() -> runCatching { BitmapFactory.decodeFile(path) }.getOrNull()
+                            bytes != null -> runCatching { BitmapFactory.decodeByteArray(bytes, 0, bytes.size) }.getOrNull()
+                            else -> null
                         }
                     }
-                },
-            )
-        }
+                    if (bitmap != null) {
+                        Image(
+                            bitmap = bitmap.asImageBitmap(),
+                            contentDescription = "Comprobante del gasto",
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 160.dp, max = 360.dp),
+                        )
+                    } else {
+                        Text("El comprobante no es una imagen previsualizable desde el móvil.")
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = tripsModel::dismissEvidenceDialog) {
+                    Text("Cerrar")
+                }
+            },
+        )
     }
 }

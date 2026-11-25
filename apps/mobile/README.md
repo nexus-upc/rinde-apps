@@ -4,11 +4,11 @@ Piloto Android del conductor, versión 0.1.0. Kotlin y Jetpack Compose, con buil
 
 ## Alcance
 
-Permite ingresar con una cuenta DRIVER, consultar sus viajes, abrir el detalle, iniciar un viaje asignado y finalizarlo cuando está en ruta. Los cambios se guardan en el backend y se consultan desde la web al actualizar sus datos.
+Permite ingresar con una cuenta DRIVER, mantener la sesión cifrada con clave del Android Keystore en almacenamiento privado excluido de copias de seguridad, consultar viajes asignados (con respaldo en caché local), abrir el detalle, iniciar un viaje asignado y finalizarlo cuando está en ruta.
 
-Incluye consulta y formulario de gastos en soles, con fecha del dispositivo y clave de idempotencia. En este piloto el gasto se registra sin comprobante y queda pendiente de sustento. La API de Expense debe estar integrada con Trip separado para aceptar los viajes nuevos; un rechazo conserva el formulario y muestra el motivo. No hay datos de operación incrustados en la aplicación.
+Incluye registro de gastos en soles con foto del comprobante (cámara o galería mediante contratos estándar de Android, redimensionada y comprimida a JPEG en almacenamiento privado) y cola local persistente en Room respaldada por WorkManager. Todos los gastos se guardan primero en la cola local con su `idempotencyKey` fija y se sincronizan al recuperar conexión (`POST /api/v1/expenses/sync` y subida multipart en `POST /api/v1/expenses/{expenseId}/evidences`). También permite adjuntar foto a gastos pendientes de sustento y corregir o descartar envíos rechazados. No hay datos de operación incrustados en la aplicación.
 
-La sesión permanece en memoria y sobrevive a la rotación mientras el proceso sigue vivo. No se guardan contraseñas ni tokens en archivos, copias de seguridad o logs. Cerrar el proceso requiere volver a ingresar. Los permisos efectivos se comprueban en el gateway y en los servicios.
+Si la sesión vence, la aplicación solicita volver a ingresar sin borrar la cola local de registros pendientes. Al cerrar sesión manualmente con registros pendientes, solicita confirmación advirtiendo que la cola se conservará para esa cuenta. Los permisos efectivos se comprueban en el gateway y en los servicios.
 
 ## Compilar e instalar
 
@@ -44,4 +44,4 @@ El script devuelve 2 si el registro de gasto falla, aunque el ciclo de viajes ha
 
 ## Pendientes
 
-Registro offline y sincronización persistente, captura y subida de comprobantes reales, incidencias, mapa, GPS, consulta de liquidación y actualización automática. El piloto no acredita esas historias como terminadas. El alcance visual está en DESIGN.md.
+Incidencias con foto en la cola sin conexión, detalle de adelanto, saldo y liquidación del viaje, mapa, GPS y actualización automática en tiempo real. El piloto no acredita esas historias como terminadas. El alcance visual está en DESIGN.md.
