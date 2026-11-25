@@ -31,11 +31,32 @@ describe('NotificationApi', () => {
     const req = http.expectOne((request) => request.url === BASE);
     expect(req.request.method).toBe('GET');
     expect(req.request.params.get('unreadOnly')).toBe('true');
+    expect(req.request.params.get('type')).toBeNull();
     expect(req.request.params.get('page')).toBe('1');
     expect(req.request.params.get('size')).toBe('10');
     req.flush(NOTIFICATION_PAGE_FIXTURE);
 
     expect(result).toEqual(NOTIFICATION_PAGE_FIXTURE);
+  });
+
+  it('serializes notification types as comma-separated parameter and omits empty list', () => {
+    api
+      .getNotifications({
+        unreadOnly: true,
+        type: ['EXPENSE_PENDING_REVIEW', 'INCIDENT_REPORTED'],
+      })
+      .subscribe();
+
+    const filteredReq = http.expectOne((request) => request.url === BASE);
+    expect(filteredReq.request.params.get('unreadOnly')).toBe('true');
+    expect(filteredReq.request.params.get('type')).toBe('EXPENSE_PENDING_REVIEW,INCIDENT_REPORTED');
+    filteredReq.flush(NOTIFICATION_PAGE_FIXTURE);
+
+    api.getNotifications({ type: [] }).subscribe();
+
+    const emptyTypeReq = http.expectOne((request) => request.url === BASE);
+    expect(emptyTypeReq.request.params.has('type')).toBe(false);
+    emptyTypeReq.flush(NOTIFICATION_PAGE_FIXTURE);
   });
 
   it('requests unread notification count', () => {

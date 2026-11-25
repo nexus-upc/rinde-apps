@@ -19,6 +19,9 @@ export class NotificationApi {
     if (filters?.unreadOnly !== undefined) {
       params = params.set('unreadOnly', filters.unreadOnly);
     }
+    if (filters?.type?.length) {
+      params = params.set('type', filters.type.join(','));
+    }
     if (filters?.page !== undefined) params = params.set('page', filters.page);
     if (filters?.size !== undefined) params = params.set('size', filters.size);
     return this.http.get<NotificationPage>(this.base, { params });

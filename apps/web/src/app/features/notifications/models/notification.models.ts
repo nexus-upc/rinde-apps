@@ -18,6 +18,7 @@ export interface NotificationItem {
 
 export interface NotificationFilters {
   readonly unreadOnly?: boolean;
+  readonly type?: readonly NotificationType[];
   readonly page?: number;
   readonly size?: number;
 }
@@ -29,8 +30,8 @@ export interface UnreadNotificationCount {
 export type NotificationPage = PageResponse<NotificationItem>;
 
 export const NOTIFICATION_TYPE_LABELS: Readonly<Record<NotificationType, string>> = {
-  EXPENSE_PENDING_REVIEW: 'Gasto por revisar',
+  EXPENSE_PENDING_REVIEW: 'Gastos por revisar',
   MAINTENANCE_DUE: 'Mantenimiento',
-  INCIDENT_REPORTED: 'Incidencia',
-  SETTLEMENT_READY: 'Liquidación lista',
+  INCIDENT_REPORTED: 'Incidencias',
+  SETTLEMENT_READY: 'Viajes por liquidar',
 };
