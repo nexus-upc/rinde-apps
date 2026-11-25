@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Notificaciones | Rinde Mockup</title>
+    <link rel="stylesheet" href="./mockups.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="shell__sidebar" aria-label="Navegación lateral">
+        <a class="shell__brand" href="./index.html">
+          <span class="shell__brand-mark" aria-hidden="true">R</span>
+          <span>Rinde</span>
+        </a>
+
+        <div class="shell__company">
+          <span class="shell__company-disc" aria-hidden="true"></span>
+          <span class="shell__stack">
+            <span class="shell__strong">Transportes Andes SAC</span>
+            <span class="shell__soft">Administrador</span>
+          </span>
+        </div>
+
+        <nav class="shell__nav" aria-label="Principal">
+          <div class="shell__group">
+            <span class="shell__group-label">Hoy</span>
+            <a class="shell__link" href="./home.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 11 12 4l8 7M6 9.5V20h12V9.5M10 20v-5h4v5" />
+              </svg>
+              <span>Inicio</span>
+            </a>
+            <a class="shell__link" href="./trip-detail.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM8 17h7.5a3 3 0 0 0 0-6h-7a3 3 0 0 1 0-6H16" />
+              </svg>
+              <span>Viajes</span>
+            </a>
+            <a class="shell__link" href="./expenses-inbox.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3" />
+              </svg>
+              <span>Gastos</span>
+            </a>
+          </div>
+
+          <div class="shell__group">
+            <span class="shell__group-label">Operación</span>
+            <a class="shell__link" href="./vehicle.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h11v10H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+              </svg>
+              <span>Flota</span>
+            </a>
+            <a class="shell__link" href="./index.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0" />
+              </svg>
+              <span>Conductores</span>
+            </a>
+            <a class="shell__link" href="./trip-detail.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3h8l4 4v14H7zM15 3v4h4M10 14l2 2 4-4" />
+              </svg>
+              <span>Liquidaciones</span>
+            </a>
+            <a class="shell__link" href="./vehicle.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4 2.5 20h19zM12 10v4M12 17v.01" />
+              </svg>
+              <span>Incidencias</span>
+            </a>
+          </div>
+
+          <div class="shell__group">
+            <span class="shell__group-label">Empresa</span>
+            <a class="shell__link" href="./account.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM2 21a7 7 0 0 1 14 0" />
+              </svg>
+              <span>Usuarios</span>
+            </a>
+            <a class="shell__link" href="./account.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h18v12H3zM3 10h18M7 15h4" />
+              </svg>
+              <span>Suscripción</span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="shell__footer">
+          <!-- Para Flor (S4-25): panel flotante desde el pie de la barra lateral superpuesto al contenido (max-width: 340px); debe cerrarse con Escape o con clic fuera del panel. -->
+          <!-- Panel desplegable de la campana (C6) -->
+          <section id="bell-popover" class="bell-popover" aria-label="Panel rápido de notificaciones" hidden>
+            <div class="bell-popover__head">
+              <strong>Avisos recientes (3)</strong>
+              <button class="ui-button ui-button--ghost" type="button" id="close-popover">Cerrar</button>
+            </div>
+            <ul class="bell-popover__list">
+              <li class="bell-popover__item">
+                <strong>Gasto pendiente de revisión</strong>
+                <span class="field__hint">S/ 180.50 en TRP-000014 | hace 8 min</span>
+              </li>
+              <li class="bell-popover__item">
+                <strong>Incidencia reportada</strong>
+                <span class="field__hint">Demora en peaje Ancón | hace 25 min</span>
+              </li>
+              <li class="bell-popover__item is-read">
+                <strong>Mantenimiento próximo</strong>
+                <span class="field__hint">Unidad B4X-892 vence en 5 días</span>
+              </li>
+            </ul>
+            <a class="text-link" href="#centro-avisos">Ver centro completo</a>
+          </section>
+
+          <!-- Componente compartido: app-notification-bell -->
+          <button
+            class="notification-bell is-active"
+            type="button"
+            id="toggle-popover"
+            aria-expanded="false"
+            aria-controls="bell-popover"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0" />
+            </svg>
+            <span class="notification-bell__label">Avisos</span>
+            <span class="notification-bell__count">3</span>
+          </button>
+
+          <a class="shell__user" href="./account.html">
+            <span class="shell__avatar" aria-hidden="true">CM</span>
+            <span class="shell__stack">
+              <span class="shell__strong">Carlos Mendoza</span>
+              <span class="shell__soft">cmendoza@andes.pe</span>
+            </span>
+          </a>
+        </div>
+      </aside>
+
+      <main class="shell__content" id="centro-avisos">
+        <div class="page-stack">
+          <!-- Componente compartido: app-page-header -->
+          <header class="page-header">
+            <div>
+              <div class="page-header__heading">
+                <h1>Centro de notificaciones</h1>
+                <!-- Componente compartido: app-status-badge -->
+                <span class="status-badge status-badge--wait">3 sin leer</span>
+              </div>
+              <p>
+                Avisos operativos de Transportes Andes SAC. El estado leído es individual para tu
+                usuario.
+              </p>
+            </div>
+            <div class="page-header__actions">
+              <button class="ui-button ui-button--primary" type="button" id="open-read-all-dialog">
+                Marcar todo como leído
+              </button>
+            </div>
+          </header>
+
+          <!-- Componente compartido: app-filter-bar -->
+          <section class="filter-bar" aria-label="Filtros de notificaciones">
+            <div class="filter-bar__fields">
+              <label class="field">
+                <span class="field__label">Mostrar</span>
+                <select class="field__select">
+                  <option selected value="all">Todas las notificaciones</option>
+                  <option value="unread">Solo no leídas (3)</option>
+                </select>
+              </label>
+              <!-- Cada opción corresponde al valor type del contrato C6: EXPENSE_PENDING_REVIEW, MAINTENANCE_DUE, INCIDENT_REPORTED y SETTLEMENT_READY. -->
+              <label class="field">
+                <span class="field__label">Tipo de aviso</span>
+                <select class="field__select">
+                  <option selected value="">Todos los tipos</option>
+                  <option value="EXPENSE_PENDING_REVIEW">Gastos por revisar</option>
+                  <option value="MAINTENANCE_DUE">Mantenimiento</option>
+                  <option value="INCIDENT_REPORTED">Incidencias</option>
+                  <option value="SETTLEMENT_READY">Viajes por liquidar</option>
+                </select>
+              </label>
+            </div>
+            <div class="filter-bar__actions">
+              <button class="ui-button ui-button--ghost" type="button">Limpiar filtros</button>
+            </div>
+          </section>
+
+          <ul class="notif-list" aria-label="Notificaciones de la empresa">
+            <li class="notif-row">
+              <div class="notif-row__body">
+                <div class="notif-row__meta">
+                  <strong>Gasto pendiente de revisión</strong>
+                  <span class="status-badge status-badge--wait">Sin leer</span>
+                  <span class="field__hint tabular">25 nov 2026, 14:00</span>
+                </div>
+                <p>Se registró un gasto por S/ 180.50 en el viaje TRP-000014 para revisar.</p>
+                <!-- En Angular (C6): /expenses?tripId={tripId} -->
+                <a class="text-link" href="./expenses-inbox.html?tripId=7b0e4f52-1c9a-4f3e-8d21-5a6c9e0b3d44">Revisar gastos del viaje</a>
+              </div>
+              <button class="ui-button ui-button--secondary" type="button">Marcar leída</button>
+            </li>
+
+            <li class="notif-row">
+              <div class="notif-row__body">
+                <div class="notif-row__meta">
+                  <strong>Incidencia reportada en ruta</strong>
+                  <span class="status-badge status-badge--wait">Sin leer</span>
+                  <span class="field__hint tabular">25 nov 2026, 13:20</span>
+                </div>
+                <p>Luis Quispe reportó demora en peaje Ancón en la unidad ABC-123.</p>
+                <!-- En Angular (C6): /incidents/{incidentId} -->
+                <a class="text-link" href="./trip-detail.html#incidents-trip-title">Ver incidencia</a>
+              </div>
+              <button class="ui-button ui-button--secondary" type="button">Marcar leída</button>
+            </li>
+
+            <li class="notif-row">
+              <div class="notif-row__body">
+                <div class="notif-row__meta">
+                  <strong>Mantenimiento próximo a vencer</strong>
+                  <span class="status-badge status-badge--wait">Sin leer</span>
+                  <span class="field__hint tabular">25 nov 2026, 09:00</span>
+                </div>
+                <p>La unidad B4X-892 tiene mantenimiento preventivo programado para el 2026-11-30.</p>
+                <!-- En Angular (C6): /fleet?vehicleId={vehicleId} -->
+                <a class="text-link" href="./vehicle.html">Ver vehículo</a>
+              </div>
+              <button class="ui-button ui-button--secondary" type="button">Marcar leída</button>
+            </li>
+
+            <li class="notif-row is-read">
+              <div class="notif-row__body">
+                <div class="notif-row__meta">
+                  <strong>Viaje finalizado para liquidación</strong>
+                  <span class="status-badge status-badge--neutral">Leída</span>
+                  <span class="field__hint tabular">24 nov 2026, 18:15</span>
+                </div>
+                <p>El viaje TRP-000012 completó su ruta y quedó listo para revisar sus gastos.</p>
+                <!-- En Angular (C6): /trips/{tripId} -->
+                <a class="text-link is-muted" href="./trip-detail.html">Ver viaje</a>
+              </div>
+            </li>
+          </ul>
+
+          <!-- Componente compartido: app-pagination -->
+          <nav class="pagination" aria-label="Paginación de notificaciones">
+            <button class="ui-button ui-button--secondary" type="button" disabled>Anterior</button>
+            <span class="pagination__summary">Página 1 de 2 (24 notificaciones)</span>
+            <button class="ui-button ui-button--secondary" type="button">Siguiente</button>
+          </nav>
+
+          <!-- Componente compartido: app-confirm-dialog -->
+          <dialog id="read-all-dialog" class="confirm-dialog" aria-labelledby="read-all-title">
+            <div class="confirm-dialog__surface">
+              <header class="confirm-dialog__header">
+                <h2 id="read-all-title">Marcar todas como leídas</h2>
+                <button class="ui-button ui-button--ghost" type="button" id="close-read-all-dialog">
+                  Cerrar
+                </button>
+              </header>
+              <p class="field__hint">
+                Se marcarán como leídas las 3 notificaciones pendientes para tu usuario. Los demás
+                integrantes conservarán su propio estado de lectura.
+              </p>
+              <footer class="confirm-dialog__footer">
+                <button class="ui-button ui-button--secondary" type="button" id="cancel-read-all">
+                  Cancelar
+                </button>
+                <button class="ui-button ui-button--primary" type="button" id="confirm-read-all">
+                  Confirmar
+                </button>
+              </footer>
+            </div>
+          </dialog>
+
+          <!-- Estados compartidos (app-state-panel) -->
+          <section class="states-section" aria-labelledby="states-notif">
+            <div class="section-head">
+              <h2 id="states-notif">Estados</h2>
+            </div>
+            <div class="states-grid">
+              <article class="state-card">
+                <span class="status-badge status-badge--neutral">Estado vacío</span>
+                <div class="state-panel" role="status">
+                  <span class="state-panel__disc" aria-hidden="true">0</span>
+                  <h3>No tienes avisos sin leer</h3>
+                  <p>
+                    Estás al día con gastos, incidencias y mantenimientos de tu flota. Puedes ver el
+                    historial completo cambiando el filtro.
+                  </p>
+                  <button class="ui-button ui-button--secondary" type="button">Ver todas</button>
+                </div>
+              </article>
+
+              <article class="state-card">
+                <span class="status-badge status-badge--wait">Estado cargando</span>
+                <div class="state-panel" role="status">
+                  <div class="skeleton-stack">
+                    <div class="skeleton-bar skeleton-bar--wide"></div>
+                    <div class="skeleton-bar"></div>
+                    <div class="skeleton-bar skeleton-bar--short"></div>
+                  </div>
+                  <h3>Cargando notificaciones</h3>
+                  <p>Obteniendo los avisos recientes de la empresa.</p>
+                </div>
+              </article>
+
+              <article class="state-card">
+                <span class="status-badge status-badge--danger">Estado error</span>
+                <div class="state-panel state-panel--error" role="alert">
+                  <span class="state-panel__disc" aria-hidden="true">!</span>
+                  <h3>No pudimos cargar tus avisos</h3>
+                  <p>Ocurrió un error al consultar el centro de notificaciones. Reintenta en unos segundos.</p>
+                  <button class="ui-button ui-button--secondary" type="button">Reintentar</button>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const popover = document.getElementById('bell-popover');
+      const toggleBtn = document.getElementById('toggle-popover');
+      const syncBell = () => toggleBtn.setAttribute('aria-expanded', String(!popover.hidden));
+      const closePopover = (restoreFocus = false) => {
+        if (popover.hidden) return;
+        popover.hidden = true;
+        syncBell();
+        if (restoreFocus) toggleBtn.focus();
+      };
+      toggleBtn.addEventListener('click', (event) => {
+        event.stopPropagation();
+        popover.hidden = !popover.hidden;
+        syncBell();
+      });
+      document.getElementById('close-popover').addEventListener('click', () => closePopover(true));
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closePopover(true);
+      });
+      document.addEventListener('click', (event) => {
+        if (!popover.hidden && !popover.contains(event.target) && !toggleBtn.contains(event.target)) {
+          closePopover(false);
+        }
+      });
+
+      const readAllDialog = document.getElementById('read-all-dialog');
+      document.getElementById('open-read-all-dialog').addEventListener('click', () => readAllDialog.showModal());
+      for (const id of ['close-read-all-dialog', 'cancel-read-all', 'confirm-read-all']) {
+        document.getElementById(id).addEventListener('click', () => readAllDialog.close());
+      }
+    </script>
+  </body>
+</html>

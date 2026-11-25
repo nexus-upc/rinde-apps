@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mockups Sprint 4 | Rinde by NEXUS</title>
+    <link rel="stylesheet" href="./mockups.css" />
+  </head>
+  <body>
+    <main class="index-wrap">
+      <!-- Componente compartido: app-page-header -->
+      <header class="page-header">
+        <div>
+          <div class="page-header__heading">
+            <h1>Mockups del Sprint 4</h1>
+            <span class="status-badge status-badge--neutral">9 pantallas</span>
+          </div>
+          <p>
+            Referencias estáticas en HTML sobre los tokens vigentes de Rinde para la empresa
+            ficticia Transportes Andes SAC (RUC 20123456789).
+          </p>
+        </div>
+        <div class="page-header__actions">
+          <a class="ui-button ui-button--primary" href="./home.html">Abrir inicio web</a>
+          <a class="ui-button ui-button--secondary" href="./mobile-trip.html">Abrir piloto móvil</a>
+        </div>
+      </header>
+
+      <section class="page-stack" aria-labelledby="sec-web">
+        <div class="section-head">
+          <h2 id="sec-web">Aplicación web (operaciones y administración)</h2>
+        </div>
+        <div class="index-grid">
+          <a class="index-card" href="./home.html">
+            <div class="onboarding__step-top">
+              <strong>1. Inicio</strong>
+              <span class="status-badge status-badge--wait">S4-23, S4-29</span>
+            </div>
+            <p>
+              Elimina el tablero sin guía ni gráficos: presenta primeros pasos para empresa nueva y
+              tres gráficos por periodo (categoría, estado y vehículo).
+            </p>
+            <span class="field__hint">
+              Componentes: app-page-header, app-status-badge, app-horizontal-bar-chart,
+              app-donut-chart, app-state-panel.
+            </span>
+          </a>
+
+          <a class="index-card" href="./trip-detail.html">
+            <div class="onboarding__step-top">
+              <strong>2. Detalle del viaje</strong>
+              <span class="status-badge status-badge--wait">S4-11, S4-15</span>
+            </div>
+            <p>
+              Resuelve la fragmentación de información: reúne viaje, vehículo, conductor, gastos,
+              adelanto, saldo, liquidación, incidencias y degradación parcial en una vista.
+            </p>
+            <span class="field__hint">
+              Componentes: app-page-header, app-status-badge, app-data-table, app-state-panel.
+            </span>
+          </a>
+
+          <a class="index-card" href="./expenses-inbox.html">
+            <div class="onboarding__step-top">
+              <strong>3. Bandeja de gastos</strong>
+              <span class="status-badge status-badge--wait">S4-12, S4-14</span>
+            </div>
+            <p>
+              Evita buscar gastos por identificador: filtra toda la empresa y muestra el comprobante
+              junto al gasto para aprobarlo u observarlo con motivo.
+            </p>
+            <span class="field__hint">
+              Componentes: app-page-header, app-filter-bar, app-data-table, app-pagination,
+              app-status-badge, app-confirm-dialog, app-state-panel.
+            </span>
+          </a>
+
+          <a class="index-card" href="./vehicle.html">
+            <div class="onboarding__step-top">
+              <strong>4. Ficha del vehículo</strong>
+              <span class="status-badge status-badge--wait">S4-13</span>
+            </div>
+            <p>
+              Reúne el historial disperso de cada unidad: próximo mantenimiento y línea de tiempo
+              unificada de viajes, mantenimientos e incidencias.
+            </p>
+            <span class="field__hint">
+              Componentes: app-page-header, app-filter-bar, app-status-badge, app-state-panel.
+            </span>
+          </a>
+
+          <a class="index-card" href="./notifications.html">
+            <div class="onboarding__step-top">
+              <strong>5. Notificaciones</strong>
+              <span class="status-badge status-badge--wait">S4-25</span>
+            </div>
+            <p>
+              Evita omisiones operativas: campana con contador, panel desplegable rápido y centro
+              completo con filtro de no leídas y lectura masiva.
+            </p>
+            <span class="field__hint">
+              Componentes: app-notification-bell, app-page-header, app-filter-bar, app-status-badge,
+              app-pagination, app-confirm-dialog, app-state-panel.
+            </span>
+          </a>
+
+          <a class="index-card" href="./account.html">
+            <div class="onboarding__step-top">
+              <strong>6. Cuenta y empresa</strong>
+              <span class="status-badge status-badge--wait">S4-28</span>
+            </div>
+            <p>
+              Completa el panel de ajustes existente con edición de perfil personal, cambio de
+              contraseña vigente y datos de contacto de la empresa.
+            </p>
+            <span class="field__hint">
+              Componentes: app-account-settings, app-status-badge, app-state-panel.
+            </span>
+          </a>
+        </div>
+      </section>
+
+      <section class="page-stack" aria-labelledby="sec-mobile">
+        <div class="section-head">
+          <h2 id="sec-mobile">Aplicación móvil del conductor (marco de 375 px)</h2>
+        </div>
+        <div class="index-grid">
+          <a class="index-card" href="./mobile-expense.html">
+            <div class="onboarding__step-top">
+              <strong>7. Gasto con foto</strong>
+              <span class="status-badge status-badge--wait">S4-07, S4-08</span>
+            </div>
+            <p>
+              Permite al conductor registrar categoría, monto en PEN y foto del comprobante en ruta,
+              quedando guardado en el teléfono cuando no hay señal.
+            </p>
+            <span class="field__hint">Patrones Material 3: campos táctiles, aviso offline, CTA único.</span>
+          </a>
+
+          <a class="index-card" href="./mobile-queue.html">
+            <div class="onboarding__step-top">
+              <strong>8. Cola sin conexión</strong>
+              <span class="status-badge status-badge--wait">S4-08, S4-10</span>
+            </div>
+            <p>
+              Da visibilidad de los gastos e incidencias pendientes de envío con estado claro y
+              reintento sin pérdida ni duplicados.
+            </p>
+            <span class="field__hint">Patrones Material 3: tarjetas de cola, chips de estado, reintento.</span>
+          </a>
+
+          <a class="index-card" href="./mobile-trip.html">
+            <div class="onboarding__step-top">
+              <strong>9. Viaje del conductor</strong>
+              <span class="status-badge status-badge--wait">S4-09, S4-10</span>
+            </div>
+            <p>
+              Muestra al conductor su viaje asignado, adelanto recibido, gastos registrados, saldo
+              disponible, estado de liquidación y reporte de incidencias.
+            </p>
+            <span class="field__hint">Patrones Material 3: ficha de resumen, acción principal y secundaria.</span>
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

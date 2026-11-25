@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Móvil: Viaje del conductor | Rinde Mockup</title>
+    <link rel="stylesheet" href="./mockups.css" />
+  </head>
+  <body class="mobile-stage">
+    <nav class="mobile-stage__nav" aria-label="Pantallas móviles">
+      <a class="ui-button ui-button--secondary" href="./index.html">Índice</a>
+      <a class="ui-button ui-button--secondary" href="./mobile-expense.html">Gasto</a>
+      <a class="ui-button ui-button--secondary" href="./mobile-queue.html">Cola (3)</a>
+    </nav>
+
+    <div class="phone-frame" role="region" aria-label="Detalle del viaje del conductor">
+      <header class="phone-topbar">
+        <a class="phone-topbar__back" href="./index.html" aria-label="Volver al inicio">&lt;</a>
+        <div class="phone-topbar__title">
+          <h1 class="mono">TRP-000014</h1>
+          <span>Lima a Trujillo | 2026-11-25</span>
+        </div>
+        <span class="status-badge status-badge--wait">En ruta</span>
+      </header>
+
+      <main class="phone-body">
+        <section class="mobile-card" aria-label="Resumen de unidad y carga">
+          <div class="onboarding__step-top">
+            <strong>Unidad asignada: ABC-123</strong>
+            <span class="status-badge status-badge--neutral">Volvo FH 460</span>
+          </div>
+          <p class="field__hint">Materiales de construcción | 4,200.00 kg | Salida 07:30</p>
+        </section>
+
+        <section class="mobile-card" aria-label="Adelanto, gastos y liquidación">
+          <div class="onboarding__step-top">
+            <strong>Liquidación y saldo</strong>
+            <span class="status-badge status-badge--wait">Liquidación abierta</span>
+          </div>
+          <dl class="mobile-kv">
+            <div>
+              <dt>Adelanto (Transferencia)</dt>
+              <dd>S/ 500.00</dd>
+            </div>
+            <div>
+              <dt>Saldo disponible</dt>
+              <dd>S/ 190.00</dd>
+            </div>
+            <div>
+              <dt>Gastos aprobados</dt>
+              <dd>S/ 310.00</dd>
+            </div>
+            <div>
+              <dt>En cola sin conexión</dt>
+              <dd>2 pendientes</dd>
+            </div>
+          </dl>
+        </section>
+
+        <section class="mobile-card" aria-label="Gastos recientes del viaje">
+          <div class="onboarding__step-top">
+            <strong>Últimos gastos del viaje</strong>
+            <a class="text-link" href="./mobile-queue.html">Ver cola</a>
+          </div>
+          <div class="onboarding__step-top">
+            <span>Combustible (sin señal)</span>
+            <span class="status-badge status-badge--wait">En cola</span>
+          </div>
+          <div class="onboarding__step-top">
+            <span>Peaje Chimbote</span>
+            <span class="status-badge status-badge--success">Aprobado (S/ 210.00)</span>
+          </div>
+          <div class="onboarding__step-top">
+            <span>Almuerzo ruta</span>
+            <span class="status-badge status-badge--success">Aprobado (S/ 100.00)</span>
+          </div>
+        </section>
+
+        <a class="ui-button ui-button--primary ui-button--block" href="./mobile-expense.html">
+          Registrar gasto con foto
+        </a>
+        <a class="ui-button ui-button--secondary ui-button--block" href="./mobile-queue.html">
+          Reportar incidencia en ruta
+        </a>
+      </main>
+
+      <nav class="phone-bottombar" aria-label="Navegación móvil">
+        <a class="is-active" href="./mobile-trip.html" aria-current="page">Viaje</a>
+        <a href="./mobile-expense.html">Gasto</a>
+        <a href="./mobile-queue.html">Cola (3)</a>
+      </nav>
+    </div>
+  </body>
+</html>
