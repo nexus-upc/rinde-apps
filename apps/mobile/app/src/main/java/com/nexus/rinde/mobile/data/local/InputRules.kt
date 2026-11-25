@@ -1,14 +1,17 @@
-package com.nexus.rinde.mobile.data
+package com.nexus.rinde.mobile.data.local
 
 import java.math.BigDecimal
 import java.net.URI
+import java.time.LocalDate
 
 object InputRules {
     fun serverUrl(value: String, allowHttp: Boolean): String {
         val uri = runCatching { URI(value.trim()) }.getOrNull()
-        require(uri != null && !uri.host.isNullOrBlank() && uri.userInfo == null &&
-            uri.query == null && uri.fragment == null && uri.path.orEmpty() in listOf("", "/") &&
-            (uri.scheme == "https" || (allowHttp && uri.scheme == "http"))) {
+        require(
+            uri != null && !uri.host.isNullOrBlank() && uri.userInfo == null &&
+                uri.query == null && uri.fragment == null && uri.path.orEmpty() in listOf("", "/") &&
+                (uri.scheme == "https" || (allowHttp && uri.scheme == "http"))
+        ) {
             "Ingresa la dirección del gateway, sin rutas ni credenciales."
         }
         return value.trim().trimEnd('/')
@@ -21,6 +24,13 @@ object InputRules {
         }
         return text.toBigDecimal().also {
             require(it > BigDecimal.ZERO) { "El monto debe ser mayor a cero." }
+        }
+    }
+
+    fun expenseDate(value: String): LocalDate {
+        val trimmed = value.trim()
+        return runCatching { LocalDate.parse(trimmed) }.getOrElse {
+            throw IllegalArgumentException("Ingresa una fecha válida en formato AAAA-MM-DD.")
         }
     }
 }
