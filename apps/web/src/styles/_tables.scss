@@ -1,0 +1,132 @@
+// Tablas de datos de Arcadia: filas sobre superficie piedra, números tabulares y tarjetas en móvil.
+.arc-table-wrap {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.arc-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 8px;
+  font-size: 14px;
+  line-height: 20px;
+
+  thead th {
+    padding: 8px 16px;
+    color: var(--arc-muted);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    background: var(--arc-surface);
+  }
+
+  tbody td {
+    padding: 14px 16px;
+    border: 0;
+    color: var(--arc-ink);
+    vertical-align: middle;
+    overflow-wrap: anywhere;
+
+    &:first-child {
+      border-radius: var(--arc-radius-row) 0 0 var(--arc-radius-row);
+    }
+
+    &:last-child {
+      border-radius: 0 var(--arc-radius-row) var(--arc-radius-row) 0;
+    }
+
+    &:only-child {
+      border-radius: var(--arc-radius-row);
+    }
+  }
+
+  th.arc-table__num,
+  td.arc-table__num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th.arc-table__actions,
+  td.arc-table__actions {
+    text-align: right;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .arc-table-wrap {
+    overflow-x: visible;
+  }
+
+  .arc-table {
+    display: block;
+    border-spacing: 0;
+
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    tbody {
+      display: grid;
+      gap: 8px;
+    }
+
+    tr {
+      display: grid;
+      gap: 10px;
+      padding: 16px;
+      border-radius: var(--arc-radius-row);
+      background: var(--arc-surface);
+    }
+
+    tbody td {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0;
+      border-radius: 0;
+      text-align: right;
+
+      &:first-child,
+      &:last-child,
+      &:only-child {
+        border-radius: 0;
+      }
+
+      &::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        color: var(--arc-muted);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 16px;
+        text-align: left;
+      }
+
+      &:empty::before {
+        display: none;
+      }
+    }
+
+    td.arc-table__actions {
+      justify-content: flex-end;
+      white-space: normal;
+
+      &::before {
+        margin-right: auto;
+      }
+    }
+  }
+}
