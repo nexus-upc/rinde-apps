@@ -92,3 +92,62 @@ export interface CreateTripPayload {
   readonly cargoWeightKg: number | null;
   readonly departureDate: string;
 }
+
+export type TripExpenseStatus = 'REGISTERED' | 'PENDING_SUPPORT' | 'APPROVED' | 'OBSERVED';
+
+export type TripSettlementStatus = 'OPEN' | 'CLOSED';
+
+export type TripAdvanceDeliveryMethod = 'CASH' | 'TRANSFER';
+
+export type TripIncidentType = 'BREAKDOWN' | 'DELAY' | 'OTHER';
+
+export type TripIncidentStatus = 'OPEN' | 'IN_PROGRESS';
+
+export type TripSummaryUnavailableSource = 'FLEET' | 'EXPENSE' | 'SETTLEMENT' | 'INCIDENT';
+
+export interface TripExpenseCountsByStatus {
+  readonly REGISTERED: number;
+  readonly PENDING_SUPPORT: number;
+  readonly APPROVED: number;
+  readonly OBSERVED: number;
+}
+
+export interface TripOpenIncident {
+  readonly id: string;
+  readonly type: TripIncidentType;
+  readonly status: TripIncidentStatus;
+  readonly reportedAt: string;
+}
+
+/** Resumen consolidado de GET /api/v1/dashboard/trips/{tripId}/summary (contrato C1). */
+export interface TripConsolidatedSummary {
+  readonly tripId: string;
+  readonly code: string;
+  readonly status: TripStatus;
+  readonly origin: string;
+  readonly destination: string;
+  readonly cargoDescription: string;
+  readonly cargoWeightKg: number | null;
+  readonly departureDate: string;
+  readonly vehicleId: string | null;
+  readonly driverId: string | null;
+  readonly startedAt: string | null;
+  readonly finishedAt: string | null;
+  readonly expenseCount: number;
+  readonly expenseTotal: number;
+  readonly expenseCurrency: string;
+  readonly settlementStatus: TripSettlementStatus | null;
+  readonly advanceAmount: number | null;
+  readonly advanceBalance: number | null;
+  readonly vehiclePlate: string | null;
+  readonly driverName: string | null;
+  readonly expenseCountsByStatus: TripExpenseCountsByStatus;
+  readonly approvedTotal: number;
+  readonly pendingReviewCount: number;
+  readonly advanceDeliveryMethod: TripAdvanceDeliveryMethod | null;
+  readonly settlementId: string | null;
+  readonly settlementClosedAt: string | null;
+  readonly openIncidents: readonly TripOpenIncident[];
+  readonly partial: boolean;
+  readonly unavailableSources: readonly TripSummaryUnavailableSource[];
+}
