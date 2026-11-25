@@ -5,6 +5,9 @@ import java.net.URI
 import java.time.LocalDate
 
 object InputRules {
+    const val INCIDENT_DESCRIPTION_MAX_LENGTH = 500
+    private val VALID_INCIDENT_TYPES = setOf("BREAKDOWN", "DELAY", "OTHER")
+
     fun serverUrl(value: String, allowHttp: Boolean): String {
         val uri = runCatching { URI(value.trim()) }.getOrNull()
         require(
@@ -32,5 +35,24 @@ object InputRules {
         return runCatching { LocalDate.parse(trimmed) }.getOrElse {
             throw IllegalArgumentException("Ingresa una fecha válida en formato AAAA-MM-DD.")
         }
+    }
+
+    fun incidentType(value: String): String {
+        val trimmed = value.trim()
+        require(trimmed in VALID_INCIDENT_TYPES) {
+            "Selecciona un tipo de incidencia válido."
+        }
+        return trimmed
+    }
+
+    fun incidentDescription(value: String): String {
+        val trimmed = value.trim()
+        require(trimmed.isNotEmpty()) {
+            "Ingresa la descripción de la incidencia."
+        }
+        require(trimmed.length <= INCIDENT_DESCRIPTION_MAX_LENGTH) {
+            "La descripción no puede superar los 500 caracteres."
+        }
+        return trimmed
     }
 }

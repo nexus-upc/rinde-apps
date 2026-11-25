@@ -5,18 +5,27 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.nexus.rinde.mobile.data.local.CapturedPhoto
 import com.nexus.rinde.mobile.data.local.QueueItemEntity
+import com.nexus.rinde.mobile.data.local.QueueItemType
 import com.nexus.rinde.mobile.data.local.SessionData
 import com.nexus.rinde.mobile.data.remote.ApiException
 import com.nexus.rinde.mobile.data.remote.Expense
+import com.nexus.rinde.mobile.data.remote.Settlement
 import com.nexus.rinde.mobile.data.remote.Trip
+import com.nexus.rinde.mobile.data.remote.TripAdvance
+import com.nexus.rinde.mobile.data.remote.VehicleSummary
 import com.nexus.rinde.mobile.data.repository.ExpenseMerger
 import com.nexus.rinde.mobile.data.repository.ExpenseRepository
+import com.nexus.rinde.mobile.data.repository.SettlementLookupResult
 import com.nexus.rinde.mobile.data.repository.TripExpenseDisplayItem
+import com.nexus.rinde.mobile.data.repository.TripFinancialCalculator
+import com.nexus.rinde.mobile.data.repository.TripFinancialSummary
 import com.nexus.rinde.mobile.data.repository.TripRepository
 import com.nexus.rinde.mobile.sync.OfflineSyncEngine
 import com.nexus.rinde.mobile.sync.SyncResult
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -29,8 +38,18 @@ data class TripsUiState(
     val trips: List<Trip> = emptyList(),
     val tripsFromCache: Boolean = false,
     val selectedTrip: Trip? = null,
+    val vehicle: VehicleSummary? = null,
+    val loadingFinancials: Boolean = false,
+    val advances: List<TripAdvance> = emptyList(),
+    val advancesError: String = "",
+    val settlement: Settlement? = null,
+    val settlementNotFound: Boolean = false,
+    val settlementError: String = "",
+    val financialSummary: TripFinancialSummary? = null,
     val remoteExpenses: List<Expense> = emptyList(),
     val displayExpenses: List<TripExpenseDisplayItem> = emptyList(),
+    val tripIncidents: List<QueueItemEntity> = emptyList(),
+    val activeSyncKeys: Set<String> = emptySet(),
     val error: String = "",
     val expenseError: String = "",
     val message: String = "",
@@ -119,8 +138,17 @@ class TripsViewModel(
                 it.copy(
                     busy = true,
                     selectedTrip = initialTrip,
+                    vehicle = null,
+                    loadingFinancials = true,
+                    advances = emptyList(),
+                    advancesError = "",
+                    settlement = null,
+                    settlementNotFound = false,
+                    settlementError = "",
+                    financialSummary = null,
                     remoteExpenses = emptyList(),
                     displayExpenses = emptyList(),
+                    tripIncidents = emptyList(),
                     error = "",
                     expenseError = "",
                     message = "",
@@ -134,16 +162,17 @@ class TripsViewModel(
                 if (e.status == 401) {
                     onSessionExpired()
                 } else {
-                    mutable.update { it.copy(error = e.message.orEmpty()) }
+                    mutable.update { it.copy(error = e.message.orEmpty(), loadingFinancials = false) }
                 }
             } catch (_: Exception) {
+                mutable.update { it.copy(loadingFinancials = false) }
                 if (initialTrip == null) {
                     mutable.update {
                         it.copy(error = "No pudimos cargar el detalle del viaje. Inténtalo de nuevo.")
                     }
                 }
             } finally {
-                mutable.update { it.copy(busy = false) }
+                mutable.update { it.copy(busy = false, loadingFinancials = false) }
             }
         }
     }
@@ -154,6 +183,7 @@ class TripsViewModel(
         viewModelScope.launch {
             runCatching {
                 loadExpensesOnly(session, tripId)
+                loadFinancialsOnly(session, tripId)
             }
         }
     }
@@ -170,12 +200,17 @@ class TripsViewModel(
                 latestTripQueue = items
                 latestActiveKeys = activeKeys
                 mutable.update { current ->
+                    val merged = ExpenseMerger.merge(
+                        serverExpenses = current.remoteExpenses,
+                        queueItems = items,
+                        activeSyncKeys = activeKeys,
+                    )
+                    val incidents = items.filter { it.queueType == QueueItemType.INCIDENT }
                     current.copy(
-                        displayExpenses = ExpenseMerger.merge(
-                            serverExpenses = current.remoteExpenses,
-                            queueItems = items,
-                            activeSyncKeys = activeKeys,
-                        ),
+                        displayExpenses = merged,
+                        tripIncidents = incidents,
+                        activeSyncKeys = activeKeys,
+                        financialSummary = recomputeSummaryIfLoaded(current, merged),
                     )
                 }
             }
@@ -184,22 +219,106 @@ class TripsViewModel(
 
     private suspend fun loadTripDetailInternal(session: SessionData, tripId: String) {
         val trip = tripRepository.loadTrip(session, tripId)
-        mutable.update { it.copy(selectedTrip = trip, expenseError = "") }
-        loadExpensesOnly(session, tripId)
+        mutable.update { it.copy(selectedTrip = trip, expenseError = "", loadingFinancials = true) }
+        coroutineScope {
+            val vehicleDeferred = async {
+                if (trip.vehicleId.isNotBlank()) {
+                    tripRepository.loadVehicle(session, trip.vehicleId)
+                } else {
+                    null
+                }
+            }
+            val expensesDeferred = async { loadExpensesOnly(session, tripId) }
+            val financialsDeferred = async { loadFinancialsOnly(session, tripId) }
+
+            val loadedVehicle = vehicleDeferred.await()
+            mutable.update { it.copy(vehicle = loadedVehicle) }
+            expensesDeferred.await()
+            financialsDeferred.await()
+        }
+    }
+
+    private suspend fun loadFinancialsOnly(session: SessionData, tripId: String) {
+        coroutineScope {
+            val advancesDeferred = async {
+                try {
+                    Result.success(tripRepository.loadAdvances(session, tripId))
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: ApiException) {
+                    if (e.status == 401) throw e
+                    Result.failure(e)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
+            }
+            val settlementDeferred = async {
+                try {
+                    Result.success(tripRepository.loadSettlement(session, tripId))
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: ApiException) {
+                    if (e.status == 401) throw e
+                    Result.failure(e)
+                } catch (e: Exception) {
+                    Result.failure(e)
+                }
+            }
+
+            val advancesResult = advancesDeferred.await()
+            val settlementResult = settlementDeferred.await()
+
+            val advancesList = advancesResult.getOrNull().orEmpty()
+            val advancesErr = advancesResult.exceptionOrNull()?.let { err ->
+                when (err) {
+                    is ApiException -> err.message.orEmpty()
+                    else -> "No pudimos consultar los adelantos del viaje."
+                }
+            }.orEmpty()
+
+            val settlementLookup = settlementResult.getOrNull()
+            val settlementValue = (settlementLookup as? SettlementLookupResult.Available)?.settlement
+            val settlementNotFound = settlementLookup is SettlementLookupResult.NotCreated
+            val settlementErr = settlementResult.exceptionOrNull()?.let { err ->
+                when (err) {
+                    is ApiException -> err.message.orEmpty()
+                    else -> "No pudimos consultar la liquidación. Se muestra un resumen orientativo."
+                }
+            }.orEmpty()
+
+            mutable.update { current ->
+                val summary = TripFinancialCalculator.calculate(
+                    settlement = settlementValue,
+                    advances = advancesList,
+                    expenses = current.displayExpenses,
+                )
+                current.copy(
+                    loadingFinancials = false,
+                    advances = advancesList,
+                    advancesError = advancesErr,
+                    settlement = settlementValue,
+                    settlementNotFound = settlementNotFound,
+                    settlementError = settlementErr,
+                    financialSummary = summary,
+                )
+            }
+        }
     }
 
     private suspend fun loadExpensesOnly(session: SessionData, tripId: String) {
         try {
             val remote = tripRepository.loadRemoteExpenses(session, tripId)
             mutable.update { current ->
+                val merged = ExpenseMerger.merge(
+                    serverExpenses = remote,
+                    queueItems = latestTripQueue,
+                    activeSyncKeys = latestActiveKeys,
+                )
                 current.copy(
                     remoteExpenses = remote,
                     expenseError = "",
-                    displayExpenses = ExpenseMerger.merge(
-                        serverExpenses = remote,
-                        queueItems = latestTripQueue,
-                        activeSyncKeys = latestActiveKeys,
-                    ),
+                    displayExpenses = merged,
+                    financialSummary = recomputeSummaryIfLoaded(current, merged),
                 )
             }
         } catch (cancelled: CancellationException) {
@@ -207,18 +326,25 @@ class TripsViewModel(
         } catch (e: ApiException) {
             if (e.status == 401) throw e
             mutable.update { current ->
+                val merged = ExpenseMerger.merge(
+                    serverExpenses = emptyList(),
+                    queueItems = latestTripQueue,
+                    activeSyncKeys = latestActiveKeys,
+                )
                 current.copy(
                     remoteExpenses = emptyList(),
                     expenseError = e.message.orEmpty(),
-                    displayExpenses = ExpenseMerger.merge(
-                        serverExpenses = emptyList(),
-                        queueItems = latestTripQueue,
-                        activeSyncKeys = latestActiveKeys,
-                    ),
+                    displayExpenses = merged,
+                    financialSummary = recomputeSummaryIfLoaded(current, merged),
                 )
             }
         } catch (_: Exception) {
             mutable.update { current ->
+                val merged = ExpenseMerger.merge(
+                    serverExpenses = emptyList(),
+                    queueItems = latestTripQueue,
+                    activeSyncKeys = latestActiveKeys,
+                )
                 current.copy(
                     remoteExpenses = emptyList(),
                     expenseError = if (latestTripQueue.isEmpty()) {
@@ -226,14 +352,25 @@ class TripsViewModel(
                     } else {
                         "Sin conexión con el servidor. Se muestran tus registros guardados en el dispositivo."
                     },
-                    displayExpenses = ExpenseMerger.merge(
-                        serverExpenses = emptyList(),
-                        queueItems = latestTripQueue,
-                        activeSyncKeys = latestActiveKeys,
-                    ),
+                    displayExpenses = merged,
+                    financialSummary = recomputeSummaryIfLoaded(current, merged),
                 )
             }
         }
+    }
+
+    private fun recomputeSummaryIfLoaded(
+        state: TripsUiState,
+        mergedExpenses: List<TripExpenseDisplayItem>,
+    ): TripFinancialSummary? {
+        if (state.financialSummary == null && !state.settlementNotFound && state.settlement == null) {
+            return null
+        }
+        return TripFinancialCalculator.calculate(
+            settlement = state.settlement,
+            advances = state.advances,
+            expenses = mergedExpenses,
+        )
     }
 
     fun changeTripStatus(action: String) {
@@ -254,6 +391,9 @@ class TripsViewModel(
                         trips = current.trips.map { old -> if (old.id == updated.id) updated else old },
                         message = if (action == "start") "Viaje iniciado." else "Viaje finalizado.",
                     )
+                }
+                if (action == "finish") {
+                    runCatching { loadFinancialsOnly(session, updated.id) }
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -300,6 +440,7 @@ class TripsViewModel(
                         if (syncResult.syncedCount > 0) {
                             mutable.update { it.copy(message = "Comprobante subido al servidor.") }
                             loadExpensesOnly(session, trip.id)
+                            loadFinancialsOnly(session, trip.id)
                         } else {
                             mutable.update {
                                 it.copy(
@@ -384,8 +525,18 @@ class TripsViewModel(
         mutable.update {
             it.copy(
                 selectedTrip = null,
+                vehicle = null,
+                loadingFinancials = false,
+                advances = emptyList(),
+                advancesError = "",
+                settlement = null,
+                settlementNotFound = false,
+                settlementError = "",
+                financialSummary = null,
                 remoteExpenses = emptyList(),
                 displayExpenses = emptyList(),
+                tripIncidents = emptyList(),
+                activeSyncKeys = emptySet(),
                 error = "",
                 expenseError = "",
                 message = "",

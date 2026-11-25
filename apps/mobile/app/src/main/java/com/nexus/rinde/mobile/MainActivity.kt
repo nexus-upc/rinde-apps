@@ -54,11 +54,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.nexus.rinde.mobile.data.local.QueueItemType
 import com.nexus.rinde.mobile.ui.auth.AuthViewModel
 import com.nexus.rinde.mobile.ui.auth.SignInScreen
 import com.nexus.rinde.mobile.ui.common.NoticeText
 import com.nexus.rinde.mobile.ui.expense.ExpenseFormScreen
 import com.nexus.rinde.mobile.ui.expense.ExpenseFormViewModel
+import com.nexus.rinde.mobile.ui.incident.IncidentFormScreen
+import com.nexus.rinde.mobile.ui.incident.IncidentFormViewModel
 import com.nexus.rinde.mobile.ui.queue.QueueScreen
 import com.nexus.rinde.mobile.ui.queue.QueueViewModel
 import com.nexus.rinde.mobile.ui.theme.RindeTheme
@@ -71,7 +74,14 @@ import java.io.File
 private enum class MobileTab {
     TRIPS,
     EXPENSE,
+    INCIDENT,
     QUEUE,
+}
+
+private sealed interface PhotoCaptureTarget {
+    data object ExpenseForm : PhotoCaptureTarget
+    data object IncidentForm : PhotoCaptureTarget
+    data class ExistingExpense(val remoteId: String) : PhotoCaptureTarget
 }
 
 class MainActivity : ComponentActivity() {
@@ -109,6 +119,12 @@ private fun RindeAppRoot() {
             photoStore = container.photoStore,
         ),
     )
+    val incidentFormModel: IncidentFormViewModel = viewModel(
+        factory = IncidentFormViewModel.Factory(
+            incidentRepository = container.incidentRepository,
+            photoStore = container.photoStore,
+        ),
+    )
     val queueModel: QueueViewModel = viewModel(
         factory = QueueViewModel.Factory(
             expenseRepository = container.expenseRepository,
@@ -121,6 +137,7 @@ private fun RindeAppRoot() {
     val authState by authModel.state.collectAsStateWithLifecycle()
     val tripsState by tripsModel.state.collectAsStateWithLifecycle()
     val formState by formModel.state.collectAsStateWithLifecycle()
+    val incidentFormState by incidentFormModel.state.collectAsStateWithLifecycle()
     val queueState by queueModel.state.collectAsStateWithLifecycle()
     val isOnline by container.networkMonitor.isOnline.collectAsStateWithLifecycle()
 
@@ -131,23 +148,29 @@ private fun RindeAppRoot() {
     var attachTargetExpenseId by remember { mutableStateOf<String?>(null) }
     var pendingCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
     var pendingCameraCacheFile by remember { mutableStateOf<File?>(null) }
-    var pendingCameraTargetExpenseId by remember { mutableStateOf<String?>(null) }
+    var pendingPhotoTarget by remember { mutableStateOf<PhotoCaptureTarget?>(null) }
     val scroll = rememberScrollState()
 
-    val handlePickedImage: (android.net.Uri, String?, File?, String?) -> Unit =
-        { uri, suggestedName, cacheFile, remoteExpenseId ->
-            if (remoteExpenseId == null) {
-                formModel.attachPhotoFromUri(uri, suggestedName, cacheFile)
-            } else {
-                scope.launch {
-                    try {
-                        val photo = container.photoStore.compressFromUri(uri, suggestedName)
-                        tripsModel.attachPhotoToExistingExpense(remoteExpenseId, photo)
-                    } catch (_: Exception) {
-                        tripsModel.notifyMessage("No pudimos procesar la foto seleccionada.")
-                    } finally {
-                        container.photoStore.deleteCacheFile(cacheFile)
+    val handlePickedImage: (android.net.Uri, String?, File?, PhotoCaptureTarget?) -> Unit =
+        { uri, suggestedName, cacheFile, target ->
+            when (target) {
+                is PhotoCaptureTarget.IncidentForm -> {
+                    incidentFormModel.attachPhotoFromUri(uri, suggestedName, cacheFile)
+                }
+                is PhotoCaptureTarget.ExistingExpense -> {
+                    scope.launch {
+                        try {
+                            val photo = container.photoStore.compressFromUri(uri, suggestedName)
+                            tripsModel.attachPhotoToExistingExpense(target.remoteId, photo)
+                        } catch (_: Exception) {
+                            tripsModel.notifyMessage("No pudimos procesar la foto seleccionada.")
+                        } finally {
+                            container.photoStore.deleteCacheFile(cacheFile)
+                        }
                     }
+                }
+                PhotoCaptureTarget.ExpenseForm, null -> {
+                    formModel.attachPhotoFromUri(uri, suggestedName, cacheFile)
                 }
             }
         }
@@ -157,12 +180,17 @@ private fun RindeAppRoot() {
     ) { captured ->
         val uri = pendingCameraUri
         val cacheFile = pendingCameraCacheFile
-        val targetId = pendingCameraTargetExpenseId
+        val target = pendingPhotoTarget
         pendingCameraUri = null
         pendingCameraCacheFile = null
-        pendingCameraTargetExpenseId = null
+        pendingPhotoTarget = null
         if (captured && uri != null) {
-            handlePickedImage(uri, "foto-comprobante.jpg", cacheFile, targetId)
+            val defaultName = if (target is PhotoCaptureTarget.IncidentForm) {
+                "foto-incidencia.jpg"
+            } else {
+                "foto-comprobante.jpg"
+            }
+            handlePickedImage(uri, defaultName, cacheFile, target)
         } else {
             container.photoStore.deleteCacheFile(cacheFile)
         }
@@ -171,23 +199,23 @@ private fun RindeAppRoot() {
     val pickGalleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
     ) { uri ->
-        val targetId = pendingCameraTargetExpenseId
-        pendingCameraTargetExpenseId = null
+        val target = pendingPhotoTarget
+        pendingPhotoTarget = null
         if (uri != null) {
-            handlePickedImage(uri, null, null, targetId)
+            handlePickedImage(uri, null, null, target)
         }
     }
 
-    fun launchCamera(targetRemoteExpenseId: String?) {
+    fun launchCamera(target: PhotoCaptureTarget) {
         val (file, uri) = container.photoStore.createCameraCaptureTarget()
         pendingCameraCacheFile = file
         pendingCameraUri = uri
-        pendingCameraTargetExpenseId = targetRemoteExpenseId
+        pendingPhotoTarget = target
         takePictureLauncher.launch(uri)
     }
 
-    fun launchGallery(targetRemoteExpenseId: String?) {
-        pendingCameraTargetExpenseId = targetRemoteExpenseId
+    fun launchGallery(target: PhotoCaptureTarget) {
+        pendingPhotoTarget = target
         pickGalleryLauncher.launch(
             PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
         )
@@ -211,10 +239,17 @@ private fun RindeAppRoot() {
         }
     }
 
-    LaunchedEffect(authState.error, tripsState.error, formState.error, queueState.error) {
+    LaunchedEffect(
+        authState.error,
+        tripsState.error,
+        formState.error,
+        incidentFormState.error,
+        queueState.error,
+    ) {
         if (authState.error.isNotBlank() ||
             tripsState.error.isNotBlank() ||
             formState.error.isNotBlank() ||
+            incidentFormState.error.isNotBlank() ||
             queueState.error.isNotBlank()
         ) {
             scroll.animateScrollTo(0)
@@ -241,6 +276,8 @@ private fun RindeAppRoot() {
                             !authState.signedIn -> "Rinde"
                             activeTab == MobileTab.EXPENSE ->
                                 if (formState.isEditing) "Corregir gasto" else "Registrar gasto"
+                            activeTab == MobileTab.INCIDENT ->
+                                if (incidentFormState.isEditing) "Corregir incidencia" else "Reportar incidencia"
                             activeTab == MobileTab.QUEUE -> "Cola sin conexión"
                             else -> tripsState.selectedTrip?.code ?: "Mis viajes"
                         },
@@ -345,7 +382,7 @@ private fun RindeAppRoot() {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
             if (!isOnline && authState.signedIn && activeTab == MobileTab.TRIPS) {
-                NoticeText("Sin señal. Los gastos nuevos se guardarán en tu cola local.")
+                NoticeText("Sin señal. Los gastos e incidencias nuevas se guardarán en tu cola local.")
             }
 
             val topError = authState.error.ifBlank { tripsState.error }
@@ -377,14 +414,27 @@ private fun RindeAppRoot() {
                         } else {
                             TripDetailScreen(
                                 trip = selectedTrip,
+                                vehicle = tripsState.vehicle,
+                                loadingFinancials = tripsState.loadingFinancials,
+                                advances = tripsState.advances,
+                                advancesError = tripsState.advancesError,
+                                settlementNotFound = tripsState.settlementNotFound,
+                                settlementError = tripsState.settlementError,
+                                financialSummary = tripsState.financialSummary,
                                 busy = tripsState.busy,
                                 isOnline = isOnline,
                                 expenseError = tripsState.expenseError,
                                 expenses = tripsState.displayExpenses,
+                                tripIncidents = tripsState.tripIncidents,
+                                activeSyncKeys = tripsState.activeSyncKeys,
                                 onRequestStatusChange = { confirmAction = it },
                                 onOpenExpenseForm = {
                                     formModel.prepareNew(selectedTrip)
                                     activeTab = MobileTab.EXPENSE
+                                },
+                                onOpenIncidentForm = {
+                                    incidentFormModel.prepareNew(selectedTrip)
+                                    activeTab = MobileTab.INCIDENT
                                 },
                                 onAttachPhotoToExpense = { remoteId ->
                                     attachTargetExpenseId = remoteId
@@ -402,8 +452,8 @@ private fun RindeAppRoot() {
                             onCategoryChange = formModel::onCategoryChange,
                             onAmountChange = formModel::onAmountChange,
                             onDateChange = formModel::onDateChange,
-                            onTakePhoto = { launchCamera(targetRemoteExpenseId = null) },
-                            onPickGallery = { launchGallery(targetRemoteExpenseId = null) },
+                            onTakePhoto = { launchCamera(PhotoCaptureTarget.ExpenseForm) },
+                            onPickGallery = { launchGallery(PhotoCaptureTarget.ExpenseForm) },
                             onRemovePhoto = formModel::removePhoto,
                             onSave = {
                                 if (session != null) {
@@ -435,6 +485,46 @@ private fun RindeAppRoot() {
                         )
                     }
 
+                    MobileTab.INCIDENT -> {
+                        val session = authState.session
+                        IncidentFormScreen(
+                            state = incidentFormState,
+                            isOnline = isOnline,
+                            onTypeChange = incidentFormModel::onTypeChange,
+                            onDescriptionChange = incidentFormModel::onDescriptionChange,
+                            onTakePhoto = { launchCamera(PhotoCaptureTarget.IncidentForm) },
+                            onPickGallery = { launchGallery(PhotoCaptureTarget.IncidentForm) },
+                            onRemovePhoto = incidentFormModel::removePhoto,
+                            onSave = {
+                                if (session != null) {
+                                    incidentFormModel.save(
+                                        session = session,
+                                        trip = tripsState.selectedTrip,
+                                        isOnline = isOnline,
+                                    ) { feedback, shouldSync ->
+                                        tripsModel.notifyMessage(feedback)
+                                        if (shouldSync) {
+                                            queueModel.triggerSync(manual = false)
+                                        }
+                                        activeTab = if (tripsState.selectedTrip != null) {
+                                            MobileTab.TRIPS
+                                        } else {
+                                            MobileTab.QUEUE
+                                        }
+                                    }
+                                }
+                            },
+                            onCancel = {
+                                incidentFormModel.resetForm(tripsState.selectedTrip)
+                                activeTab = if (tripsState.selectedTrip != null) {
+                                    MobileTab.TRIPS
+                                } else {
+                                    MobileTab.QUEUE
+                                }
+                            },
+                        )
+                    }
+
                     MobileTab.QUEUE -> {
                         QueueScreen(
                             state = queueState,
@@ -442,8 +532,13 @@ private fun RindeAppRoot() {
                             onRetryAll = { queueModel.triggerSync(manual = true) },
                             onRetrySingle = queueModel::retrySingle,
                             onEditRejected = { rejectedItem ->
-                                formModel.prepareEdit(rejectedItem)
-                                activeTab = MobileTab.EXPENSE
+                                if (rejectedItem.queueType == QueueItemType.INCIDENT) {
+                                    incidentFormModel.prepareEdit(rejectedItem)
+                                    activeTab = MobileTab.INCIDENT
+                                } else {
+                                    formModel.prepareEdit(rejectedItem)
+                                    activeTab = MobileTab.EXPENSE
+                                }
                             },
                             onDiscard = queueModel::discard,
                         )
@@ -521,7 +616,7 @@ private fun RindeAppRoot() {
                 TextButton(
                     onClick = {
                         attachTargetExpenseId = null
-                        launchCamera(targetRemoteExpenseId = pendingAttachId)
+                        launchCamera(PhotoCaptureTarget.ExistingExpense(pendingAttachId))
                     },
                 ) {
                     Text("Tomar foto")
@@ -531,7 +626,7 @@ private fun RindeAppRoot() {
                 TextButton(
                     onClick = {
                         attachTargetExpenseId = null
-                        launchGallery(targetRemoteExpenseId = pendingAttachId)
+                        launchGallery(PhotoCaptureTarget.ExistingExpense(pendingAttachId))
                     },
                 ) {
                     Text("Elegir de galería")

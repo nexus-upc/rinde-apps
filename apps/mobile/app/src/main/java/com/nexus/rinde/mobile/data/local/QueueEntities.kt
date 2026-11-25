@@ -78,6 +78,26 @@ data class ExpenseQueuePayload(
     }
 }
 
+data class IncidentQueuePayload(
+    val type: String,
+    val description: String,
+) {
+    fun toJson(): String = JSONObject()
+        .put("type", type)
+        .put("description", description)
+        .toString()
+
+    companion object {
+        fun fromJson(raw: String): IncidentQueuePayload {
+            val obj = JSONObject(raw)
+            return IncidentQueuePayload(
+                type = obj.getString("type"),
+                description = obj.getString("description"),
+            )
+        }
+    }
+}
+
 @Entity(
     tableName = "cached_trips",
     primaryKeys = ["ownerUserId", "tripId"],

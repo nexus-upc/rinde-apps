@@ -21,7 +21,13 @@ data class CapturedPhoto(
     val sizeBytes: Long,
 )
 
-class ReceiptPhotoStore(private val context: Context) {
+interface PhotoAttachmentStore {
+    suspend fun compressFromUri(uri: Uri, suggestedName: String? = null): CapturedPhoto
+    fun deletePhoto(path: String?)
+    fun deleteCacheFile(file: File?)
+}
+
+class ReceiptPhotoStore(private val context: Context) : PhotoAttachmentStore {
     private val receiptsDir: File
         get() = File(context.filesDir, "receipts").apply { mkdirs() }
 
@@ -38,7 +44,7 @@ class ReceiptPhotoStore(private val context: Context) {
         return targetFile to uri
     }
 
-    suspend fun compressFromUri(uri: Uri, suggestedName: String? = null): CapturedPhoto =
+    override suspend fun compressFromUri(uri: Uri, suggestedName: String?): CapturedPhoto =
         withContext(Dispatchers.IO) {
             val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
             context.contentResolver.openInputStream(uri)?.use { input ->
@@ -75,12 +81,12 @@ class ReceiptPhotoStore(private val context: Context) {
             )
         }
 
-    fun deletePhoto(path: String?) {
+    override fun deletePhoto(path: String?) {
         if (path.isNullOrBlank()) return
         runCatching { File(path).delete() }
     }
 
-    fun deleteCacheFile(file: File?) {
+    override fun deleteCacheFile(file: File?) {
         if (file == null) return
         runCatching { file.delete() }
     }
