@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.InputStream
 import java.util.UUID
 import kotlin.math.max
 
@@ -20,6 +21,70 @@ data class CapturedPhoto(
     val fileName: String,
     val sizeBytes: Long,
 )
+
+internal data class ImageBounds(
+    val width: Int,
+    val height: Int,
+)
+
+internal class MutableImageBounds(
+    var width: Int = 0,
+    var height: Int = 0,
+)
+
+internal object ReceiptPhotoCodec {
+    const val MAX_DIMENSION_PX = 1600
+    const val MAX_OUTPUT_BYTES = 4_500_000
+
+    fun <T> readImageBounds(
+        openStream: () -> InputStream?,
+        decodeBounds: (InputStream, MutableImageBounds) -> T?,
+    ): ImageBounds {
+        val stream = openStream()
+            ?: throw IllegalArgumentException("No pudimos leer la imagen seleccionada.")
+        val holder = MutableImageBounds()
+        stream.use { input ->
+            // decodeStream con inJustDecodeBounds devuelve null por contrato de Android.
+            decodeBounds(input, holder)
+        }
+        require(holder.width > 0 && holder.height > 0) {
+            "El archivo seleccionado no es una imagen válida."
+        }
+        return ImageBounds(holder.width, holder.height)
+    }
+
+    fun <B> decodeSampledBitmap(
+        openStream: () -> InputStream?,
+        bounds: ImageBounds,
+        maxDimension: Int = MAX_DIMENSION_PX,
+        decodeBitmap: (InputStream, Int) -> B?,
+    ): B {
+        val sampleSize = calculateInSampleSize(bounds.width, bounds.height, maxDimension)
+        val stream = openStream()
+            ?: throw IllegalArgumentException("No pudimos procesar la foto del comprobante.")
+        return stream.use { input ->
+            decodeBitmap(input, sampleSize)
+        } ?: throw IllegalArgumentException("No pudimos procesar la foto del comprobante.")
+    }
+
+    fun calculateInSampleSize(width: Int, height: Int, targetMax: Int = MAX_DIMENSION_PX): Int {
+        var sample = 1
+        val longest = max(width, height)
+        while (longest / (sample * 2) >= targetMax) {
+            sample *= 2
+        }
+        return sample
+    }
+
+    fun sanitizeFileName(rawName: String?): String {
+        val base = (rawName ?: "comprobante.jpg")
+            .substringBeforeLast('.')
+            .replace(Regex("[^A-Za-z0-9._-]"), "-")
+            .trim('-')
+            .ifBlank { "comprobante" }
+        return "$base.jpg"
+    }
+}
 
 interface PhotoAttachmentStore {
     suspend fun compressFromUri(uri: Uri, suggestedName: String? = null): CapturedPhoto
@@ -46,23 +111,28 @@ class ReceiptPhotoStore(private val context: Context) : PhotoAttachmentStore {
 
     override suspend fun compressFromUri(uri: Uri, suggestedName: String?): CapturedPhoto =
         withContext(Dispatchers.IO) {
-            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            context.contentResolver.openInputStream(uri)?.use { input ->
-                BitmapFactory.decodeStream(input, null, bounds)
-            } ?: throw IllegalArgumentException("No pudimos leer la imagen seleccionada.")
-
-            require(bounds.outWidth > 0 && bounds.outHeight > 0) {
-                "El archivo seleccionado no es una imagen válida."
-            }
-
-            val sampleSize = calculateInSampleSize(bounds.outWidth, bounds.outHeight, MAX_DIMENSION_PX)
-            val decodeOpts = BitmapFactory.Options().apply { inSampleSize = sampleSize }
-            val decoded = context.contentResolver.openInputStream(uri)?.use { input ->
-                BitmapFactory.decodeStream(input, null, decodeOpts)
-            } ?: throw IllegalArgumentException("No pudimos procesar la foto del comprobante.")
+            val bounds = ReceiptPhotoCodec.readImageBounds(
+                openStream = { context.contentResolver.openInputStream(uri) },
+                decodeBounds = { input, holder ->
+                    val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                    val decodedNull = BitmapFactory.decodeStream(input, null, options)
+                    holder.width = options.outWidth
+                    holder.height = options.outHeight
+                    decodedNull
+                },
+            )
+            val decoded = ReceiptPhotoCodec.decodeSampledBitmap(
+                openStream = { context.contentResolver.openInputStream(uri) },
+                bounds = bounds,
+                maxDimension = ReceiptPhotoCodec.MAX_DIMENSION_PX,
+                decodeBitmap = { input, sampleSize ->
+                    val decodeOpts = BitmapFactory.Options().apply { inSampleSize = sampleSize }
+                    BitmapFactory.decodeStream(input, null, decodeOpts)
+                },
+            )
 
             val rotated = applyExifRotation(uri, decoded)
-            val scaled = scaleDownIfNeeded(rotated, MAX_DIMENSION_PX)
+            val scaled = scaleDownIfNeeded(rotated, ReceiptPhotoCodec.MAX_DIMENSION_PX)
             val jpegBytes = compressWithinLimit(scaled)
 
             if (scaled !== rotated) scaled.recycle()
@@ -92,12 +162,14 @@ class ReceiptPhotoStore(private val context: Context) : PhotoAttachmentStore {
     }
 
     private fun applyExifRotation(uri: Uri, source: Bitmap): Bitmap {
-        val orientation = context.contentResolver.openInputStream(uri)?.use { input ->
-            ExifInterface(input).getAttributeInt(
-                ExifInterface.TAG_ORIENTATION,
-                ExifInterface.ORIENTATION_NORMAL,
-            )
-        } ?: ExifInterface.ORIENTATION_NORMAL
+        val orientation = runCatching {
+            context.contentResolver.openInputStream(uri)?.use { input ->
+                ExifInterface(input).getAttributeInt(
+                    ExifInterface.TAG_ORIENTATION,
+                    ExifInterface.ORIENTATION_NORMAL,
+                )
+            }
+        }.getOrNull() ?: ExifInterface.ORIENTATION_NORMAL
 
         val matrix = Matrix()
         when (orientation) {
@@ -125,7 +197,7 @@ class ReceiptPhotoStore(private val context: Context) : PhotoAttachmentStore {
         for (quality in listOf(80, 70, 60, 50)) {
             out.reset()
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, out)
-            if (out.size() <= MAX_OUTPUT_BYTES) {
+            if (out.size() <= ReceiptPhotoCodec.MAX_OUTPUT_BYTES) {
                 return out.toByteArray()
             }
         }
@@ -142,25 +214,6 @@ class ReceiptPhotoStore(private val context: Context) : PhotoAttachmentStore {
         )?.use { cursor ->
             if (cursor.moveToFirst()) cursor.getString(0) else null
         }
-        val base = (queried ?: fallback ?: "comprobante.jpg")
-            .substringBeforeLast('.')
-            .replace(Regex("[^A-Za-z0-9._-]"), "-")
-            .trim('-')
-            .ifBlank { "comprobante" }
-        return "$base.jpg"
-    }
-
-    private fun calculateInSampleSize(width: Int, height: Int, targetMax: Int): Int {
-        var sample = 1
-        val longest = max(width, height)
-        while (longest / (sample * 2) >= targetMax) {
-            sample *= 2
-        }
-        return sample
-    }
-
-    private companion object {
-        const val MAX_DIMENSION_PX = 1600
-        const val MAX_OUTPUT_BYTES = 4_500_000
+        return ReceiptPhotoCodec.sanitizeFileName(queried ?: fallback)
     }
 }
