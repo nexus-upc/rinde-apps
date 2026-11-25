@@ -49,6 +49,7 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+google-services.json
 
 # Salidas y dependencias de las aplicaciones del monorepo
 node_modules/

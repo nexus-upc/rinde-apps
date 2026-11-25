@@ -41,8 +41,15 @@ dependencies {
     ksp("androidx.room:room-compiler:2.8.1")
     implementation("androidx.work:work-runtime-ktx:2.10.5")
     implementation("androidx.exifinterface:exifinterface:1.4.1")
+    implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
+    implementation("com.google.firebase:firebase-messaging")
     debugImplementation("androidx.compose.ui:ui-tooling")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
     testImplementation("org.json:json:20240303")
+}
+
+// Aplicar google-services solo si existe configuración local de Firebase
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }

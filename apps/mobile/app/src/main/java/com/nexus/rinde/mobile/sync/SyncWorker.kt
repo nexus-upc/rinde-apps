@@ -49,7 +49,11 @@ class OfflineSyncWorker(
             is SyncResult.NoSession,
             is SyncResult.SessionExpired -> Result.success()
             is SyncResult.Completed -> {
-                if (result.retryPendingCount > 0) Result.retry() else Result.success()
+                if (result.retryPendingCount > 0 || container.pushDeviceRepository.hasPendingSync()) {
+                    Result.retry()
+                } else {
+                    Result.success()
+                }
             }
         }
     }
