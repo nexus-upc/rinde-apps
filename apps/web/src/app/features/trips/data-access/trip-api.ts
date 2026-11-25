@@ -7,6 +7,7 @@ import {
   CreateTripPayload,
   DriverSummary,
   TripAssignmentResponse,
+  TripConsolidatedSummary,
   TripDetail,
   TripFilters,
   TripSummary,
@@ -27,6 +28,12 @@ export class TripApi {
 
   getTrip(id: string): Observable<TripDetail> {
     return this.http.get<TripDetail>(`${this.base}/trips/${encodeURIComponent(id)}`);
+  }
+
+  getTripSummary(tripId: string): Observable<TripConsolidatedSummary> {
+    return this.http.get<TripConsolidatedSummary>(
+      `${this.base}/dashboard/trips/${encodeURIComponent(tripId)}/summary`,
+    );
   }
 
   createTrip(payload: CreateTripPayload): Observable<TripDetail> {

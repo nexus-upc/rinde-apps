@@ -56,6 +56,15 @@ function inspectImport(file, specifier, node) {
     fail(file, `dependencia directa entre funcionalidades: ${to}.`);
   if (from.includes('/models/') && specifier.startsWith('@angular/'))
     fail(file, 'Los modelos no dependen de Angular.');
+  if (!from.includes('/fixtures/') && to.includes('/fixtures/'))
+    fail(file, 'Los datos de prueba solo pueden importarse desde pruebas (.spec.ts).');
+  if (
+    from.includes('/fixtures/') &&
+    (specifier.startsWith('@angular/') ||
+      /\/(data-access|state|pages|ui)\//.test(to) ||
+      (to.startsWith('core/') && !to.endsWith('.models.ts')))
+  )
+    fail(file, `Los datos de prueba solo dependen de modelos: ${to}.`);
   if (from.includes('/data-access/') && /\/(pages|state|ui)\//.test(to))
     fail(file, `data-access depende de ${to}.`);
   if (from.includes('/state/') && /\/(pages|ui)\//.test(to)) fail(file, `state depende de ${to}.`);

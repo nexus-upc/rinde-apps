@@ -100,6 +100,14 @@ export const routes: Routes = [
         loadChildren: () =>
           import('./features/incidents/incidents.routes').then((module) => module.INCIDENTS_ROUTES),
       },
+      {
+        path: 'notifications',
+        canActivate: [operationsGuard],
+        loadChildren: () =>
+          import('./features/notifications/notifications.routes').then(
+            (module) => module.NOTIFICATIONS_ROUTES,
+          ),
+      },
       { path: '', pathMatch: 'full', redirectTo: 'home' },
     ],
   },

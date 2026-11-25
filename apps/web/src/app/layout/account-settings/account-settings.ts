@@ -9,6 +9,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { AccountProfileSection } from '@features/account/ui/account-profile-section/account-profile-section';
+import { AccountSecuritySection } from '@features/account/ui/account-security-section/account-security-section';
+import { CompanyProfileSection } from '@features/account/ui/company-profile-section/company-profile-section';
 import { CurrentUser } from '@features/iam/models/iam.models';
 import { SHELL_ICONS, ShellIcon, initialsOf } from '../shell-icons';
 
@@ -23,11 +26,7 @@ interface Section {
 
 const SECTIONS: Record<SectionId, Section> = {
   profile: { label: 'Perfil', icon: 'person' },
-  security: {
-    label: 'Seguridad',
-    icon: 'lock',
-    soon: 'Podrás cambiar tu contraseña sin salir de Rinde. Mientras tanto, usa la recuperación desde la pantalla de acceso.',
-  },
+  security: { label: 'Seguridad', icon: 'lock' },
   notices: {
     label: 'Avisos',
     icon: 'bell',
@@ -38,11 +37,7 @@ const SECTIONS: Record<SectionId, Section> = {
     icon: 'palette',
     soon: 'Tema claro u oscuro y tamaño del texto.',
   },
-  company: {
-    label: 'Empresa',
-    icon: 'company',
-    soon: 'Los datos de tu empresa, su plan y sus usuarios, en un solo lugar.',
-  },
+  company: { label: 'Empresa', icon: 'company' },
   about: { label: 'Acerca de Rinde', icon: 'info' },
 };
 
@@ -63,9 +58,10 @@ const STATUS_LABELS: Readonly<Record<string, string>> = {
   SUSPENDED: 'Suspendida',
 };
 
-/** Ajustes de la cuenta como ventana modal: el perfil sale de IAM y el resto se anuncia como próximo. */
+/** Ajustes de la cuenta como ventana modal: enlaza las secciones de cuenta y conserva las próximas. */
 @Component({
   selector: 'app-account-settings',
+  imports: [AccountProfileSection, AccountSecuritySection, CompanyProfileSection],
   templateUrl: './account-settings.html',
   styleUrl: './account-settings.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,6 +70,7 @@ export class AccountSettings {
   readonly profile = input<CurrentUser | null>(null);
   readonly email = input('');
   readonly roleLabel = input('');
+  readonly canEditCompany = input(false);
   /** Lo que se pulsó para abrir y a dónde vuelve al cerrar; sin ellos, crece desde el centro. */
   readonly openFrom = input<DOMRect | null>(null);
   readonly closeTo = input<(() => HTMLElement | null) | null>(null);

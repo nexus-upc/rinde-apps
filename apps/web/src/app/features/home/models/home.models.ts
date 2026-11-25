@@ -54,3 +54,47 @@ export interface DashboardMetrics {
   };
   readonly partial: boolean;
 }
+
+export type DashboardExpenseCategory =
+  | 'FUEL'
+  | 'TOLL'
+  | 'FOOD'
+  | 'LODGING'
+  | 'MAINTENANCE'
+  | 'OTHER';
+
+export type DashboardChartUnavailableSource = 'EXPENSE' | 'TRIP' | 'FLEET';
+
+export interface ExpenseCategoryChartItem {
+  readonly category: DashboardExpenseCategory;
+  readonly total: number;
+}
+
+export interface TripStatusChartItem {
+  readonly status: TripStatus;
+  readonly count: number;
+}
+
+export interface VehicleExpenseChartItem {
+  readonly vehicleId: string;
+  readonly plateNumber: string;
+  readonly total: number;
+}
+
+export interface DashboardChartsFilters {
+  readonly from?: string;
+  readonly to?: string;
+}
+
+/** Series agregadas devueltas por GET /api/v1/dashboard/charts (contrato C9). */
+export interface DashboardCharts {
+  readonly from: string;
+  readonly to: string;
+  readonly currency: string;
+  readonly excludedCurrencies: readonly string[];
+  readonly expensesByCategory: readonly ExpenseCategoryChartItem[];
+  readonly tripsByStatus: readonly TripStatusChartItem[];
+  readonly expensesByVehicle: readonly VehicleExpenseChartItem[];
+  readonly partial: boolean;
+  readonly unavailableSources: readonly DashboardChartUnavailableSource[];
+}

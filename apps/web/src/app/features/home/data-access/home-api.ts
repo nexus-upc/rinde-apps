@@ -1,8 +1,15 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { API_BASE_URL } from '@core/config/api-config';
 import { Observable } from 'rxjs';
-import { DashboardMetrics, FleetDriver, FleetVehicle, TripSummary } from '../models/home.models';
+import {
+  DashboardCharts,
+  DashboardChartsFilters,
+  DashboardMetrics,
+  FleetDriver,
+  FleetVehicle,
+  TripSummary,
+} from '../models/home.models';
 
 /** Lecturas que necesita el inicio, a través del gateway. */
 @Injectable({ providedIn: 'root' })
@@ -26,5 +33,12 @@ export class HomeApi {
     return this.http.get<DashboardMetrics>(`${this.base}/dashboard/metrics`, {
       params: { from, to },
     });
+  }
+
+  charts(filters?: DashboardChartsFilters): Observable<DashboardCharts> {
+    let params = new HttpParams();
+    if (filters?.from) params = params.set('from', filters.from);
+    if (filters?.to) params = params.set('to', filters.to);
+    return this.http.get<DashboardCharts>(`${this.base}/dashboard/charts`, { params });
   }
 }

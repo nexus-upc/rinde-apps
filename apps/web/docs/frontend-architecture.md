@@ -11,6 +11,7 @@ funcionalidad sin agregar lógica de negocio a los componentes compartidos.
 | app y layout | Configuración, rutas, sesión visible y composición del espacio de trabajo. | core, shared y puntos de entrada de las funcionalidades. |
 | core | Sesión, almacenamiento, HTTP, avisos globales y coordinación genérica de peticiones. | Angular, RxJS y contratos puros compartidos. No depende de funcionalidades. |
 | features/*/models | Contratos y tipos de la funcionalidad. | TypeScript. No importa Angular. |
+| features/*/fixtures | Datos de prueba alineados a los contratos para pruebas unitarias. | Modelos propios y contratos puros de core. Solo se importan desde archivos `.spec.ts`. |
 | features/*/data-access | Llamadas HTTP y recursos de la API. | Configuración de core y modelos propios. |
 | features/*/state | Consultas, acciones, transiciones y estado observable de una pantalla. | data-access, modelos y servicios transversales de core. |
 | features/*/pages | Composición de vistas, formularios del acceso y navegación. | state, ui y componentes compartidos. No usa HttpClient ni llama al cliente de datos. |

@@ -1,9 +1,13 @@
+import { PageResponse } from '@core/http/page.models';
+
 export type ExpenseStatus =
   | 'REGISTERED'
   | 'PENDING_SUPPORT'
   | 'APPROVED'
   | 'OBSERVED'
   | 'LOCKED';
+
+export type ExpenseTrayStatus = 'REGISTERED' | 'PENDING_SUPPORT' | 'APPROVED' | 'OBSERVED';
 
 export type ExpenseCategory =
   | 'FUEL'
@@ -34,32 +38,46 @@ export const EXPENSE_CATEGORY_LABELS: Record<ExpenseCategory, string> = {
 export type EvidenceLoadState = 'idle' | 'loading' | 'ready' | 'error';
 
 export interface Evidence {
-  id: string;
-  fileName: string;
-  contentType: string;
-  fileSizeBytes: number;
+  readonly id: string;
+  readonly fileName: string;
+  readonly contentType: string;
+  readonly fileSizeBytes: number;
+  readonly sha256?: string;
   /** Ruta autenticada del archivo; null en comprobantes anteriores al almacenamiento. */
-  contentUrl: string | null;
-  uploadedAt: string;
+  readonly contentUrl: string | null;
+  readonly uploadedAt: string;
 }
 
+/** Gasto devuelto por Expense; driverId es el userId de IAM (cruzar con DriverResource.userId). */
 export interface Expense {
-  id: string;
-  tenantId: string;
-  tripId: string;
-  driverId: string;
-  category: ExpenseCategory;
-  amount: number;
-  currency: string;
-  expenseDate: string;
-  status: ExpenseStatus;
-  idempotencyKey?: string | null;
-  observationReason?: string | null;
-  isLocked?: boolean;
-  evidence?: Evidence | null;
-  createdAt: string;
-  updatedAt?: string;
+  readonly id: string;
+  readonly tenantId: string;
+  readonly tripId: string;
+  readonly driverId: string;
+  readonly category: ExpenseCategory;
+  readonly amount: number;
+  readonly currency: string;
+  readonly expenseDate: string;
+  readonly status: ExpenseStatus;
+  readonly idempotencyKey?: string | null;
+  readonly observationReason?: string | null;
+  readonly isLocked?: boolean;
+  readonly evidence?: Evidence | null;
+  readonly createdAt: string;
+  readonly updatedAt?: string;
 }
+
+export interface ExpenseTrayFilters {
+  readonly status?: readonly ExpenseTrayStatus[] | ExpenseTrayStatus;
+  readonly tripId?: string;
+  readonly driverId?: string;
+  readonly from?: string;
+  readonly to?: string;
+  readonly page?: number;
+  readonly size?: number;
+}
+
+export type ExpensePage = PageResponse<Expense>;
 
 export interface UpdateExpenseStatusPayload {
   status: 'APPROVED' | 'OBSERVED';

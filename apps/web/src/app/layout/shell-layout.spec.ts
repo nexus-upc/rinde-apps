@@ -58,7 +58,7 @@ describe('ShellLayout', () => {
   });
 
   it('links the operation sections for administrators and operations managers', () => {
-    for (const path of ['/fleet', '/drivers', '/settlements', '/incidents']) {
+    for (const path of ['/fleet', '/drivers', '/settlements', '/incidents', '/notifications']) {
       expect(link(path), path).not.toBeNull();
     }
     expect(link('/fleet')?.textContent).toContain('Flota');
@@ -68,6 +68,7 @@ describe('ShellLayout', () => {
 
     expect(root().textContent).toContain('Operación');
     expect(link('/incidents')).not.toBeNull();
+    expect(link('/notifications')).not.toBeNull();
     expect(link('/users')).toBeNull();
   });
 
@@ -77,6 +78,7 @@ describe('ShellLayout', () => {
 
     expect(root().textContent).not.toContain('Operación');
     expect(link('/fleet')).toBeNull();
+    expect(link('/notifications')).toBeNull();
     expect(link('/trips')).not.toBeNull();
   });
 
@@ -102,10 +104,21 @@ describe('ShellLayout', () => {
     const dialog = root().querySelector('dialog');
     expect(dialog?.textContent).toContain('20123456789');
     expect(dialog?.textContent).toContain('Activa');
+    expect(dialog?.textContent).toContain('Editar perfil');
 
     button('Seguridad')!.click();
     fixture.detectChanges();
-    expect(dialog?.textContent).toContain('Seguridad llegará pronto');
+    expect(dialog?.textContent).toContain('Cambio de contraseña');
+
+    button('Empresa')!.click();
+    fixture.detectChanges();
+    expect(dialog?.textContent).toContain('Datos de la empresa');
+
+    Array.from(dialog!.querySelectorAll('button'))
+      .find((item) => item.textContent?.includes('Avisos'))!
+      .click();
+    fixture.detectChanges();
+    expect(dialog?.textContent).toContain('Avisos llegará pronto');
 
     Array.from(dialog!.querySelectorAll('button'))
       .find((item) => item.textContent?.includes('Cerrar sesión'))!

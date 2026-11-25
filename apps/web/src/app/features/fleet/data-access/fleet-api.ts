@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { API_BASE_URL } from '@core/config/api-config';
 import { Observable } from 'rxjs';
@@ -9,6 +9,8 @@ import {
   RecordMaintenancePayload,
   Vehicle,
   VehicleHealthStatus,
+  VehicleHistory,
+  VehicleHistoryFilters,
 } from '../models/fleet.models';
 
 /** Operaciones de Flota, Vehículos y Mantenimiento a través del API Gateway. */
@@ -50,6 +52,19 @@ export class FleetApi {
     return this.http.post<Maintenance>(
       `${this.base}/vehicles/${encodeURIComponent(vehicleId)}/maintenances`,
       payload,
+    );
+  }
+
+  getVehicleHistory(
+    vehicleId: string,
+    filters?: VehicleHistoryFilters,
+  ): Observable<VehicleHistory> {
+    let params = new HttpParams();
+    if (filters?.from) params = params.set('from', filters.from);
+    if (filters?.to) params = params.set('to', filters.to);
+    return this.http.get<VehicleHistory>(
+      `${this.base}/vehicles/${encodeURIComponent(vehicleId)}/history`,
+      { params },
     );
   }
 }

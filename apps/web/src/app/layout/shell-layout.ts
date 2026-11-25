@@ -12,6 +12,7 @@ import { OPERATION_ROLES } from '@core/auth/auth.models';
 import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@core/feedback/toast.service';
 import { SessionProfileStore } from '@features/iam/state/session-profile.store';
+import { NotificationBell } from '@features/notifications/ui/notification-bell/notification-bell';
 import { BrandMark } from '@shared/brand/brand-mark/brand-mark';
 import { AccountSettings } from './account-settings/account-settings';
 import { SHELL_ICONS, ShellIcon, initialsOf } from './shell-icons';
@@ -41,7 +42,7 @@ const OPERATION: NavGroup = {
 /** Composición del espacio de trabajo: menú lateral, cuenta y pantallas de cada funcionalidad. */
 @Component({
   selector: 'app-shell-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark, AccountSettings],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark, AccountSettings, NotificationBell],
   templateUrl: './shell-layout.html',
   styleUrl: './shell-layout.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +57,10 @@ export class ShellLayout {
   protected readonly user = this.auth.user;
   protected readonly roleLabel = this.auth.roleLabel;
   protected readonly profile = inject(SessionProfileStore).profile;
+  protected readonly showNotifications = computed(() =>
+    OPERATION_ROLES.includes(this.user()?.role ?? ''),
+  );
+  protected readonly isAdmin = computed(() => this.user()?.role === 'ADMINISTRATOR');
   protected readonly menuOpen = signal(false);
   protected readonly settingsOpen = signal(false);
   /** Ajustes crece desde la opción pulsada y vuelve al botón de cuenta al cerrar. */

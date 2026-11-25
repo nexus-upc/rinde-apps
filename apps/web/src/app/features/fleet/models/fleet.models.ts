@@ -89,3 +89,36 @@ export const MAINTENANCE_STATE_LABELS: Record<string, string> = {
   DUE_SOON: 'Mantenimiento Próximo',
   OVERDUE: 'Mantenimiento Vencido',
 };
+
+export type VehicleHistoryItemType = 'TRIP' | 'MAINTENANCE' | 'INCIDENT';
+
+export type VehicleHistoryUnavailableSource = 'TRIP' | 'INCIDENT';
+
+export interface VehicleHistoryItem {
+  readonly type: VehicleHistoryItemType;
+  readonly id: string;
+  readonly date: string;
+  readonly title: string;
+  readonly status: string | null;
+  readonly detail: string | null;
+}
+
+/** Historial unificado devuelto por GET /api/v1/vehicles/{id}/history (contrato C3). */
+export interface VehicleHistory {
+  readonly vehicleId: string;
+  readonly nextMaintenanceDate: string | null;
+  readonly items: readonly VehicleHistoryItem[];
+  readonly partial: boolean;
+  readonly unavailableSources: readonly VehicleHistoryUnavailableSource[];
+}
+
+export interface VehicleHistoryFilters {
+  readonly from?: string;
+  readonly to?: string;
+}
+
+export const VEHICLE_HISTORY_TYPE_LABELS: Readonly<Record<VehicleHistoryItemType, string>> = {
+  TRIP: 'Viaje',
+  MAINTENANCE: 'Mantenimiento',
+  INCIDENT: 'Incidencia',
+};

@@ -234,6 +234,41 @@ El panel de estado compartido centra título, explicación y acción secundaria 
 
 Los avisos flotantes se sitúan a (24px) del borde inferior, centrados, con ancho máximo de (560px) y margen horizontal total de (32px) en pantallas estrechas. Conservan forma de píldora, fondo de tinta y texto blanco; el aviso de peligro usa su par funcional.
 
+### Badges de estado (`app-status-badge`)
+
+Sirve para mostrar un estado operativo o comercial mediante una etiqueta de texto acompañada de un par de color (`neutral`, `success`, `wait` o `danger`). Debe usarse en listados, fichas y resúmenes donde el estado requiera distinción visual rápida sin depender solo del color. No debe usarse sin texto ni como elemento interactivo o botón de filtro.
+
+### Paginación (`app-pagination`)
+
+Sirve para navegar por listas paginadas en base cero (`page`, `size`, `totalItems`) con la leyenda "Página X de Y" y botones de anterior y siguiente con altura táctil mínima de (44px). Debe usarse en bandejas y listados que consumen respuestas paginadas del gateway. No debe usarse en listas cortas que cargan todos sus registros en una sola petición.
+
+### Barra de filtros (`app-filter-bar`)
+
+Sirve como contenedor adaptable para campos de filtro y una acción de limpiar que pasa a una sola columna por debajo de (640px). Debe usarse sobre tablas o listas filtrables por estado, fecha, viaje o conductor. No debe usarse para formularios de creación o edición de entidades.
+
+### Tabla de datos (`app-data-table` y `_tables.scss`)
+
+Sirve para presentar colecciones estructuradas con encabezados claros, filas sobre superficie piedra y números tabulares alineados a la derecha, transformando cada fila en tarjeta apilada con atributo `data-label` por debajo de (768px). Debe usarse en bandejas operativas con múltiples columnas comparables. No debe usarse para fichas clave-valor de un único registro ni para tarjetas narrativas.
+
+### Diálogo de confirmación (`app-confirm-dialog`)
+
+Sirve para confirmar acciones irreversibles como cerrar una liquidación o marcar todas las notificaciones como leídas. Atrapa el foco dentro del diálogo, cierra con la tecla Escape, devuelve el foco al control origen y destaca la acción principal en tinta (`--arc-fill`). Debe usarse solo ante acciones con impacto definitivo. No debe usarse para formularios extensos ni para avisos informativos que no requieren decisión.
+
+### Gráficos en SVG (`app-horizontal-bar-chart` y `app-donut-chart`)
+
+Sirven para visualizar resúmenes operativos mediante barras horizontales y donas construidas con SVG nativo, acompañadas de una tabla equivalente oculta visualmente para lectores de pantalla y un estado vacío cuando no hay valores positivos. Deben usarse en tableros de resumen con series acotadas. No deben usarse para series temporales densas ni sustituir tablas detalladas de auditoría o liquidación.
+
+La asignación de tokens `--arc-*` por orden de serie es la siguiente:
+
+- Serie 1 o tono `primary`: `var(--arc-fill)`.
+- Serie 2 o tono `brand-end`: `var(--arc-brand-end)`.
+- Serie 3 o tono `brand-start`: `var(--arc-brand-start)`.
+- Serie 4 o tono `success`: `var(--arc-success)`.
+- Serie 5 o tono `muted`: `var(--arc-muted)`.
+- Serie 6 o tono `subtle`: `var(--arc-subtle)`.
+- Tonos explícitos adicionales disponibles para estados puntuales: `wait` usa `var(--arc-wait)` y `danger` usa `var(--arc-danger)`.
+- La pista de fondo del riel o dona usa `var(--arc-surface)`.
+
 ## Do's and Don'ts
 
 ### Do:

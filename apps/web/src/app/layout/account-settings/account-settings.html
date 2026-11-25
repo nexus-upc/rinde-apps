@@ -80,6 +80,14 @@
             liquidaciones en un solo lugar.
           </p>
         </div>
+      } @else if (current() === 'security') {
+        <div class="settings__pane">
+          <app-account-security-section />
+        </div>
+      } @else if (current() === 'company') {
+        <div class="settings__pane">
+          <app-company-profile-section [canEdit]="canEditCompany()" />
+        </div>
       } @else if (section().soon; as soon) {
         <div class="settings__pane settings__soon">
           <span class="settings__soon-disc" aria-hidden="true">
@@ -98,8 +106,8 @@
               <strong class="settings__name">{{ profile()?.fullName ?? email() }}</strong>
               <small>{{ email() }}</small>
             </span>
-            <button class="settings__pill" type="button" disabled>Editar perfil, pronto</button>
           </div>
+          <app-account-profile-section [fullName]="profile()?.fullName ?? ''" />
           @if (facts().length) {
             <dl class="settings__facts">
               @for (fact of facts(); track fact.label) {
