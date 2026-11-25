@@ -289,6 +289,52 @@ data class SyncExpensesResponse(
     }
 }
 
+data class ReportIncidentRequest(
+    val type: String,
+    val description: String,
+    val evidenceUrl: String? = null,
+    val idempotencyKey: String,
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("type", type)
+        .put("description", description)
+        .put("evidenceUrl", evidenceUrl ?: JSONObject.NULL)
+        .put("idempotencyKey", idempotencyKey)
+}
+
+data class Incident(
+    val id: String,
+    val tripId: String,
+    val vehicleId: String = "",
+    val reportedBy: String = "",
+    val type: String,
+    val description: String,
+    val evidenceUrl: String? = null,
+    val evidence: EvidenceMetadata? = null,
+    val status: String,
+    val reportedAt: String = "",
+    val updatedAt: String = "",
+) {
+    companion object {
+        fun from(json: JSONObject): Incident {
+            val evidenceJson = if (json.isNull("evidence")) null else json.optJSONObject("evidence")
+            return Incident(
+                id = json.getString("id"),
+                tripId = json.text("tripId"),
+                vehicleId = json.text("vehicleId"),
+                reportedBy = json.text("reportedBy"),
+                type = json.text("type"),
+                description = json.text("description"),
+                evidenceUrl = json.text("evidenceUrl").ifBlank { null },
+                evidence = evidenceJson?.let(EvidenceMetadata::from),
+                status = json.text("status"),
+                reportedAt = json.text("reportedAt"),
+                updatedAt = json.text("updatedAt"),
+            )
+        }
+    }
+}
+
 internal fun JSONObject.text(key: String): String =
     if (!has(key) || isNull(key)) "" else optString(key)
 

@@ -10,6 +10,8 @@ import com.nexus.rinde.mobile.data.local.SessionStore
 import com.nexus.rinde.mobile.data.remote.ApiException
 import com.nexus.rinde.mobile.data.remote.EvidenceMetadata
 import com.nexus.rinde.mobile.data.remote.Expense
+import com.nexus.rinde.mobile.data.remote.Incident
+import com.nexus.rinde.mobile.data.remote.ReportIncidentRequest
 import com.nexus.rinde.mobile.data.remote.RindeRemoteClient
 import com.nexus.rinde.mobile.data.remote.Settlement
 import com.nexus.rinde.mobile.data.remote.SyncExpenseRequest
@@ -191,6 +193,16 @@ class OfflineSyncEngineTest {
             syncedExpensesByKey[match.key] = updated
             return updated
         }
+
+        override suspend fun reportIncident(tripId: String, request: ReportIncidentRequest): Incident =
+            error("unused")
+
+        override suspend fun uploadIncidentEvidence(
+            incidentId: String,
+            file: File,
+            fileName: String,
+            contentType: String,
+        ): Incident = error("unused")
 
         override suspend fun downloadEvidenceBytes(contentUrl: String): ByteArray = ByteArray(0)
     }

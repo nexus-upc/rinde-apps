@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.nexus.rinde.mobile.data.local.CapturedPhoto
 import com.nexus.rinde.mobile.data.local.QueueItemEntity
+import com.nexus.rinde.mobile.data.local.QueueItemType
 import com.nexus.rinde.mobile.data.local.SessionData
 import com.nexus.rinde.mobile.data.remote.ApiException
 import com.nexus.rinde.mobile.data.remote.Expense
@@ -47,6 +48,8 @@ data class TripsUiState(
     val financialSummary: TripFinancialSummary? = null,
     val remoteExpenses: List<Expense> = emptyList(),
     val displayExpenses: List<TripExpenseDisplayItem> = emptyList(),
+    val tripIncidents: List<QueueItemEntity> = emptyList(),
+    val activeSyncKeys: Set<String> = emptySet(),
     val error: String = "",
     val expenseError: String = "",
     val message: String = "",
@@ -145,6 +148,7 @@ class TripsViewModel(
                     financialSummary = null,
                     remoteExpenses = emptyList(),
                     displayExpenses = emptyList(),
+                    tripIncidents = emptyList(),
                     error = "",
                     expenseError = "",
                     message = "",
@@ -201,8 +205,11 @@ class TripsViewModel(
                         queueItems = items,
                         activeSyncKeys = activeKeys,
                     )
+                    val incidents = items.filter { it.queueType == QueueItemType.INCIDENT }
                     current.copy(
                         displayExpenses = merged,
+                        tripIncidents = incidents,
+                        activeSyncKeys = activeKeys,
                         financialSummary = recomputeSummaryIfLoaded(current, merged),
                     )
                 }
@@ -528,6 +535,8 @@ class TripsViewModel(
                 financialSummary = null,
                 remoteExpenses = emptyList(),
                 displayExpenses = emptyList(),
+                tripIncidents = emptyList(),
+                activeSyncKeys = emptySet(),
                 error = "",
                 expenseError = "",
                 message = "",

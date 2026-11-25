@@ -82,12 +82,51 @@ class RindeApi(
         file: File,
         fileName: String,
         contentType: String,
-    ): Expense = withContext(Dispatchers.IO) {
+    ): Expense {
+        val body = postMultipartEvidence(
+            path = "/api/v1/expenses/$expenseId/evidences",
+            file = file,
+            fileName = fileName,
+            fallbackName = "comprobante.jpg",
+            contentType = contentType,
+        )
+        return Expense.from(JSONObject(body))
+    }
+
+    override suspend fun reportIncident(tripId: String, request: ReportIncidentRequest): Incident =
+        Incident.from(
+            JSONObject(
+                request("POST", "/api/v1/trips/$tripId/incidents", request.toJson().toString()),
+            ),
+        )
+
+    override suspend fun uploadIncidentEvidence(
+        incidentId: String,
+        file: File,
+        fileName: String,
+        contentType: String,
+    ): Incident {
+        val body = postMultipartEvidence(
+            path = "/api/v1/incidents/$incidentId/evidences",
+            file = file,
+            fileName = fileName,
+            fallbackName = "incidencia.jpg",
+            contentType = contentType,
+        )
+        return Incident.from(JSONObject(body))
+    }
+
+    private suspend fun postMultipartEvidence(
+        path: String,
+        file: File,
+        fileName: String,
+        fallbackName: String,
+        contentType: String,
+    ): String = withContext(Dispatchers.IO) {
         val boundary = "RindeBoundary-${UUID.randomUUID()}"
         val safeName = fileName.replace("\"", "").replace("\r", "").replace("\n", "")
-            .ifBlank { "comprobante.jpg" }
-        val connection = URI("$server/api/v1/expenses/$expenseId/evidences").toURL()
-            .openConnection() as HttpURLConnection
+            .ifBlank { fallbackName }
+        val connection = URI("$server$path").toURL().openConnection() as HttpURLConnection
         try {
             connection.requestMethod = "POST"
             connection.instanceFollowRedirects = false
@@ -110,8 +149,7 @@ class RindeApi(
                 out.write("\r\n--$boundary--\r\n".toByteArray(Charsets.UTF_8))
                 out.flush()
             }
-            val body = readTextResponse(connection)
-            Expense.from(JSONObject(body))
+            readTextResponse(connection)
         } finally {
             connection.disconnect()
         }

@@ -12,6 +12,7 @@ import com.nexus.rinde.mobile.data.local.RoomQueueStore
 import com.nexus.rinde.mobile.data.local.SessionStore
 import com.nexus.rinde.mobile.data.remote.RindeApi
 import com.nexus.rinde.mobile.data.repository.ExpenseRepository
+import com.nexus.rinde.mobile.data.repository.IncidentRepository
 import com.nexus.rinde.mobile.data.repository.SessionRepository
 import com.nexus.rinde.mobile.data.repository.TripRepository
 import com.nexus.rinde.mobile.sync.NetworkMonitor
@@ -62,6 +63,12 @@ class AppContainer(context: Context) {
     val expenseRepository = ExpenseRepository(
         queueStore = queueStore,
         syncEngine = syncEngine,
+        syncScheduler = syncScheduler,
+        deletePhotoFile = photoStore::deletePhoto,
+    )
+
+    val incidentRepository = IncidentRepository(
+        queueStore = queueStore,
         syncScheduler = syncScheduler,
         deletePhotoFile = photoStore::deletePhoto,
     )

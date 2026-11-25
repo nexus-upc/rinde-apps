@@ -19,5 +19,12 @@ interface RindeRemoteClient {
         fileName: String,
         contentType: String = "image/jpeg",
     ): Expense
+    suspend fun reportIncident(tripId: String, request: ReportIncidentRequest): Incident
+    suspend fun uploadIncidentEvidence(
+        incidentId: String,
+        file: File,
+        fileName: String,
+        contentType: String = "image/jpeg",
+    ): Incident
     suspend fun downloadEvidenceBytes(contentUrl: String): ByteArray
 }

@@ -16,6 +16,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.nexus.rinde.mobile.data.local.IncidentQueuePayload
+import com.nexus.rinde.mobile.data.local.QueueItemEntity
 import com.nexus.rinde.mobile.data.local.QueueItemStatus
 import com.nexus.rinde.mobile.data.remote.Trip
 import com.nexus.rinde.mobile.data.remote.TripAdvance
@@ -27,6 +29,7 @@ import com.nexus.rinde.mobile.ui.common.backendStatusLabel
 import com.nexus.rinde.mobile.ui.common.categoryLabel
 import com.nexus.rinde.mobile.ui.common.deliveryMethodLabel
 import com.nexus.rinde.mobile.ui.common.formatMoney
+import com.nexus.rinde.mobile.ui.common.incidentTypeLabel
 import com.nexus.rinde.mobile.ui.common.localTime
 import com.nexus.rinde.mobile.ui.common.queueStatusLabel
 import com.nexus.rinde.mobile.ui.common.settlementStatusLabel
@@ -46,8 +49,11 @@ fun TripDetailScreen(
     isOnline: Boolean,
     expenseError: String,
     expenses: List<TripExpenseDisplayItem>,
+    tripIncidents: List<QueueItemEntity>,
+    activeSyncKeys: Set<String>,
     onRequestStatusChange: (String) -> Unit,
     onOpenExpenseForm: () -> Unit,
+    onOpenIncidentForm: () -> Unit,
     onAttachPhotoToExpense: (remoteId: String) -> Unit,
     onViewEvidence: (TripExpenseDisplayItem) -> Unit,
 ) {
@@ -141,6 +147,13 @@ fun TripDetailScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Registrar gasto")
+            }
+            OutlinedButton(
+                onClick = onOpenIncidentForm,
+                enabled = !busy,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Reportar incidencia")
             }
             OutlinedButton(
                 onClick = { onRequestStatusChange("finish") },
@@ -288,6 +301,54 @@ fun TripDetailScreen(
                         Text(
                             localTime(change.changedAt),
                             style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (tripIncidents.isNotEmpty()) {
+        Text("Incidencias del viaje", style = MaterialTheme.typography.titleLarge)
+        tripIncidents.forEach { incident ->
+            val payload = IncidentQueuePayload.fromJson(incident.payloadJson)
+            val syncing = activeSyncKeys.contains(incident.idempotencyKey)
+            val statusText = queueStatusLabel(incident.queueStatus, isOnline, syncing)
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(14.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        Text(
+                            incidentTypeLabel(payload.type),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        Text(
+                            statusText,
+                            style = MaterialTheme.typography.labelMedium,
+                            color = if (incident.queueStatus == QueueItemStatus.REJECTED) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            },
+                        )
+                    }
+                    Text(payload.description, style = MaterialTheme.typography.bodyMedium)
+                    if (!incident.photoFileName.isNullOrBlank()) {
+                        Text(
+                            "Foto local: ${incident.photoFileName}",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    if (incident.errorMessage.isNotBlank()) {
+                        Text(
+                            incident.errorMessage,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.error,
                         )
                     }
                 }
