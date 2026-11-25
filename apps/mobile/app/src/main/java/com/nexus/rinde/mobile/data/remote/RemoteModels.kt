@@ -335,6 +335,15 @@ data class Incident(
     }
 }
 
+data class RegisterDeviceRequest(
+    val token: String,
+    val platform: String = "ANDROID",
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("token", token)
+        .put("platform", platform)
+}
+
 internal fun JSONObject.text(key: String): String =
     if (!has(key) || isNull(key)) "" else optString(key)
 

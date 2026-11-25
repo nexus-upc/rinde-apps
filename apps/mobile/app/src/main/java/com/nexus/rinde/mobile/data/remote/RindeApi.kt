@@ -9,6 +9,8 @@ import java.io.File
 import java.io.FileInputStream
 import java.net.HttpURLConnection
 import java.net.URI
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.util.UUID
 
 class RindeApi(
@@ -187,6 +189,18 @@ class RindeApi(
                 connection.disconnect()
             }
         }
+
+    override suspend fun registerDevice(request: RegisterDeviceRequest) {
+        request("POST", "/api/v1/notifications/devices", request.toJson().toString())
+    }
+
+    override suspend fun removeDevice(token: String) {
+        require(token.isNotBlank()) { "El token del dispositivo es obligatorio." }
+        request("DELETE", "/api/v1/notifications/devices/${encodePathSegment(token)}")
+    }
+
+    private fun encodePathSegment(segment: String): String =
+        URLEncoder.encode(segment, StandardCharsets.UTF_8.name()).replace("+", "%20")
 
     private fun readTextResponse(connection: HttpURLConnection): String {
         val status = connection.responseCode

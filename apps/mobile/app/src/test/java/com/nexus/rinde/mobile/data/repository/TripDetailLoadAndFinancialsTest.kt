@@ -7,6 +7,7 @@ import com.nexus.rinde.mobile.data.local.SessionData
 import com.nexus.rinde.mobile.data.remote.ApiException
 import com.nexus.rinde.mobile.data.remote.Expense
 import com.nexus.rinde.mobile.data.remote.Incident
+import com.nexus.rinde.mobile.data.remote.RegisterDeviceRequest
 import com.nexus.rinde.mobile.data.remote.ReportIncidentRequest
 import com.nexus.rinde.mobile.data.remote.RindeRemoteClient
 import com.nexus.rinde.mobile.data.remote.Settlement
@@ -124,6 +125,8 @@ class TripDetailLoadAndFinancialsTest {
         ): Incident = error("unused")
 
         override suspend fun downloadEvidenceBytes(contentUrl: String): ByteArray = ByteArray(0)
+        override suspend fun registerDevice(request: RegisterDeviceRequest) = Unit
+        override suspend fun removeDevice(token: String) = Unit
     }
 
     private val session = SessionData(

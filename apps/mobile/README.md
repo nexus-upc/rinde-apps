@@ -42,6 +42,18 @@ Para probar en un teléfono conectado por USB con depuración autorizada, puede 
 
 El script devuelve 2 si el registro de gasto falla, aunque el ciclo de viajes haya pasado. Revisar results.json para distinguir el recorrido correcto de la integración pendiente. No se presenta ese resultado parcial como una suite completa en verde.
 
+## Notificaciones push con FCM
+
+La aplicación incluye el servicio de Firebase Cloud Messaging, el canal de notificaciones "Asignación de viajes", el registro del dispositivo en el backend y la solicitud no bloqueante del permiso `POST_NOTIFICATIONS` en Android 13 o superior.
+
+El plugin `com.google.gms.google-services` solo se aplica en Gradle cuando existe el archivo local `app/google-services.json`, por lo que `assembleDebug`, `testDebugUnitTest` y `lintDebug` funcionan sin secretos en el repositorio.
+
+Para probar notificaciones reales con FCM en local:
+
+1. Descargar el archivo `google-services.json` del proyecto de Firebase configurado para el paquete `com.nexus.rinde.mobile` (el mismo proyecto usado por `RINDE_FCM_CREDENTIALS_JSON` en `rinde-backend`).
+2. Copiarlo en `apps/mobile/app/google-services.json`. El archivo está ignorado en `.gitignore` y no debe subirse al repositorio.
+3. Compilar e instalar nuevamente en un dispositivo o emulador con Google Play Services.
+
 ## Pendientes
 
 Incidencias con foto en la cola sin conexión, detalle de adelanto, saldo y liquidación del viaje, mapa, GPS y actualización automática en tiempo real. El piloto no acredita esas historias como terminadas. El alcance visual está en DESIGN.md.

@@ -1,7 +1,11 @@
 package com.nexus.rinde.mobile
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.os.Build
 import android.os.Bundle
+import androidx.core.content.ContextCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -149,7 +153,14 @@ private fun RindeAppRoot() {
     var pendingCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
     var pendingCameraCacheFile by remember { mutableStateOf<File?>(null) }
     var pendingPhotoTarget by remember { mutableStateOf<PhotoCaptureTarget?>(null) }
+    var requestedNotificationPermissionForUser by rememberSaveable { mutableStateOf<String?>(null) }
     val scroll = rememberScrollState()
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { _ ->
+        // El permiso es opcional y no bloquea la operación sin conexión
+    }
 
     val handlePickedImage: (android.net.Uri, String?, File?, PhotoCaptureTarget?) -> Unit =
         { uri, suggestedName, cacheFile, target ->
@@ -222,12 +233,26 @@ private fun RindeAppRoot() {
     }
 
     LaunchedEffect(authState.session) {
-        tripsModel.bindSession(authState.session)
-        queueModel.bindSession(authState.session)
-        if (authState.session != null && isOnline) {
-            queueModel.triggerSync(manual = false)
-        }
-        if (authState.session == null) {
+        val session = authState.session
+        tripsModel.bindSession(session)
+        queueModel.bindSession(session)
+        if (session != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) != PackageManager.PERMISSION_GRANTED &&
+                requestedNotificationPermissionForUser != session.userId
+            ) {
+                requestedNotificationPermissionForUser = session.userId
+                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            if (isOnline) {
+                queueModel.triggerSync(manual = false)
+            } else {
+                container.pushDeviceRepository.ensurePendingScheduled(session)
+            }
+        } else {
             activeTab = MobileTab.TRIPS
         }
     }

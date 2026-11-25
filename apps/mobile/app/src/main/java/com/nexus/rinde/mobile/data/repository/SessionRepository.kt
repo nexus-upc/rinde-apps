@@ -20,6 +20,7 @@ class SessionRepository(
     private val queueStore: QueueStore,
     private val remoteFactory: (server: String, token: String) -> RindeRemoteClient,
     private val syncScheduler: SyncScheduler,
+    private val pushDeviceRepository: PushDeviceRepository? = null,
     private val clockSeconds: () -> Long = { System.currentTimeMillis() / 1000L },
 ) {
     suspend fun restoreSession(): SessionRestoreResult {
@@ -27,10 +28,12 @@ class SessionRepository(
         if (saved.isExpired(clockSeconds())) {
             // La cola local nunca se borra cuando vence la sesión
             val pending = queueStore.countPending(saved.userId)
+            pushDeviceRepository?.clearRegistrationState()
             sessionStore.clear()
             return SessionRestoreResult.Expired(email = saved.email, pendingCount = pending)
         }
         if (saved.role != DRIVER_ROLE) {
+            pushDeviceRepository?.clearRegistrationState()
             sessionStore.clear()
             return SessionRestoreResult.None
         }
@@ -57,6 +60,7 @@ class SessionRepository(
             expiresAtEpochSeconds = claims.expiresAtEpochSeconds,
         )
         sessionStore.save(session)
+        pushDeviceRepository?.syncRegistrationIfNeeded(session)
         syncScheduler.scheduleWhenOnline()
         return session
     }
@@ -65,7 +69,21 @@ class SessionRepository(
 
     suspend fun pendingCount(userId: String): Int = queueStore.countPending(userId)
 
-    fun signOutKeepingQueue() {
+    suspend fun signOutKeepingQueue() {
+        val current = sessionStore.read()
+        try {
+            if (current != null) {
+                pushDeviceRepository?.unregisterOnSignOut(current)
+            } else {
+                pushDeviceRepository?.clearRegistrationState()
+            }
+        } finally {
+            sessionStore.clear()
+        }
+    }
+
+    fun clearExpiredSessionKeepingQueue() {
+        pushDeviceRepository?.clearRegistrationState()
         sessionStore.clear()
     }
 
