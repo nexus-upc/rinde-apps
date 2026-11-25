@@ -29,7 +29,7 @@ npm run check:architecture
 npm start -- --host 127.0.0.1
 ```
 
-El servidor web usa http://localhost:4200 y consume el gateway en http://localhost:8000. El acceso del dueño está en /platform/sign-in. Los secretos del backend no forman parte de este repositorio. La documentación de la aplicación y del diseño está en apps/web/README.md, apps/web/docs y apps/web/DESIGN.md.
+El servidor web usa http://localhost:4200 y consume el gateway en http://localhost:8000. El acceso del dueño está en /platform/sign-in. Los secretos del backend no forman parte de este repositorio. La documentación de la aplicación está en apps/web/README.md y apps/web/docs; la identidad visual definitiva de la web está pendiente de definirse y por ahora las pantallas priorizan funcionalidad completa, estructura limpia con grid y estados vacío, carga y error.
 
 npm run check conserva las comprobaciones de arquitectura, pruebas unitarias y build. npm run test:platform y npm run test:mailbox ejecutan las comprobaciones de navegador del panel del dueño y del buzón de demostración. Requieren su entorno de backend de prueba configurado; no son necesarias para compilar.
 

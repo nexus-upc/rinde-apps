@@ -68,9 +68,7 @@ La explicación y las reglas están en [docs/frontend-architecture.md](docs/fron
 
 ## Estilo
 
-Se usa el estilo Arcadia, tema claro Piedra. Los tokens están en `src/styles/_tokens.scss` con el prefijo `--arc-`, y los componentes solo los usan: ningún color hexadecimal fuera de ese archivo. La fuente es DM Sans Variable, servida desde el paquete `@fontsource-variable/dm-sans` (sin CDN). Los títulos pesan 600 y el resto, 500 como máximo.
-
-Desde 1100 px, el acceso tiene dos columnas, con una vista decorativa del Inicio que no recibe foco y no se monta en pantallas menores. El menú lateral va sobre el mismo fondo que la página (`--arc-bg`), sin línea divisoria, y el rojo `--arc-danger` se reserva para los errores.
+La identidad visual definitiva de la aplicación web está pendiente de definirse, por lo que se retiró la guía anterior (`DESIGN.md`). Por ahora las pantallas priorizan funcionalidad completa, estructura limpia con grid y estados vacío, carga y error. Los tokens base disponibles siguen en `src/styles/_tokens.scss` con el prefijo `--arc-`, sin colores hexadecimales dispersos en los componentes.
 
 ## Suscripción
 
@@ -95,7 +93,7 @@ El dueño ingresa por /platform/sign-in. Tiene un espacio propio para empresas, 
 
 Las acciones de acceso y catálogo piden un motivo. Suspender una empresa impide usar también los tokens que ya tenía abiertos. Restablecer su acceso conserva las restricciones comerciales de la suscripción. Los precios de un plan existente no se editan: se crea otro plan y se retira el anterior, para conservar las condiciones de quienes ya lo contrataron. Los pagos están identificados como simulados.
 
-La funcionalidad platform conserva models, data-access, state, pages y ui. El marco y la navegación de plataforma están separados del marco de empresa. La sesión identifica el ámbito y evita consultar /users/me con una identidad de plataforma. DESIGN.md describe los tokens y patrones Arcadia existentes y su extensión.
+La funcionalidad platform conserva models, data-access, state, pages y ui. El marco y la navegación de plataforma están separados del marco de empresa. La sesión identifica el ámbito y evita consultar /users/me con una identidad de plataforma. Mientras se define la identidad visual definitiva, estas vistas priorizan funcionalidad completa, estructura limpia con grid y estados vacío, carga y error.
 
 ## Buzón de demostración
 
