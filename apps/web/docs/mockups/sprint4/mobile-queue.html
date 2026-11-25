@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Móvil: Cola sin conexión | Rinde Mockup</title>
+    <link rel="stylesheet" href="./mockups.css" />
+  </head>
+  <body class="mobile-stage">
+    <nav class="mobile-stage__nav" aria-label="Pantallas móviles">
+      <a class="ui-button ui-button--secondary" href="./index.html">Índice</a>
+      <a class="ui-button ui-button--secondary" href="./mobile-trip.html">Viaje</a>
+      <a class="ui-button ui-button--secondary" href="./mobile-expense.html">Gasto</a>
+    </nav>
+
+    <div class="phone-frame" role="region" aria-label="Cola sin conexión del conductor">
+      <header class="phone-topbar">
+        <a class="phone-topbar__back" href="./mobile-trip.html" aria-label="Volver al viaje">&lt;</a>
+        <div class="phone-topbar__title">
+          <h1>Cola sin conexión</h1>
+          <span>3 registros pendientes de envío</span>
+        </div>
+        <span class="status-badge status-badge--wait">En espera</span>
+      </header>
+
+      <main class="phone-body">
+        <div class="form-wait" role="status">
+          Los gastos e incidencias se conservan tras cerrar o reiniciar el teléfono y se envían con
+          clave única sin duplicarse.
+        </div>
+
+        <article class="mobile-card">
+          <div class="onboarding__step-top">
+            <strong>Gasto: Combustible</strong>
+            <span class="status-badge status-badge--wait">En espera de señal</span>
+          </div>
+          <p class="field__hint tabular">Viaje TRP-000014 | S/ 180.50 | 2026-11-25</p>
+          <span class="field__hint">Foto recibo-combustible.jpg guardada en dispositivo</span>
+          <button class="ui-button ui-button--secondary ui-button--block" type="button">
+            Reintentar envío
+          </button>
+        </article>
+
+        <article class="mobile-card">
+          <div class="onboarding__step-top">
+            <strong>Incidencia: avería</strong>
+            <span class="status-badge status-badge--danger">Error al enviar</span>
+          </div>
+          <p class="field__hint">Viaje TRP-000014 | Freno neumático | Con foto adjunta</p>
+          <p class="field__error">Tiempo de espera agotado al conectar con el servidor.</p>
+          <button class="ui-button ui-button--secondary ui-button--block" type="button">
+            Reintentar envío
+          </button>
+        </article>
+
+        <article class="mobile-card">
+          <div class="onboarding__step-top">
+            <strong>Gasto: Peaje Chimbote</strong>
+            <span class="status-badge status-badge--neutral">Subiendo foto</span>
+          </div>
+          <p class="field__hint tabular">Viaje TRP-000014 | S/ 32.00 | 2026-11-25</p>
+          <span class="field__hint">Gasto sincronizado, subiendo comprobante 1 de 1</span>
+        </article>
+
+        <button class="ui-button ui-button--primary ui-button--block" type="button">
+          Reintentar todo (3)
+        </button>
+      </main>
+
+      <nav class="phone-bottombar" aria-label="Navegación móvil">
+        <a href="./mobile-trip.html">Viaje</a>
+        <a href="./mobile-expense.html">Gasto</a>
+        <a class="is-active" href="./mobile-queue.html" aria-current="page">Cola (3)</a>
+      </nav>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bandeja de gastos | Rinde Mockup</title>
+    <link rel="stylesheet" href="./mockups.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="shell__sidebar" aria-label="Navegación lateral">
+        <a class="shell__brand" href="./index.html">
+          <span class="shell__brand-mark" aria-hidden="true">R</span>
+          <span>Rinde</span>
+        </a>
+
+        <div class="shell__company">
+          <span class="shell__company-disc" aria-hidden="true"></span>
+          <span class="shell__stack">
+            <span class="shell__strong">Transportes Andes SAC</span>
+            <span class="shell__soft">Responsable de operaciones</span>
+          </span>
+        </div>
+
+        <nav class="shell__nav" aria-label="Principal">
+          <div class="shell__group">
+            <span class="shell__group-label">Hoy</span>
+            <a class="shell__link" href="./home.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M4 11 12 4l8 7M6 9.5V20h12V9.5M10 20v-5h4v5" />
+              </svg>
+              <span>Inicio</span>
+            </a>
+            <a class="shell__link" href="./trip-detail.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM18 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM8 17h7.5a3 3 0 0 0 0-6h-7a3 3 0 0 1 0-6H16" />
+              </svg>
+              <span>Viajes</span>
+            </a>
+            <a class="shell__link shell__link--active" href="./expenses-inbox.html" aria-current="page">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3" />
+              </svg>
+              <span>Gastos</span>
+            </a>
+          </div>
+
+          <div class="shell__group">
+            <span class="shell__group-label">Operación</span>
+            <a class="shell__link" href="./vehicle.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M3 6h11v10H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+              </svg>
+              <span>Flota</span>
+            </a>
+            <a class="shell__link" href="./index.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4 21a8 8 0 0 1 16 0" />
+              </svg>
+              <span>Conductores</span>
+            </a>
+            <a class="shell__link" href="./trip-detail.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7 3h8l4 4v14H7zM15 3v4h4M10 14l2 2 4-4" />
+              </svg>
+              <span>Liquidaciones</span>
+            </a>
+            <a class="shell__link" href="./vehicle.html">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 4 2.5 20h19zM12 10v4M12 17v.01" />
+              </svg>
+              <span>Incidencias</span>
+            </a>
+          </div>
+        </nav>
+
+        <div class="shell__footer">
+          <!-- Componente compartido: app-notification-bell -->
+          <a class="notification-bell" href="./notifications.html" aria-label="Centro de notificaciones, 3 sin leer">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0" />
+            </svg>
+            <span class="notification-bell__label">Avisos</span>
+            <span class="notification-bell__count">3</span>
+          </a>
+          <a class="shell__user" href="./account.html">
+            <span class="shell__avatar" aria-hidden="true">CM</span>
+            <span class="shell__stack">
+              <span class="shell__strong">Carlos Mendoza</span>
+              <span class="shell__soft">cmendoza@andes.pe</span>
+            </span>
+          </a>
+        </div>
+      </aside>
+
+      <main class="shell__content">
+        <div class="page-stack">
+          <!-- Componente compartido: app-page-header -->
+          <header class="page-header">
+            <div>
+              <div class="page-header__heading">
+                <h1>Bandeja de gastos</h1>
+                <span class="status-badge status-badge--wait">12 por revisar</span>
+              </div>
+              <p>
+                Revisa todos los comprobantes de la empresa desde un solo listado, sin buscar
+                identificadores internos.
+              </p>
+            </div>
+          </header>
+
+          <!-- Componente compartido: app-filter-bar -->
+          <section class="filter-bar" aria-label="Filtros de gastos">
+            <div class="filter-bar__fields">
+              <label class="field">
+                <span class="field__label">Estado</span>
+                <select class="field__select">
+                  <option value="">Todos</option>
+                  <option selected value="REGISTERED,PENDING_SUPPORT">Por revisar</option>
+                  <option value="APPROVED">Aprobado</option>
+                  <option value="OBSERVED">Observado</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Viaje</span>
+                <select class="field__select">
+                  <option selected value="">Todos los viajes</option>
+                  <option value="trp-14">TRP-000014 (Lima a Trujillo)</option>
+                  <option value="trp-13">TRP-000013 (Lima a Arequipa)</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Conductor</span>
+                <select class="field__select">
+                  <option selected value="">Todos los conductores</option>
+                  <option value="luis">Luis Quispe Mamani</option>
+                  <option value="jorge">Jorge Paredes Silva</option>
+                </select>
+              </label>
+
+              <label class="field">
+                <span class="field__label">Desde</span>
+                <input class="field__input" type="date" value="2026-11-01" />
+              </label>
+
+              <label class="field">
+                <span class="field__label">Hasta</span>
+                <input class="field__input" type="date" value="2026-11-30" />
+              </label>
+            </div>
+
+            <div class="filter-bar__actions">
+              <button class="ui-button ui-button--ghost" type="button">Limpiar filtros</button>
+            </div>
+          </section>
+
+          <div class="split-grid">
+            <section class="page-stack" aria-label="Listado de gastos">
+              <!-- Componente compartido: app-data-table -->
+              <div class="arc-table-wrap">
+                <table class="arc-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Viaje</th>
+                      <th>Conductor</th>
+                      <th>Categoría</th>
+                      <th>Estado</th>
+                      <th class="arc-table__num">Monto</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="is-selected" aria-selected="true">
+                      <td data-label="Fecha" class="tabular arc-table__nowrap">2026-11-20</td>
+                      <td data-label="Viaje" class="mono arc-table__nowrap">TRP-000014</td>
+                      <td data-label="Conductor">Luis Quispe</td>
+                      <td data-label="Categoría" class="arc-table__nowrap">Combustible</td>
+                      <td data-label="Estado">
+                        <span class="status-badge status-badge--wait">Registrado</span>
+                      </td>
+                      <td data-label="Monto" class="arc-table__num arc-table__nowrap">S/ 180.50</td>
+                    </tr>
+                    <tr>
+                      <td data-label="Fecha" class="tabular arc-table__nowrap">2026-11-19</td>
+                      <td data-label="Viaje" class="mono arc-table__nowrap">TRP-000013</td>
+                      <td data-label="Conductor">Jorge Paredes</td>
+                      <td data-label="Categoría" class="arc-table__nowrap">Hospedaje</td>
+                      <td data-label="Estado">
+                        <span class="status-badge status-badge--wait">Sin sustento</span>
+                      </td>
+                      <td data-label="Monto" class="arc-table__num arc-table__nowrap">S/ 145.00</td>
+                    </tr>
+                    <tr>
+                      <td data-label="Fecha" class="tabular arc-table__nowrap">2026-11-18</td>
+                      <td data-label="Viaje" class="mono arc-table__nowrap">TRP-000012</td>
+                      <td data-label="Conductor">Luis Quispe</td>
+                      <td data-label="Categoría" class="arc-table__nowrap">Peajes</td>
+                      <td data-label="Estado">
+                        <span class="status-badge status-badge--wait">Registrado</span>
+                      </td>
+                      <td data-label="Monto" class="arc-table__num arc-table__nowrap">S/ 84.00</td>
+                    </tr>
+                    <tr>
+                      <td data-label="Fecha" class="tabular arc-table__nowrap">2026-11-17</td>
+                      <td data-label="Viaje" class="mono arc-table__nowrap">TRP-000011</td>
+                      <td data-label="Conductor">Jorge Paredes</td>
+                      <td data-label="Categoría" class="arc-table__nowrap">Alimentación</td>
+                      <td data-label="Estado">
+                        <span class="status-badge status-badge--wait">Registrado</span>
+                      </td>
+                      <td data-label="Monto" class="arc-table__num arc-table__nowrap">S/ 62.00</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Componente compartido: app-pagination -->
+              <nav class="pagination" aria-label="Paginación de gastos">
+                <button class="ui-button ui-button--secondary" type="button" disabled>Anterior</button>
+                <span class="pagination__summary">Página 1 de 3 (12 gastos)</span>
+                <button class="ui-button ui-button--secondary" type="button">Siguiente</button>
+              </nav>
+            </section>
+
+            <aside class="surface-card" aria-labelledby="selected-expense-title">
+              <div class="section-head">
+                <div>
+                  <h2 id="selected-expense-title">Combustible (S/ 180.50)</h2>
+                  <p class="field__hint">Viaje TRP-000014 | Luis Quispe Mamani</p>
+                </div>
+                <span class="status-badge status-badge--wait">Registrado</span>
+              </div>
+
+              <div class="proof-box" aria-label="Vista previa del comprobante">
+                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="var(--arc-fill)" stroke-width="1.6" aria-hidden="true">
+                  <rect x="4" y="3" width="16" height="18" rx="2" />
+                  <path d="M8 8h8M8 12h8M8 16h5" />
+                </svg>
+                <strong>Comprobante: recibo-combustible.jpg</strong>
+                <span class="field__hint">JPEG | 200 KB | Subido el 20 nov, 14:05</span>
+              </div>
+
+              <label class="field">
+                <span class="field__label">Motivo (obligatorio al observar)</span>
+                <textarea
+                  class="field__textarea"
+                  placeholder="Indica qué falta o qué debe corregir el conductor..."
+                ></textarea>
+              </label>
+
+              <div class="page-header__actions">
+                <button class="ui-button ui-button--primary" type="button" id="open-approve-dialog">
+                  Aprobar gasto
+                </button>
+                <button class="ui-button ui-button--secondary" type="button">Observar gasto</button>
+              </div>
+            </aside>
+          </div>
+
+          <!-- Componente compartido: app-confirm-dialog -->
+          <dialog id="approve-dialog" class="confirm-dialog" aria-labelledby="approve-title">
+            <div class="confirm-dialog__surface">
+              <header class="confirm-dialog__header">
+                <h2 id="approve-title">Aprobar gasto seleccionado</h2>
+                <button class="ui-button ui-button--ghost" type="button" id="close-approve-dialog" aria-label="Cerrar diálogo">
+                  Cerrar
+                </button>
+              </header>
+              <p class="field__hint">
+                Se aprobará el gasto de combustible por S/ 180.50 del viaje TRP-000014 y se sumará
+                al total de la liquidación.
+              </p>
+              <footer class="confirm-dialog__footer">
+                <button class="ui-button ui-button--secondary" type="button" id="cancel-approve-dialog">
+                  Cancelar
+                </button>
+                <button class="ui-button ui-button--primary" type="button" id="confirm-approve-dialog">
+                  Confirmar aprobación
+                </button>
+              </footer>
+            </div>
+          </dialog>
+
+          <!-- Estados compartidos (app-state-panel) -->
+          <section class="states-section" aria-labelledby="states-expenses">
+            <div class="section-head">
+              <h2 id="states-expenses">Estados</h2>
+            </div>
+            <div class="states-grid">
+              <article class="state-card">
+                <span class="status-badge status-badge--neutral">Estado vacío</span>
+                <div class="state-panel" role="status">
+                  <span class="state-panel__disc" aria-hidden="true">0</span>
+                  <h3>Sin gastos para estos filtros</h3>
+                  <p>
+                    Ningún gasto coincide con el estado, conductor o fechas elegidas. Limpia los
+                    filtros para ver toda la bandeja.
+                  </p>
+                  <button class="ui-button ui-button--secondary" type="button">Limpiar filtros</button>
+                </div>
+              </article>
+
+              <article class="state-card">
+                <span class="status-badge status-badge--wait">Estado cargando</span>
+                <div class="state-panel" role="status">
+                  <div class="skeleton-stack">
+                    <div class="skeleton-bar skeleton-bar--wide"></div>
+                    <div class="skeleton-bar"></div>
+                    <div class="skeleton-bar skeleton-bar--short"></div>
+                  </div>
+                  <h3>Cargando gastos de la empresa</h3>
+                  <p>Obteniendo gastos y comprobantes adjuntos.</p>
+                </div>
+              </article>
+
+              <article class="state-card">
+                <span class="status-badge status-badge--danger">Estado error</span>
+                <div class="state-panel state-panel--error" role="alert">
+                  <span class="state-panel__disc" aria-hidden="true">!</span>
+                  <h3>No pudimos cargar la bandeja</h3>
+                  <p>Ocurrió un error al consultar el servicio de gastos. Reintenta en unos segundos.</p>
+                  <button class="ui-button ui-button--secondary" type="button">Reintentar</button>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      const dialog = document.getElementById('approve-dialog');
+      document.getElementById('open-approve-dialog').addEventListener('click', () => dialog.showModal());
+      for (const id of ['close-approve-dialog', 'cancel-approve-dialog', 'confirm-approve-dialog']) {
+        document.getElementById(id).addEventListener('click', () => dialog.close());
+      }
+    </script>
+  </body>
+</html>
