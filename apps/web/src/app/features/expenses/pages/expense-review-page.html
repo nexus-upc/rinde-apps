@@ -1,88 +1,157 @@
-<div class="expense-review-page">
+<div class="expenses-inbox">
   <app-page-header
-    title="Revisión y Resumen de Gastos"
-    description="Auditoría, aprobación, observación y resumen por estado de comprobantes del viaje."
+    title="Bandeja de gastos"
+    description="Revisa todos los comprobantes de la empresa desde un solo listado, sin buscar identificadores internos."
   >
-    <div class="header-actions">
-      @if (store.tripId()) {
-        <a
-          uiButton
-          variant="secondary"
-          [routerLink]="['/settlements']"
-          [queryParams]="{ tripId: store.tripId() }"
-        >
-          Ver liquidación
-        </a>
-      }
-      <button uiButton variant="secondary" type="button" (click)="goBack()">
-        Volver a Viajes
-      </button>
-    </div>
+    @if (store.headerBadgeLabel()) {
+      <app-status-badge
+        [tone]="store.statusFilter() === 'REGISTERED,PENDING_SUPPORT' ? 'wait' : 'neutral'"
+        [label]="store.headerBadgeLabel()"
+      />
+    }
   </app-page-header>
 
-  <section class="trip-search-bar">
-    <label for="trip-search-input" class="search-label">ID del Viaje:</label>
-    <div class="search-input-group">
-      <input
-        id="trip-search-input"
-        type="text"
-        class="search-input"
-        placeholder="Ejemplo: 3fa85f64-5717-4562-b3fc-2c963f66afa6"
-        [ngModel]="inputTripId()"
-        (ngModelChange)="inputTripId.set($event)"
-        (keyup.enter)="searchTrip()"
-      />
-      <button
-        uiButton
-        variant="primary"
-        type="button"
-        [disabled]="!inputTripId().trim() || store.state() === 'loading'"
-        (click)="searchTrip()"
+  <app-filter-bar
+    ariaLabel="Filtros de gastos"
+    [canClear]="store.hasActiveFilters()"
+    (cleared)="onClearFilters()"
+  >
+    <label class="field">
+      <span class="field__label">Estado</span>
+      <select class="field__select" [value]="store.statusFilter()" (change)="onStatusChange($event)">
+        @for (option of statusOptions; track option.value) {
+          <option [value]="option.value" [selected]="option.value === store.statusFilter()">
+            {{ option.label }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Viaje</span>
+      <select class="field__select" [value]="store.tripIdFilter()" (change)="onTripChange($event)">
+        <option value="" [selected]="store.tripIdFilter() === ''">Todos los viajes</option>
+        @if (store.tripIdFilter() && !store.tripLabelsById()[store.tripIdFilter()]) {
+          <option [value]="store.tripIdFilter()" selected>Viaje seleccionado</option>
+        }
+        @for (trip of store.trips(); track trip.id) {
+          <option [value]="trip.id" [selected]="trip.id === store.tripIdFilter()">
+            {{ store.tripLabelsById()[trip.id] }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Conductor</span>
+      <select
+        class="field__select"
+        [value]="store.driverIdFilter()"
+        (change)="onDriverChange($event)"
       >
-        Buscar Gastos
-      </button>
-    </div>
-  </section>
+        <option value="" [selected]="store.driverIdFilter() === ''">Todos los conductores</option>
+        @for (driver of store.selectableDrivers(); track driver.id) {
+          <option [value]="driver.userId" [selected]="driver.userId === store.driverIdFilter()">
+            {{ driver.fullName }}
+          </option>
+        }
+      </select>
+    </label>
+
+    <label class="field">
+      <span class="field__label">Desde</span>
+      <input
+        class="field__input"
+        type="date"
+        [value]="store.fromFilter()"
+        (change)="onFromChange($event)"
+      />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Hasta</span>
+      <input
+        class="field__input"
+        type="date"
+        [value]="store.toFilter()"
+        (change)="onToChange($event)"
+      />
+    </label>
+  </app-filter-bar>
 
   @if (store.state() === 'loading') {
-    <app-state-panel
-      title="Cargando comprobantes"
-      message="Obteniendo la lista de gastos registrados para el viaje..."
-    />
+    <section class="inbox-loading" role="status" aria-live="polite">
+      <div class="inbox-loading__skeleton" aria-hidden="true">
+        <span class="inbox-loading__bar inbox-loading__bar--wide"></span>
+        <span class="inbox-loading__bar"></span>
+        <span class="inbox-loading__bar inbox-loading__bar--short"></span>
+      </div>
+      <h2>Cargando gastos de la empresa</h2>
+      <p>Obteniendo gastos y comprobantes adjuntos.</p>
+    </section>
   } @else if (store.state() === 'error') {
     <app-state-panel
-      [error]="true"
-      title="Error al consultar gastos"
+      title="No pudimos cargar la bandeja"
       [message]="store.error()"
       actionLabel="Reintentar"
+      [error]="true"
       (action)="retry()"
-    />
-  } @else if (store.state() === 'ready') {
-    <app-expense-trip-summary [summary]="store.tripSummary()" />
-
-    <section class="table-section">
-      <app-expense-table
-        [expenses]="store.expenses()"
-        [busy]="store.busy()"
-        (reviewExpense)="onReviewExpense($event)"
-        (quickApprove)="onQuickApprove($event)"
-      />
-    </section>
+    >
+      !
+    </app-state-panel>
+  } @else if (store.expenses().length === 0) {
+    <app-state-panel
+      title="Sin gastos para estos filtros"
+      message="Ningún gasto coincide con el estado, viaje, conductor o fechas elegidas. Limpia los filtros para ver toda la bandeja."
+      [actionLabel]="store.hasActiveFilters() ? 'Limpiar filtros' : ''"
+      (action)="onClearFilters()"
+    >
+      0
+    </app-state-panel>
   } @else {
-    <div class="idle-placeholder">
-      <p>Ingresa el identificador de un viaje para comenzar la revisión de comprobantes.</p>
+    <div class="inbox-grid">
+      <section class="inbox-grid__list" aria-label="Listado y paginación de gastos">
+        <app-expense-table
+          [expenses]="store.expenses()"
+          [selectedExpenseId]="store.selectedExpense()?.id ?? null"
+          [tripCodes]="store.tripCodesById()"
+          [driverNames]="store.driverNamesByUserId()"
+          (expenseSelected)="onSelectExpense($event)"
+        />
+
+        <app-pagination
+          ariaLabel="Paginación de gastos"
+          [page]="store.page()"
+          [size]="store.size()"
+          [totalItems]="store.totalItems()"
+          [disabled]="store.busy()"
+          (pageChange)="onPageChange($event)"
+        />
+      </section>
+
+      <app-expense-detail-panel
+        [expense]="store.selectedExpense()"
+        [tripCode]="selectedTripCode()"
+        [driverName]="selectedDriverName()"
+        [evidenceUrl]="store.evidenceUrl()"
+        [evidenceState]="store.evidenceState()"
+        [busy]="store.busy()"
+        [actionError]="store.actionError()"
+        (approveRequested)="onRequestApprove($event)"
+        (observeRequested)="onObserve($event)"
+      />
     </div>
   }
 
-  <app-expense-review-modal
-    [expense]="store.selectedExpense()"
-    [busy]="store.busy()"
-    [actionError]="store.actionError()"
-    [evidenceUrl]="store.evidenceUrl()"
-    [evidenceState]="store.evidenceState()"
-    (closeModal)="onCloseModal()"
-    (approve)="onApprove($event)"
-    (observe)="onObserve($event)"
-    (clearError)="store.clearActionError()"
+  <app-confirm-dialog
+    [open]="pendingApproval() !== null"
+    title="Aprobar gasto seleccionado"
+    [message]="approveDialogMessage()"
+    confirmLabel="Confirmar aprobación"
+    cancelLabel="Cancelar"
+    [pending]="store.busy()"
+    [error]="store.actionError() || null"
+    (confirmed)="onConfirmApprove()"
+    (cancelled)="onCancelApprove()"
   />
 </div>

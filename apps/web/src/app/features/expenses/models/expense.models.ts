@@ -9,6 +9,30 @@ export type ExpenseStatus =
 
 export type ExpenseTrayStatus = 'REGISTERED' | 'PENDING_SUPPORT' | 'APPROVED' | 'OBSERVED';
 
+export type ExpenseStatusFilterValue =
+  | ''
+  | 'REGISTERED,PENDING_SUPPORT'
+  | ExpenseTrayStatus;
+
+export const EXPENSE_STATUS_FILTER_OPTIONS: ReadonlyArray<{
+  readonly value: ExpenseStatusFilterValue;
+  readonly label: string;
+}> = [
+  { value: '', label: 'Todos' },
+  { value: 'REGISTERED,PENDING_SUPPORT', label: 'Por revisar' },
+  { value: 'REGISTERED', label: 'Registrado' },
+  { value: 'PENDING_SUPPORT', label: 'Pendiente de soporte' },
+  { value: 'APPROVED', label: 'Aprobado' },
+  { value: 'OBSERVED', label: 'Observado' },
+];
+
+export const EXPENSE_CONTENT_TYPE_LABELS: Readonly<Record<string, string>> = {
+  'image/jpeg': 'JPEG',
+  'image/png': 'PNG',
+  'image/webp': 'WEBP',
+  'application/pdf': 'PDF',
+};
+
 export type ExpenseCategory =
   | 'FUEL'
   | 'TOLL'
@@ -96,4 +120,19 @@ export interface ExpenseTripSummaryData {
   readonly approvedCount: number;
   readonly observedCount: number;
   readonly approvedTotals: readonly ExpenseCurrencyTotal[];
+}
+
+/** Resumen mínimo de viaje devuelto por GET /api/v1/trips para enriquecer la bandeja. */
+export interface ExpenseTripLookup {
+  readonly id: string;
+  readonly code: string;
+  readonly origin: string;
+  readonly destination: string;
+}
+
+/** Resumen mínimo de conductor devuelto por GET /api/v1/drivers; userId cruza con Expense.driverId. */
+export interface ExpenseDriverLookup {
+  readonly id: string;
+  readonly userId: string | null;
+  readonly fullName: string;
 }

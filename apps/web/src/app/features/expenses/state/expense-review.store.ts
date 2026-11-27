@@ -2,141 +2,213 @@ import { DestroyRef, Injectable, computed, inject, signal } from '@angular/core'
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ToastService } from '@core/feedback/toast.service';
 import { problemMessage } from '@core/http/problem-message';
-import { Subscription } from 'rxjs';
+import { Subscription, catchError, forkJoin, of } from 'rxjs';
 import { ExpenseApi } from '../data-access/expense-api';
 import {
   EvidenceLoadState,
   Expense,
-  ExpenseCurrencyTotal,
-  ExpenseTripSummaryData,
+  ExpenseDriverLookup,
+  ExpenseStatusFilterValue,
+  ExpenseTrayFilters,
+  ExpenseTrayStatus,
+  ExpenseTripLookup,
   UpdateExpenseStatusPayload,
 } from '../models/expense.models';
 
-/** Estado y lógica para la revisión y aprobación/observación de gastos de un viaje (US24). */
+const DEFAULT_PAGE_SIZE = 20;
+
+/** Estado observable de la bandeja global de gastos y revisión de comprobantes (US23 y US24). */
 @Injectable()
 export class ExpenseReviewStore {
   private readonly api = inject(ExpenseApi);
   private readonly toasts = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
 
-  private readonly tripIdState = signal('');
   private readonly loadState = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
   private readonly errorState = signal('');
-  private readonly expensesState = signal<readonly Expense[]>([]);
+  private readonly itemsState = signal<readonly Expense[]>([]);
+  private readonly pageState = signal(0);
+  private readonly sizeState = signal(DEFAULT_PAGE_SIZE);
+  private readonly totalItemsState = signal(0);
+  private readonly totalPagesState = signal(0);
+
+  private readonly statusFilterState = signal<ExpenseStatusFilterValue>(
+    'REGISTERED,PENDING_SUPPORT',
+  );
+  private readonly tripIdFilterState = signal('');
+  private readonly driverIdFilterState = signal('');
+  private readonly fromFilterState = signal('');
+  private readonly toFilterState = signal('');
+
+  private readonly tripsState = signal<readonly ExpenseTripLookup[]>([]);
+  private readonly driversState = signal<readonly ExpenseDriverLookup[]>([]);
   private readonly selectedExpenseState = signal<Expense | null>(null);
   private readonly busyState = signal(false);
   private readonly actionErrorState = signal('');
   private readonly evidenceUrlState = signal<string | null>(null);
   private readonly evidenceLoadState = signal<EvidenceLoadState>('idle');
-  private evidenceRequest?: Subscription;
 
-  readonly tripId = this.tripIdState.asReadonly();
+  private listRequest?: Subscription;
+  private evidenceRequest?: Subscription;
+  private lookupsLoaded = false;
+
   readonly state = this.loadState.asReadonly();
   readonly error = this.errorState.asReadonly();
-  readonly expenses = this.expensesState.asReadonly();
+  readonly expenses = this.itemsState.asReadonly();
+  readonly page = this.pageState.asReadonly();
+  readonly size = this.sizeState.asReadonly();
+  readonly totalItems = this.totalItemsState.asReadonly();
+  readonly totalPages = this.totalPagesState.asReadonly();
+
+  readonly statusFilter = this.statusFilterState.asReadonly();
+  readonly tripIdFilter = this.tripIdFilterState.asReadonly();
+  readonly driverIdFilter = this.driverIdFilterState.asReadonly();
+  readonly fromFilter = this.fromFilterState.asReadonly();
+  readonly toFilter = this.toFilterState.asReadonly();
+
+  readonly trips = this.tripsState.asReadonly();
   readonly selectedExpense = this.selectedExpenseState.asReadonly();
   readonly busy = this.busyState.asReadonly();
   readonly actionError = this.actionErrorState.asReadonly();
-  /** URL local (blob) del comprobante seleccionado; existe solo mientras la página vive. */
+  /** URL local del comprobante seleccionado; se revoca al cambiar o destruir la vista. */
   readonly evidenceUrl = this.evidenceUrlState.asReadonly();
   readonly evidenceState = this.evidenceLoadState.asReadonly();
 
-  constructor() {
-    this.destroyRef.onDestroy(() => this.releaseEvidence());
-  }
-
-  readonly totalExpenses = computed(() => this.expensesState().length);
-  readonly registeredExpenses = computed(() =>
-    this.expensesState().filter((e) => e.status === 'REGISTERED'),
-  );
-  readonly pendingSupportExpenses = computed(() =>
-    this.expensesState().filter((e) => e.status === 'PENDING_SUPPORT'),
-  );
-  readonly approvedExpenses = computed(() =>
-    this.expensesState().filter((e) => e.status === 'APPROVED'),
-  );
-  readonly observedExpenses = computed(() =>
-    this.expensesState().filter((e) => e.status === 'OBSERVED'),
-  );
-  readonly pendingExpenses = computed(() =>
-    this.expensesState().filter(
-      (e) => e.status === 'REGISTERED' || e.status === 'PENDING_SUPPORT',
+  readonly selectableDrivers = computed(() =>
+    this.driversState().filter(
+      (driver): driver is ExpenseDriverLookup & { readonly userId: string } =>
+        Boolean(driver.userId),
     ),
   );
-  readonly totalAmount = computed(() =>
-    this.expensesState().reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-  );
-  readonly approvedAmount = computed(() =>
-    this.approvedExpenses().reduce((sum, e) => sum + (Number(e.amount) || 0), 0),
-  );
-  readonly tripSummary = computed<ExpenseTripSummaryData>(() => {
-    const items = this.expensesState();
-    const totalsByCurrency = new Map<string, number>();
 
-    for (const item of items) {
-      if (item.status !== 'APPROVED') continue;
-      const currency = item.currency || 'PEN';
-      totalsByCurrency.set(
-        currency,
-        (totalsByCurrency.get(currency) ?? 0) + (Number(item.amount) || 0),
-      );
+  readonly tripCodesById = computed<Readonly<Record<string, string>>>(() => {
+    const map: Record<string, string> = {};
+    for (const trip of this.tripsState()) {
+      map[trip.id] = trip.code;
     }
-
-    const approvedTotals: ExpenseCurrencyTotal[] =
-      totalsByCurrency.size > 0
-        ? Array.from(totalsByCurrency, ([currency, amount]) => ({ currency, amount }))
-        : [{ currency: items[0]?.currency ?? 'PEN', amount: 0 }];
-
-    return {
-      totalCount: items.length,
-      registeredCount: this.registeredExpenses().length,
-      pendingSupportCount: this.pendingSupportExpenses().length,
-      approvedCount: this.approvedExpenses().length,
-      observedCount: this.observedExpenses().length,
-      approvedTotals,
-    };
+    return map;
   });
 
-  load(tripId: string): void {
-    if (!tripId) return;
-    this.tripIdState.set(tripId);
-    this.loadState.set('loading');
-    this.errorState.set('');
-    this.actionErrorState.set('');
+  readonly tripLabelsById = computed<Readonly<Record<string, string>>>(() => {
+    const map: Record<string, string> = {};
+    for (const trip of this.tripsState()) {
+      map[trip.id] = `${trip.code} (${trip.origin} a ${trip.destination})`;
+    }
+    return map;
+  });
 
-    this.api
-      .getExpensesByTrip(tripId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (expenses) => {
-          this.expensesState.set(expenses);
-          this.loadState.set('ready');
-        },
-        error: (err) => {
-          this.errorState.set(
-            problemMessage(err, 'No fue posible cargar los gastos del viaje.'),
-          );
-          this.loadState.set('error');
-        },
-      });
+  /** Cruza Expense.driverId (userId de IAM) con DriverResource.userId de Fleet (C2). */
+  readonly driverNamesByUserId = computed<Readonly<Record<string, string>>>(() => {
+    const map: Record<string, string> = {};
+    for (const driver of this.driversState()) {
+      if (driver.userId) {
+        map[driver.userId] = driver.fullName;
+      }
+    }
+    return map;
+  });
+
+  readonly hasActiveFilters = computed(() =>
+    Boolean(
+      this.statusFilterState() ||
+        this.tripIdFilterState() ||
+        this.driverIdFilterState() ||
+        this.fromFilterState() ||
+        this.toFilterState(),
+    ),
+  );
+
+  readonly headerBadgeLabel = computed(() => {
+    if (this.loadState() !== 'ready') return '';
+    const total = this.totalItemsState();
+    if (this.statusFilterState() === 'REGISTERED,PENDING_SUPPORT') {
+      return `${total} por revisar`;
+    }
+    return `${total} ${total === 1 ? 'gasto' : 'gastos'}`;
+  });
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.listRequest?.unsubscribe();
+      this.evidenceRequest?.unsubscribe();
+      this.releaseEvidence();
+    });
+  }
+
+  /** Carga catálogos auxiliares una sola vez y consulta la primera página según la ruta. */
+  initialize(initialTripId?: string | null): void {
+    this.loadLookupsOnce();
+    const cleanTripId = initialTripId?.trim() ?? '';
+    if (cleanTripId) {
+      this.tripIdFilterState.set(cleanTripId);
+      this.statusFilterState.set('');
+    }
+    this.loadPage(0);
+  }
+
+  setStatusFilter(status: ExpenseStatusFilterValue): void {
+    this.statusFilterState.set(status);
+    this.loadPage(0);
+  }
+
+  setTripFilter(tripId: string): void {
+    this.tripIdFilterState.set(tripId);
+    this.loadPage(0);
+  }
+
+  setDriverFilter(driverUserId: string): void {
+    this.driverIdFilterState.set(driverUserId);
+    this.loadPage(0);
+  }
+
+  setFromFilter(from: string): void {
+    this.fromFilterState.set(from);
+    this.loadPage(0);
+  }
+
+  setToFilter(to: string): void {
+    this.toFilterState.set(to);
+    this.loadPage(0);
+  }
+
+  clearFilters(): void {
+    this.statusFilterState.set('');
+    this.tripIdFilterState.set('');
+    this.driverIdFilterState.set('');
+    this.fromFilterState.set('');
+    this.toFilterState.set('');
+    this.loadPage(0);
+  }
+
+  goToPage(targetPage: number): void {
+    if (targetPage < 0) return;
+    this.loadPage(targetPage);
+  }
+
+  retry(): void {
+    this.loadLookupsOnce();
+    this.loadPage(this.pageState());
   }
 
   selectExpense(expense: Expense | null): void {
+    const previous = this.selectedExpenseState();
     this.selectedExpenseState.set(expense);
     this.actionErrorState.set('');
-    this.loadEvidence(expense?.evidence?.contentUrl ?? null);
-  }
 
-  clearActionError(): void {
-    this.actionErrorState.set('');
+    const nextUrl = expense?.evidence?.contentUrl ?? null;
+    const prevUrl = previous?.evidence?.contentUrl ?? null;
+    if (nextUrl && nextUrl === prevUrl && this.evidenceLoadState() === 'ready') {
+      return;
+    }
+    this.loadEvidence(nextUrl);
   }
 
   approve(expenseId: string, onComplete?: () => void): void {
+    if (this.busyState()) return;
     this.busyState.set(true);
     this.actionErrorState.set('');
 
     const payload: UpdateExpenseStatusPayload = { status: 'APPROVED' };
-
     this.api
       .updateExpenseStatus(expenseId, payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -162,6 +234,7 @@ export class ExpenseReviewStore {
       this.actionErrorState.set('El motivo de observación es obligatorio.');
       return;
     }
+    if (this.busyState()) return;
 
     this.busyState.set(true);
     this.actionErrorState.set('');
@@ -190,8 +263,77 @@ export class ExpenseReviewStore {
       });
   }
 
+  private loadLookupsOnce(): void {
+    if (this.lookupsLoaded) return;
+    this.lookupsLoaded = true;
+    forkJoin({
+      trips: this.api.getTrips().pipe(catchError(() => of<ExpenseTripLookup[]>([]))),
+      drivers: this.api.getDrivers().pipe(catchError(() => of<ExpenseDriverLookup[]>([]))),
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ trips, drivers }) => {
+        this.tripsState.set(trips);
+        this.driversState.set(drivers);
+      });
+  }
+
+  private loadPage(targetPage: number): void {
+    this.listRequest?.unsubscribe();
+    this.pageState.set(targetPage);
+    this.loadState.set('loading');
+    this.errorState.set('');
+    this.actionErrorState.set('');
+
+    this.listRequest = this.api
+      .getExpenses(this.buildFilters(targetPage))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.itemsState.set(response.items);
+          this.pageState.set(response.page);
+          this.sizeState.set(response.size);
+          this.totalItemsState.set(response.totalItems);
+          this.totalPagesState.set(response.totalPages);
+          this.loadState.set('ready');
+
+          const currentId = this.selectedExpenseState()?.id ?? null;
+          const preserved = currentId
+            ? response.items.find((item) => item.id === currentId)
+            : undefined;
+          this.selectExpense(preserved ?? response.items[0] ?? null);
+        },
+        error: (err) => {
+          this.errorState.set(
+            problemMessage(
+              err,
+              'Ocurrió un error al consultar el servicio de gastos. Reintenta en unos segundos.',
+            ),
+          );
+          this.loadState.set('error');
+        },
+      });
+  }
+
+  private buildFilters(targetPage: number): ExpenseTrayFilters {
+    const statusRaw = this.statusFilterState();
+    const status: readonly ExpenseTrayStatus[] | ExpenseTrayStatus | undefined =
+      statusRaw === 'REGISTERED,PENDING_SUPPORT'
+        ? ['REGISTERED', 'PENDING_SUPPORT']
+        : statusRaw || undefined;
+
+    return {
+      status,
+      tripId: this.tripIdFilterState() || undefined,
+      driverId: this.driverIdFilterState() || undefined,
+      from: this.fromFilterState() || undefined,
+      to: this.toFilterState() || undefined,
+      page: targetPage,
+      size: this.sizeState(),
+    };
+  }
+
   private replaceExpense(updated: Expense): void {
-    this.expensesState.update((current) =>
+    this.itemsState.update((current) =>
       current.map((item) => (item.id === updated.id ? updated : item)),
     );
     if (this.selectedExpenseState()?.id === updated.id) {
@@ -199,7 +341,7 @@ export class ExpenseReviewStore {
     }
   }
 
-  /** Descarga el comprobante con el JWT; una descarga anterior se cancela para no mostrar un archivo ajeno. */
+  /** Descarga el comprobante autenticado; cancela cualquier petición previa antes de abrir otra. */
   private loadEvidence(contentUrl: string | null): void {
     this.evidenceRequest?.unsubscribe();
     this.releaseEvidence();

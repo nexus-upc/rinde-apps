@@ -1,80 +1,45 @@
-<div class="expense-table-container">
-  @if (expenses().length === 0) {
-    <div class="expense-table-empty">
-      <p>No se encontraron gastos registrados para este viaje.</p>
-    </div>
-  } @else {
-    <table class="expense-table">
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>ID / Clave</th>
-          <th>Categoría</th>
-          <th>Monto</th>
-          <th>Estado</th>
-          <th>Evidencia</th>
-          <th class="actions-col">Acciones</th>
+<app-data-table ariaLabel="Listado de gastos">
+  <table class="arc-table">
+    <thead>
+      <tr>
+        <th scope="col">Fecha</th>
+        <th scope="col">Viaje</th>
+        <th scope="col">Conductor</th>
+        <th scope="col">Categoría</th>
+        <th scope="col">Estado</th>
+        <th scope="col" class="arc-table__num">Monto</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (item of expenses(); track item.id) {
+        <tr
+          class="expense-row"
+          tabindex="0"
+          [class.is-selected]="item.id === selectedExpenseId()"
+          [attr.aria-selected]="item.id === selectedExpenseId()"
+          (click)="selectRow(item)"
+          (keydown)="onRowKeydown($event, item)"
+        >
+          <td data-label="Fecha" class="expense-row__date">
+            {{ formatExpenseDate(item.expenseDate) }}
+          </td>
+          <td data-label="Viaje" class="expense-row__trip">
+            {{ resolveTripCode(item.tripId) }}
+          </td>
+          <td data-label="Conductor">
+            {{ resolveDriverName(item.driverId) }}
+          </td>
+          <td data-label="Categoría" class="expense-row__nowrap">
+            {{ getCategoryLabel(item.category) }}
+          </td>
+          <td data-label="Estado">
+            <app-status-badge [tone]="getStatusTone(item)" [label]="getStatusLabel(item)" />
+          </td>
+          <td data-label="Monto" class="arc-table__num expense-row__nowrap">
+            {{ formatExpenseAmount(item.amount, item.currency) }}
+          </td>
         </tr>
-      </thead>
-      <tbody>
-        @for (item of expenses(); track item.id) {
-          <tr [class.is-observed]="item.status === 'OBSERVED'" [class.is-approved]="item.status === 'APPROVED'">
-            <td class="date-cell">{{ item.expenseDate }}</td>
-            <td class="doc-cell">
-              <span class="doc-num">{{ item.idempotencyKey || item.id }}</span>
-            </td>
-            <td>
-              <span class="category-badge">{{ getCategoryLabel(item.category) }}</span>
-            </td>
-            <td class="amount-cell">
-              <strong>{{ item.amount | currency:item.currency:'symbol':'1.2-2' }}</strong>
-            </td>
-            <td>
-              <span
-                class="status-badge"
-                [class.status-registered]="item.status === 'REGISTERED'"
-                [class.status-pending-support]="item.status === 'PENDING_SUPPORT'"
-                [class.status-approved]="item.status === 'APPROVED'"
-                [class.status-observed]="item.status === 'OBSERVED'"
-                [class.status-locked]="item.status === 'LOCKED'"
-              >
-                {{ getStatusLabel(item.status) }}
-              </span>
-            </td>
-            <td>
-              @if (item.evidence) {
-                <span class="evidence-tag">
-                  📎 Adjunto ({{ (item.evidence.fileSizeBytes / 1024) | number:'1.0-0' }} KB)
-                </span>
-              } @else {
-                <span class="no-evidence">Sin archivo</span>
-              }
-            </td>
-            <td class="actions-cell">
-              <button
-                uiButton
-                variant="secondary"
-                type="button"
-                [disabled]="busy()"
-                (click)="reviewExpense.emit(item)"
-              >
-                Revisar
-              </button>
-              @if (item.status === 'REGISTERED') {
-                <button
-                  uiButton
-                  variant="primary"
-                  type="button"
-                  [disabled]="busy()"
-                  (click)="quickApprove.emit(item.id)"
-                >
-                  Aprobar
-                </button>
-              }
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  }
-</div>
+      }
+    </tbody>
+  </table>
+</app-data-table>

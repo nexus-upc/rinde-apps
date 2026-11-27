@@ -1,4 +1,36 @@
-import { ExpensePage } from '../models/expense.models';
+import {
+  ExpenseDriverLookup,
+  ExpensePage,
+  ExpenseTripLookup,
+} from '../models/expense.models';
+
+export const EXPENSE_TRIPS_FIXTURE: readonly ExpenseTripLookup[] = [
+  {
+    id: '87460614-42ea-4cd5-9de1-8f38d9496434',
+    code: 'TRP-000014',
+    origin: 'Lima',
+    destination: 'Trujillo',
+  },
+  {
+    id: '2a11bc09-98d4-4c55-8a01-9f38d9491111',
+    code: 'TRP-000013',
+    origin: 'Lima',
+    destination: 'Arequipa',
+  },
+];
+
+export const EXPENSE_DRIVERS_FIXTURE: readonly ExpenseDriverLookup[] = [
+  {
+    id: '1355b6b8-7cd5-4f4f-9f66-7b883c7e8819',
+    userId: '764a4968-403f-40d7-9172-ba637d10fb16',
+    fullName: 'Luis Quispe Mamani',
+  },
+  {
+    id: '9911a2b3-7cd5-4f4f-9f66-7b883c7e2222',
+    userId: '5511a2b3-403f-40d7-9172-ba637d109999',
+    fullName: 'Jorge Paredes Silva',
+  },
+];
 
 export const EXPENSE_PAGE_FIXTURE: ExpensePage = {
   items: [

@@ -1,28 +1,42 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { formatPen } from '@shared/formatters/formatters';
+import { ConfirmDialog } from '@shared/ui/confirm-dialog/confirm-dialog';
+import { FilterBar } from '@shared/ui/filter-bar/filter-bar';
 import { PageHeader } from '@shared/ui/page-header/page-header';
+import { Pagination } from '@shared/ui/pagination/pagination';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
-import { UiButton } from '@shared/ui/ui-button/ui-button';
-import { Expense } from '../models/expense.models';
+import { StatusBadge } from '@shared/ui/status-badge/status-badge';
+import {
+  EXPENSE_CATEGORY_LABELS,
+  EXPENSE_STATUS_FILTER_OPTIONS,
+  Expense,
+  ExpenseStatusFilterValue,
+} from '../models/expense.models';
 import { ExpenseReviewStore } from '../state/expense-review.store';
-import { ExpenseReviewModal } from '../ui/expense-review-modal/expense-review-modal';
+import { ExpenseDetailPanel } from '../ui/expense-detail-panel/expense-detail-panel';
 import { ExpenseTable } from '../ui/expense-table/expense-table';
-import { ExpenseTripSummary } from '../ui/expense-trip-summary/expense-trip-summary';
 
-/** Página contenedora para la revisión y aprobación de gastos de un viaje (US23 y US24). */
+/** Bandeja global de gastos de la empresa con filtros, paginación y revisión (S4-12). */
 @Component({
   selector: 'app-expense-review-page',
   providers: [ExpenseReviewStore],
   imports: [
-    FormsModule,
-    RouterLink,
     PageHeader,
+    StatusBadge,
+    FilterBar,
+    Pagination,
     StatePanel,
-    UiButton,
-    ExpenseTripSummary,
+    ConfirmDialog,
     ExpenseTable,
-    ExpenseReviewModal,
+    ExpenseDetailPanel,
   ],
   templateUrl: './expense-review-page.html',
   styleUrl: './expense-review-page.scss',
@@ -31,58 +45,105 @@ import { ExpenseTripSummary } from '../ui/expense-trip-summary/expense-trip-summ
 export class ExpenseReviewPage implements OnInit {
   protected readonly store = inject(ExpenseReviewStore);
   private readonly route = inject(ActivatedRoute);
-  private readonly router = inject(Router);
 
-  protected readonly inputTripId = signal('');
+  protected readonly statusOptions = EXPENSE_STATUS_FILTER_OPTIONS;
+  protected readonly pendingApproval = signal<Expense | null>(null);
+
+  protected readonly selectedTripCode = computed(() => {
+    const selected = this.store.selectedExpense();
+    if (!selected) return 'Viaje asignado';
+    return this.store.tripCodesById()[selected.tripId] ?? 'Viaje asignado';
+  });
+
+  protected readonly selectedDriverName = computed(() => {
+    const selected = this.store.selectedExpense();
+    if (!selected) return 'Conductor registrado';
+    return this.store.driverNamesByUserId()[selected.driverId] ?? 'Conductor registrado';
+  });
+
+  protected readonly approveDialogMessage = computed(() => {
+    const item = this.pendingApproval();
+    if (!item) return '';
+    const category = (EXPENSE_CATEGORY_LABELS[item.category] ?? 'otros').toLowerCase();
+    const amount =
+      (item.currency || 'PEN') === 'PEN'
+        ? formatPen(item.amount)
+        : new Intl.NumberFormat('es-PE', {
+            style: 'currency',
+            currency: item.currency,
+          }).format(item.amount);
+    const tripCode = this.store.tripCodesById()[item.tripId] ?? 'asignado';
+    return `Se aprobará el gasto de ${category} por ${amount} del viaje ${tripCode} y se sumará al total de la liquidación.`;
+  });
 
   ngOnInit(): void {
     const tripIdFromRoute =
-      this.route.snapshot.paramMap?.get('tripId') ??
-      this.route.snapshot.queryParamMap?.get('tripId');
-    if (tripIdFromRoute) {
-      this.inputTripId.set(tripIdFromRoute);
-      this.store.load(tripIdFromRoute);
-    }
+      this.route.snapshot?.paramMap?.get('tripId') ??
+      this.route.snapshot?.queryParamMap?.get('tripId') ??
+      null;
+    this.store.initialize(tripIdFromRoute);
   }
 
-  searchTrip(): void {
-    const tripId = this.inputTripId().trim();
-    if (tripId) {
-      this.store.load(tripId);
-    }
+  protected onStatusChange(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value as ExpenseStatusFilterValue;
+    this.store.setStatusFilter(value);
+  }
+
+  protected onTripChange(event: Event): void {
+    this.store.setTripFilter((event.target as HTMLSelectElement).value);
+  }
+
+  protected onDriverChange(event: Event): void {
+    this.store.setDriverFilter((event.target as HTMLSelectElement).value);
+  }
+
+  protected onFromChange(event: Event): void {
+    this.store.setFromFilter((event.target as HTMLInputElement).value);
+  }
+
+  protected onToChange(event: Event): void {
+    this.store.setToFilter((event.target as HTMLInputElement).value);
+  }
+
+  onClearFilters(): void {
+    this.store.clearFilters();
   }
 
   retry(): void {
-    if (this.inputTripId()) {
-      this.store.load(this.inputTripId());
-    }
+    this.store.retry();
   }
 
-  onReviewExpense(expense: Expense): void {
+  onSelectExpense(expense: Expense): void {
     this.store.selectExpense(expense);
   }
 
-  onCloseModal(): void {
-    this.store.selectExpense(null);
+  onPageChange(targetPage: number): void {
+    this.store.goToPage(targetPage);
   }
 
-  onQuickApprove(expenseId: string): void {
-    this.store.approve(expenseId);
+  onRequestApprove(expense: Expense): void {
+    this.pendingApproval.set(expense);
+  }
+
+  onCancelApprove(): void {
+    this.pendingApproval.set(null);
+  }
+
+  onConfirmApprove(): void {
+    const target = this.pendingApproval();
+    if (!target) return;
+    this.store.approve(target.id, () => {
+      this.pendingApproval.set(null);
+    });
   }
 
   onApprove(expenseId: string): void {
     this.store.approve(expenseId, () => {
-      this.store.selectExpense(null);
+      this.pendingApproval.set(null);
     });
   }
 
-  onObserve(payload: { id: string; reason: string }): void {
-    this.store.observe(payload.id, payload.reason, () => {
-      this.store.selectExpense(null);
-    });
-  }
-
-  goBack(): void {
-    void this.router.navigate(['/trips']);
+  onObserve(payload: { readonly id: string; readonly reason: string }): void {
+    this.store.observe(payload.id, payload.reason);
   }
 }

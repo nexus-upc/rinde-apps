@@ -2,7 +2,11 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
-import { EXPENSE_PAGE_FIXTURE } from '../fixtures/expense.fixtures';
+import {
+  EXPENSE_DRIVERS_FIXTURE,
+  EXPENSE_PAGE_FIXTURE,
+  EXPENSE_TRIPS_FIXTURE,
+} from '../fixtures/expense.fixtures';
 import { ExpenseApi } from './expense-api';
 
 const BASE = `${environment.apiBaseUrl}/api/v1`;
@@ -55,5 +59,19 @@ describe('ExpenseApi', () => {
     const req = http.expectOne(`${BASE}/expenses`);
     expect(req.request.params.keys().length).toBe(0);
     req.flush(EXPENSE_PAGE_FIXTURE);
+  });
+
+  it('requests company trips and drivers for inbox enrichment', () => {
+    let trips: unknown;
+    let drivers: unknown;
+
+    api.getTrips().subscribe((value) => (trips = value));
+    api.getDrivers().subscribe((value) => (drivers = value));
+
+    http.expectOne(`${BASE}/trips`).flush(EXPENSE_TRIPS_FIXTURE);
+    http.expectOne(`${BASE}/drivers`).flush(EXPENSE_DRIVERS_FIXTURE);
+
+    expect(trips).toEqual(EXPENSE_TRIPS_FIXTURE);
+    expect(drivers).toEqual(EXPENSE_DRIVERS_FIXTURE);
   });
 });
