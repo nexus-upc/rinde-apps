@@ -48,7 +48,7 @@
                 [class.status-trip]="item.status === 'IN_TRIP'"
                 [class.status-maintenance]="item.status === 'IN_MAINTENANCE' || item.status === 'MAINTENANCE'"
               >
-                {{ statusLabels[item.status] ?? item.status }}
+                {{ statusLabels[item.status] ?? 'En revisión' }}
               </span>
             </div>
 
@@ -83,14 +83,14 @@
                   [class.health-warn]="healthStatus.maintenanceState === 'DUE_SOON'"
                   [class.health-danger]="healthStatus.maintenanceState === 'OVERDUE'"
                 >
-                  {{ maintenanceLabels[healthStatus.maintenanceState] ?? healthStatus.maintenanceState }}
+                  {{ maintenanceLabels[healthStatus.maintenanceState] ?? 'Al Día' }}
                 </span>
               </div>
 
               <div class="detail-card">
                 <span class="detail-label">Próxima Fecha Programada</span>
                 <span class="detail-value">
-                  {{ healthStatus.nextMaintenanceDate ? (healthStatus.nextMaintenanceDate | date:'mediumDate') : 'No programada' }}
+                  {{ formatMaintenanceDate(history()?.nextMaintenanceDate ?? healthStatus.nextMaintenanceDate) }}
                 </span>
               </div>
 
@@ -108,11 +108,132 @@
           }
         </section>
 
-        <section class="section">
-          <h3 class="section__title">Historial de Mantenimientos</h3>
-          <div class="history-box">
-            <p class="history-box__notice">Historial de mantenimiento no disponible.</p>
+        <section class="section" aria-labelledby="vehicle-timeline-title">
+          <div class="section__header-row">
+            <h3 class="section__title" id="vehicle-timeline-title">Historial unificado del vehículo</h3>
+            @if (historyState() === 'ready' && history(); as currentHistory) {
+              @if (currentHistory.partial) {
+                <app-status-badge tone="wait" label="Información parcial" />
+              } @else {
+                <app-status-badge tone="success" label="Fuentes completas" />
+              }
+            }
           </div>
+
+          <app-filter-bar
+            ariaLabel="Periodo del historial"
+            clearLabel="Últimos 90 días"
+            (cleared)="historyRangeReset.emit()"
+          >
+            <label class="field">
+              <span class="field__label">Desde</span>
+              <input
+                #fromInput
+                id="history-from"
+                class="field__input"
+                type="date"
+                [value]="historyFrom()"
+                (change)="onDateFilterChange(fromInput.value, toInput.value)"
+              />
+            </label>
+
+            <label class="field">
+              <span class="field__label">Hasta</span>
+              <input
+                #toInput
+                id="history-to"
+                class="field__input"
+                type="date"
+                [value]="historyTo()"
+                (change)="onDateFilterChange(fromInput.value, toInput.value)"
+              />
+            </label>
+          </app-filter-bar>
+
+          @switch (historyState()) {
+            @case ('loading') {
+              <div class="history-loading" role="status" aria-busy="true">
+                <div class="skeleton-bar skeleton-bar--wide"></div>
+                <div class="skeleton-bar"></div>
+                <div class="skeleton-bar skeleton-bar--short"></div>
+                <p class="notice notice--muted">
+                  Cargando historial de la unidad. Combinando mantenimientos locales, viajes e incidencias.
+                </p>
+              </div>
+            }
+            @case ('error') {
+              <div class="history-state-wrap">
+                <app-state-panel
+                  title="No pudimos cargar el historial"
+                  [message]="historyError() ?? 'Verifica tu conexión y vuelve a intentarlo.'"
+                  [error]="true"
+                  actionLabel="Reintentar"
+                  (action)="historyRetryRequested.emit()"
+                >
+                  <span aria-hidden="true">!</span>
+                </app-state-panel>
+              </div>
+            }
+            @case ('ready') {
+              @if (history(); as currentHistory) {
+                @if (currentHistory.partial) {
+                  <p class="partial-banner" role="status">
+                    {{ unavailableNotice(currentHistory.unavailableSources) }}
+                  </p>
+                }
+
+                @if (currentHistory.items.length === 0) {
+                  <div class="history-state-wrap">
+                    <app-state-panel
+                      title="Sin eventos en el periodo"
+                      message="Este vehículo no registra viajes, mantenimientos ni incidencias en el rango elegido. Cambia las fechas para consultar otro periodo."
+                      actionLabel="Ver últimos 90 días"
+                      (action)="historyRangeReset.emit()"
+                    >
+                      <span aria-hidden="true">0</span>
+                    </app-state-panel>
+                  </div>
+                } @else {
+                  <ol class="timeline">
+                    @for (entry of currentHistory.items; track entry.type + '-' + entry.id) {
+                      <li class="timeline__item">
+                        <span class="timeline__date tabular">{{ formatItemDate(entry) }}</span>
+                        <div class="timeline__content">
+                          <strong class="timeline__title">{{ formatTitle(entry) }}</strong>
+                          @if (entry.detail || entry.type === 'TRIP') {
+                            <p class="timeline__detail">
+                              @if (entry.detail) {
+                                <span>{{ entry.detail }}</span>
+                              }
+                              @if (entry.detail && entry.type === 'TRIP') {
+                                <span aria-hidden="true"> | </span>
+                              }
+                              @if (entry.type === 'TRIP') {
+                                <a
+                                  class="text-link"
+                                  [routerLink]="['/trips', entry.id]"
+                                  (click)="closeModal.emit()"
+                                >
+                                  Ver viaje
+                                </a>
+                              }
+                            </p>
+                          }
+                        </div>
+                        @if (formatStatus(entry.status); as statusLabel) {
+                          <app-status-badge
+                            class="timeline__badge"
+                            [tone]="statusTone(entry.status)"
+                            [label]="statusLabel"
+                          />
+                        }
+                      </li>
+                    }
+                  </ol>
+                }
+              }
+            }
+          }
         </section>
       </div>
 

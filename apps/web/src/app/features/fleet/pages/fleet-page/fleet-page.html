@@ -127,7 +127,15 @@
     [health]="store.selectedHealth()"
     [healthLoading]="store.healthLoadState() === 'loading'"
     [healthError]="store.healthError()"
+    [history]="store.vehicleHistory()"
+    [historyState]="store.historyLoadState()"
+    [historyError]="store.historyError()"
+    [historyFrom]="store.historyFrom()"
+    [historyTo]="store.historyTo()"
     (closeModal)="store.closeVehicleDetail()"
     (recordMaintenanceRequested)="onRecordRequested($event)"
+    (historyFiltered)="store.filterVehicleHistory($event)"
+    (historyRangeReset)="store.resetVehicleHistoryRange()"
+    (historyRetryRequested)="store.retryVehicleHistory()"
   />
 </section>

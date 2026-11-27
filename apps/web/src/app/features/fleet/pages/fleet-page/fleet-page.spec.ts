@@ -4,11 +4,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { ToastService } from '@core/feedback/toast.service';
 import { environment } from '../../../../../environments/environment';
+import { VEHICLE_HISTORY_FIXTURE } from '../../fixtures/fleet.fixtures';
 import {
   Maintenance,
   MaintenanceAlert,
   Vehicle,
   VehicleHealthStatus,
+  VehicleHistory,
 } from '../../models/fleet.models';
 import { FleetPage } from './fleet-page';
 
@@ -244,6 +246,10 @@ describe('FleetPage', () => {
 
     const healthUrl = `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/maintenance-status`;
     http.expectOne(healthUrl).flush(MOCK_HEALTH);
+    const historyReq = http.expectOne((req) =>
+      req.url === `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/history`,
+    );
+    historyReq.flush(VEHICLE_HISTORY_FIXTURE);
     fixture.detectChanges();
 
     expect(root().querySelector('app-vehicle-detail-modal')).not.toBeNull();
@@ -256,6 +262,108 @@ describe('FleetPage', () => {
     expect(root().querySelector('app-maintenance-form')).not.toBeNull();
     const vehicleSelect = root().querySelector('#m-vehicle') as HTMLSelectElement;
     expect(vehicleSelect.value).toBe('veh-01');
+  });
+
+  it('renders unified vehicle history with translated labels and no status badge on maintenance', () => {
+    flushInitialLoad();
+
+    (root().querySelector('.vehicle-row button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    http.expectOne(`${environment.apiBaseUrl}/api/v1/vehicles/veh-01/maintenance-status`).flush(MOCK_HEALTH);
+    http
+      .expectOne((req) => req.url === `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/history`)
+      .flush(VEHICLE_HISTORY_FIXTURE);
+    fixture.detectChanges();
+
+    const modalText = root().querySelector('app-vehicle-detail-modal')?.textContent ?? '';
+    expect(modalText).toContain('Fuentes completas');
+    expect(modalText).toContain('Incidencia: avería');
+    expect(modalText).toContain('Cerrada');
+    expect(modalText).toContain('TRP-000014 Lima a Trujillo');
+    expect(modalText).toContain('Finalizado');
+    expect(modalText).toContain('Ver viaje');
+    expect(modalText).toContain('Mantenimiento preventivo');
+    expect(modalText).not.toContain('BREAKDOWN');
+    expect(modalText).not.toContain('PREVENTIVE');
+    expect(modalText).not.toContain('FINISHED');
+
+    const timelineItems = root().querySelectorAll('.timeline__item');
+    expect(timelineItems.length).toBe(3);
+    // Mantenimiento (ítem 2) no debe renderizar badge de estado.
+    expect(timelineItems.item(2)?.querySelector('.timeline__badge')).toBeNull();
+  });
+
+  it('shows partial availability banner without technical codes and filters history by dates', () => {
+    flushInitialLoad();
+
+    (root().querySelector('.vehicle-row button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    http.expectOne(`${environment.apiBaseUrl}/api/v1/vehicles/veh-01/maintenance-status`).flush(MOCK_HEALTH);
+    const partialHistory: VehicleHistory = {
+      vehicleId: 'veh-01',
+      nextMaintenanceDate: null,
+      items: [],
+      partial: true,
+      unavailableSources: ['TRIP', 'INCIDENT'],
+    };
+    http
+      .expectOne((req) => req.url === `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/history`)
+      .flush(partialHistory);
+    fixture.detectChanges();
+
+    const modalText = root().querySelector('app-vehicle-detail-modal')?.textContent ?? '';
+    expect(modalText).toContain('Información parcial');
+    expect(modalText).toContain('viajes e incidencias');
+    expect(modalText).toContain('Sin eventos en el periodo');
+
+    const fromInput = root().querySelector('#history-from') as HTMLInputElement;
+    const toInput = root().querySelector('#history-to') as HTMLInputElement;
+    fromInput.value = '2026-10-01';
+    toInput.value = '2026-11-15';
+    fromInput.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    const filteredReq = http.expectOne((req) =>
+      req.url === `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/history` &&
+      req.params.get('from') === '2026-10-01' &&
+      req.params.get('to') === '2026-11-15',
+    );
+    filteredReq.flush(VEHICLE_HISTORY_FIXTURE);
+    fixture.detectChanges();
+
+    expect(root().querySelectorAll('.timeline__item').length).toBe(3);
+  });
+
+  it('shows API error panel and allows retrying vehicle history lookup', () => {
+    flushInitialLoad();
+
+    (root().querySelector('.vehicle-row button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    http.expectOne(`${environment.apiBaseUrl}/api/v1/vehicles/veh-01/maintenance-status`).flush(MOCK_HEALTH);
+    http
+      .expectOne((req) => req.url === `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/history`)
+      .flush(
+        { detail: 'La fecha final no puede ser anterior a la inicial.' },
+        { status: 400, statusText: 'Bad Request' },
+      );
+    fixture.detectChanges();
+
+    const modalText = root().querySelector('app-vehicle-detail-modal')?.textContent ?? '';
+    expect(modalText).toContain('No pudimos cargar el historial');
+    expect(modalText).toContain('La fecha final no puede ser anterior a la inicial.');
+
+    button('Reintentar').click();
+    fixture.detectChanges();
+
+    http
+      .expectOne((req) => req.url === `${environment.apiBaseUrl}/api/v1/vehicles/veh-01/history`)
+      .flush(VEHICLE_HISTORY_FIXTURE);
+    fixture.detectChanges();
+
+    expect(root().querySelectorAll('.timeline__item').length).toBe(3);
   });
 
   it('displays error message when recording maintenance fails with API error', () => {

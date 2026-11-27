@@ -122,3 +122,87 @@ export const VEHICLE_HISTORY_TYPE_LABELS: Readonly<Record<VehicleHistoryItemType
   MAINTENANCE: 'Mantenimiento',
   INCIDENT: 'Incidencia',
 };
+
+export type HistoryBadgeTone = 'neutral' | 'success' | 'wait' | 'danger';
+
+const INCIDENT_TYPE_LABELS: Record<string, string> = {
+  BREAKDOWN: 'avería',
+  ACCIDENT: 'accidente',
+  DELAY: 'retraso',
+  ROUTE_DEVIATION: 'desvío de ruta',
+  TRAFFIC: 'tráfico',
+  OTHER: 'otra',
+};
+
+const MAINTENANCE_LOWER_LABELS: Record<string, string> = {
+  PREVENTIVE: 'preventivo',
+  CORRECTIVE: 'correctivo',
+  PREDICTIVE: 'predictivo',
+};
+
+const HISTORY_STATUS_LABELS: Record<string, string> = {
+  SCHEDULED: 'Programado',
+  ASSIGNED: 'Asignado',
+  IN_ROUTE: 'En ruta',
+  FINISHED: 'Finalizado',
+  CANCELLED: 'Cancelado',
+  OPEN: 'Abierta',
+  IN_PROGRESS: 'En atención',
+  CLOSED: 'Cerrada',
+};
+
+const HISTORY_STATUS_TONES: Record<string, HistoryBadgeTone> = {
+  SCHEDULED: 'neutral',
+  ASSIGNED: 'wait',
+  IN_ROUTE: 'wait',
+  FINISHED: 'success',
+  CANCELLED: 'danger',
+  OPEN: 'danger',
+  IN_PROGRESS: 'wait',
+  CLOSED: 'neutral',
+};
+
+/** Traduce el título técnico de un evento del historial a español legible. */
+export function formatHistoryTitle(item: VehicleHistoryItem): string {
+  if (item.type === 'INCIDENT') {
+    const rawType = item.title.replace(/^Incidencia\s+/i, '').trim().toUpperCase();
+    const label = INCIDENT_TYPE_LABELS[rawType] ?? rawType.toLowerCase();
+    return `Incidencia: ${label}`;
+  }
+  if (item.type === 'MAINTENANCE') {
+    const rawType = item.title.replace(/^Mantenimiento\s+/i, '').trim().toUpperCase();
+    const label = MAINTENANCE_LOWER_LABELS[rawType] ?? rawType.toLowerCase();
+    return `Mantenimiento ${label}`;
+  }
+  return item.title;
+}
+
+/** Traduce el estado de viaje o incidencia; devuelve null si el evento no tiene estado. */
+export function formatHistoryStatus(status: string | null): string | null {
+  if (!status) return null;
+  return HISTORY_STATUS_LABELS[status] ?? 'Registrado';
+}
+
+/** Devuelve el tono visual del badge según el estado del evento. */
+export function historyStatusTone(status: string | null): HistoryBadgeTone {
+  if (!status) return 'neutral';
+  return HISTORY_STATUS_TONES[status] ?? 'neutral';
+}
+
+/** Construye un mensaje en español natural cuando faltan fuentes remotas. */
+export function formatUnavailableSourcesNotice(
+  sources: readonly VehicleHistoryUnavailableSource[],
+): string {
+  const hasTrip = sources.includes('TRIP');
+  const hasIncident = sources.includes('INCIDENT');
+  if (hasTrip && hasIncident) {
+    return 'Historial parcial: viajes e incidencias no están disponibles en este momento.';
+  }
+  if (hasTrip) {
+    return 'Historial parcial: los viajes no están disponibles en este momento.';
+  }
+  if (hasIncident) {
+    return 'Historial parcial: las incidencias no están disponibles en este momento.';
+  }
+  return 'Historial parcial: algunas fuentes remotas no respondieron.';
+}

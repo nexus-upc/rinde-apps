@@ -7,6 +7,7 @@ import {
   inject,
   viewChild,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
@@ -17,7 +18,7 @@ import { VehicleDetailModal } from '../../ui/vehicle-detail-modal/vehicle-detail
 import { VehicleForm } from '../../ui/vehicle-form/vehicle-form';
 import { VehicleList } from '../../ui/vehicle-list/vehicle-list';
 
-/** Página principal del módulo de Flota: listado, registro, alertas y mantenimiento (US12, US32 y US34). */
+/** Página principal del módulo de Flota: listado, registro, alertas e historial (US12, US32, US33 y US34). */
 @Component({
   selector: 'app-fleet-page',
   providers: [FleetStore],
@@ -37,6 +38,7 @@ import { VehicleList } from '../../ui/vehicle-list/vehicle-list';
 })
 export class FleetPage {
   protected readonly store = inject(FleetStore);
+  private readonly route = inject(ActivatedRoute);
   private readonly injector = inject(Injector);
 
   private readonly trigger = viewChild<UiButton, ElementRef<HTMLButtonElement>>('createTrigger', {
@@ -44,7 +46,8 @@ export class FleetPage {
   });
 
   constructor() {
-    this.store.load();
+    const vehicleId = this.route.snapshot.queryParamMap.get('vehicleId');
+    this.store.load(vehicleId);
   }
 
   protected closeCreate(): void {
