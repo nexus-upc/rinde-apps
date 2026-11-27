@@ -8,9 +8,11 @@ import {
   RecordMaintenancePayload,
   Vehicle,
   VehicleHealthStatus,
+  VehicleHistory,
+  VehicleHistoryFilters,
 } from '../models/fleet.models';
 
-/** Gestión de estado para el módulo de Flota y Mantenimiento (US12, US32 y US34). */
+/** Gestión de estado para el módulo de Flota y Mantenimiento (US12, US32, US33 y US34). */
 @Injectable()
 export class FleetStore {
   private readonly api = inject(FleetApi);
@@ -20,6 +22,7 @@ export class FleetStore {
   private readonly loadAction = new RequestAction(this.destroyRef);
   readonly createAction = new RequestAction(this.destroyRef);
   private readonly healthAction = new RequestAction(this.destroyRef);
+  private readonly historyAction = new RequestAction(this.destroyRef);
   private readonly alertsAction = new RequestAction(this.destroyRef);
   readonly recordAction = new RequestAction(this.destroyRef);
 
@@ -35,6 +38,11 @@ export class FleetStore {
   private readonly selectedHealthState = signal<VehicleHealthStatus | null>(null);
   private readonly healthState = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
 
+  private readonly historyDataState = signal<VehicleHistory | null>(null);
+  private readonly historyState = signal<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  private readonly historyFromState = signal('');
+  private readonly historyToState = signal('');
+
   readonly vehicles = this.vehiclesState.asReadonly();
   readonly alerts = this.alertsState.asReadonly();
   readonly state = this.loadState.asReadonly();
@@ -49,6 +57,12 @@ export class FleetStore {
   readonly healthLoadState = this.healthState.asReadonly();
   readonly healthError = this.healthAction.error;
 
+  readonly vehicleHistory = this.historyDataState.asReadonly();
+  readonly historyLoadState = this.historyState.asReadonly();
+  readonly historyError = this.historyAction.error;
+  readonly historyFrom = this.historyFromState.asReadonly();
+  readonly historyTo = this.historyToState.asReadonly();
+
   readonly countLabel = computed(() => {
     const len = this.vehiclesState().length;
     return len === 1 ? '1 vehículo' : `${len} vehículos`;
@@ -56,12 +70,18 @@ export class FleetStore {
 
   readonly alertsCount = computed(() => this.alertsState().length);
 
-  load(): void {
+  load(initialVehicleId?: string | null): void {
     this.loadState.set('loading');
     this.loadAction.run(this.api.getVehicles(), {
       onSuccess: (vehicles) => {
         this.vehiclesState.set(vehicles);
         this.loadState.set('ready');
+        if (initialVehicleId) {
+          const match = vehicles.find((v) => v.id === initialVehicleId);
+          if (match) {
+            this.openVehicleDetail(match);
+          }
+        }
       },
       onError: () => this.loadState.set('error'),
       errorMessage: 'No se pudo cargar la flota de vehículos. Intente nuevamente.',
@@ -123,7 +143,7 @@ export class FleetStore {
         this.recordingMaintenanceState.set(false);
         this.preselectedVehicleIdState.set(null);
         this.toasts.show('Mantenimiento técnico registrado exitosamente.');
-        this.load(); // Actualiza estados de vehículos y alertas
+        this.load();
         if (this.selectedVehicleState()?.id === payload.vehicleId) {
           this.openVehicleDetail(this.selectedVehicleState()!);
         }
@@ -137,6 +157,10 @@ export class FleetStore {
     this.selectedHealthState.set(null);
     this.healthState.set('loading');
 
+    const defaultRange = defaultHistoryRange();
+    this.historyFromState.set(defaultRange.from);
+    this.historyToState.set(defaultRange.to);
+
     this.healthAction.run(this.api.getVehicleHealth(vehicle.id), {
       onSuccess: (health) => {
         this.selectedHealthState.set(health);
@@ -147,11 +171,83 @@ export class FleetStore {
       },
       errorMessage: 'Estado de mantenimiento no disponible.',
     });
+
+    this.fetchVehicleHistory(vehicle.id, defaultRange);
+  }
+
+  filterVehicleHistory(filters: VehicleHistoryFilters): void {
+    const vehicle = this.selectedVehicleState();
+    if (!vehicle) return;
+
+    const from = filters.from?.trim() ?? '';
+    const to = filters.to?.trim() ?? '';
+    this.historyFromState.set(from);
+    this.historyToState.set(to);
+    this.fetchVehicleHistory(vehicle.id, {
+      from: from || undefined,
+      to: to || undefined,
+    });
+  }
+
+  resetVehicleHistoryRange(): void {
+    const vehicle = this.selectedVehicleState();
+    if (!vehicle) return;
+
+    const defaultRange = defaultHistoryRange();
+    this.historyFromState.set(defaultRange.from);
+    this.historyToState.set(defaultRange.to);
+    this.fetchVehicleHistory(vehicle.id, defaultRange);
+  }
+
+  retryVehicleHistory(): void {
+    const vehicle = this.selectedVehicleState();
+    if (!vehicle) return;
+
+    const from = this.historyFromState().trim();
+    const to = this.historyToState().trim();
+    this.fetchVehicleHistory(vehicle.id, {
+      from: from || undefined,
+      to: to || undefined,
+    });
   }
 
   closeVehicleDetail(): void {
     this.selectedVehicleState.set(null);
     this.selectedHealthState.set(null);
     this.healthState.set('idle');
+    this.historyDataState.set(null);
+    this.historyState.set('idle');
+    this.historyAction.clearError();
   }
+
+  private fetchVehicleHistory(vehicleId: string, filters: VehicleHistoryFilters): void {
+    this.historyDataState.set(null);
+    this.historyState.set('loading');
+    this.historyAction.run(this.api.getVehicleHistory(vehicleId, filters), {
+      onSuccess: (history) => {
+        this.historyDataState.set(history);
+        this.historyState.set('ready');
+      },
+      onError: () => {
+        this.historyState.set('error');
+      },
+      errorMessage: 'No se pudo cargar el historial del vehículo.',
+    });
+  }
+}
+
+function defaultHistoryRange(): { from: string; to: string } {
+  const now = new Date();
+  const to = formatIsoDate(now);
+  const fromDate = new Date(now);
+  fromDate.setUTCDate(fromDate.getUTCDate() - 90);
+  const from = formatIsoDate(fromDate);
+  return { from, to };
+}
+
+function formatIsoDate(date: Date): string {
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
