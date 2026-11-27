@@ -1,0 +1,123 @@
+<aside class="detail-card" aria-labelledby="selected-expense-title">
+  @if (expense(); as item) {
+    <div class="detail-card__head">
+      <div class="detail-card__titles">
+        <h2 id="selected-expense-title">
+          {{ getCategoryLabel(item) }} ({{ formatAmount(item.amount, item.currency) }})
+        </h2>
+        <p class="field__hint">Viaje {{ tripCode() }} | {{ driverName() }}</p>
+      </div>
+      <app-status-badge [tone]="getStatusTone(item)" [label]="getStatusLabel(item)" />
+    </div>
+
+    <div class="proof-box" aria-label="Vista previa del comprobante">
+      @if (item.evidence; as ev) {
+        @if (evidenceState() === 'loading') {
+          <p class="field__hint" role="status">Cargando vista previa del comprobante...</p>
+        } @else if (evidenceState() === 'error') {
+          <p class="field__error" role="alert">No fue posible cargar el comprobante.</p>
+        } @else if (evidenceUrl(); as url) {
+          @if (isImage(ev.contentType)) {
+            <div class="evidence-preview">
+              <img [src]="url" [alt]="'Comprobante ' + ev.fileName" />
+            </div>
+          }
+          <a class="text-link" [href]="url" target="_blank" rel="noopener noreferrer">
+            Abrir archivo original
+          </a>
+        } @else {
+          <p class="field__hint">El archivo de este comprobante no está disponible.</p>
+        }
+
+        <strong class="proof-box__name">Comprobante: {{ ev.fileName }}</strong>
+        <span class="field__hint">
+          {{ formatContentType(ev.contentType) }} | {{ formatFileSize(ev.fileSizeBytes) }} | Subido
+          el {{ formatUploadedAt(ev.uploadedAt) }}
+        </span>
+      } @else {
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+          aria-hidden="true"
+          class="proof-box__icon"
+        >
+          <rect x="4" y="3" width="16" height="18" rx="2" />
+          <path d="M8 8h8M8 12h8M8 16h5" />
+        </svg>
+        <strong class="proof-box__name">Sin comprobante adjunto</strong>
+        <span class="field__hint">
+          El conductor aún no ha subido la foto o documento de sustento.
+        </span>
+      }
+    </div>
+
+    @if (item.status === 'OBSERVED' && item.observationReason) {
+      <div class="detail-card__observation">
+        <span class="detail-card__observation-label">Observación actual</span>
+        <p>{{ item.observationReason }}</p>
+      </div>
+    }
+
+    @if (actionError()) {
+      <div class="form-alert" role="alert">{{ actionError() }}</div>
+    }
+
+    @if (isLockedExpense(item)) {
+      <div class="detail-card__locked" role="status">
+        Este gasto pertenece a un viaje con liquidación cerrada y no admite cambios.
+      </div>
+    } @else {
+      <label class="field">
+        <span class="field__label">Motivo (obligatorio al observar)</span>
+        <textarea
+          class="detail-card__textarea"
+          [class.detail-card__textarea--invalid]="validationError()"
+          rows="3"
+          placeholder="Indica qué falta o qué debe corregir el conductor..."
+          [value]="reasonText()"
+          [disabled]="busy()"
+          [attr.aria-invalid]="validationError() ? 'true' : null"
+          [attr.aria-describedby]="validationError() ? 'observe-reason-error' : null"
+          (input)="onReasonInput($event)"
+        ></textarea>
+        @if (validationError()) {
+          <span id="observe-reason-error" class="field__error" role="alert">
+            {{ validationError() }}
+          </span>
+        }
+      </label>
+
+      <div class="detail-card__actions">
+        <button
+          uiButton
+          variant="primary"
+          type="button"
+          [disabled]="busy()"
+          (click)="requestApprove(item)"
+        >
+          Aprobar gasto
+        </button>
+        <button
+          uiButton
+          variant="secondary"
+          type="button"
+          [disabled]="busy()"
+          (click)="requestObserve(item)"
+        >
+          Observar gasto
+        </button>
+      </div>
+    }
+  } @else {
+    <div class="detail-card__empty">
+      <h2 id="selected-expense-title">Detalle del comprobante</h2>
+      <p class="field__hint">
+        Selecciona un gasto de la tabla para ver su comprobante y registrar tu decisión.
+      </p>
+    </div>
+  }
+</aside>

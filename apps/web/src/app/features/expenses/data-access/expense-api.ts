@@ -4,8 +4,10 @@ import { API_BASE_URL } from '@core/config/api-config';
 import { Observable } from 'rxjs';
 import {
   Expense,
+  ExpenseDriverLookup,
   ExpensePage,
   ExpenseTrayFilters,
+  ExpenseTripLookup,
   UpdateExpenseStatusPayload,
 } from '../models/expense.models';
 
@@ -30,6 +32,14 @@ export class ExpenseApi {
     if (filters?.page !== undefined) params = params.set('page', filters.page);
     if (filters?.size !== undefined) params = params.set('size', filters.size);
     return this.http.get<ExpensePage>(`${this.base}/expenses`, { params });
+  }
+
+  getTrips(): Observable<ExpenseTripLookup[]> {
+    return this.http.get<ExpenseTripLookup[]>(`${this.base}/trips`);
+  }
+
+  getDrivers(): Observable<ExpenseDriverLookup[]> {
+    return this.http.get<ExpenseDriverLookup[]>(`${this.base}/drivers`);
   }
 
   getExpensesByTrip(tripId: string): Observable<Expense[]> {
