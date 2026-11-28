@@ -12,7 +12,7 @@ Desde la raíz de `rinde-apps`:
 - `npm run check --workspace=rinde-landing-page`: arquitectura, pruebas y build de producción, en ese orden.
 
 El formulario de demostración envía `POST /api/v1/public/demo-requests` al gateway
-(`http://localhost:8000`, configurable en `src/environments/environment.ts`). El resto de la página es contenido.
+(`http://localhost:8000` en desarrollo, según `src/environments/environment.ts`; en producción la URL llega en `config.json`, ver «Despliegue en Azure Static Web Apps»). El resto de la página es contenido.
 
 ## Estructura
 
@@ -60,3 +60,12 @@ muestra un recuadro neutro con la misma proporción.
 | `route-banner.webp` | Banner entre secciones |
 | `steps-driver.webp` | Cómo empezar |
 | `footer-andes.webp` | Pie (WebP animado en bucle) |
+
+## Despliegue en Azure Static Web Apps
+
+1. Compilar la aplicación: `npm run build`. La salida queda en `dist/rinde-landing-page/browser`.
+2. Generar la configuración con la URL del gateway: `RINDE_API_BASE_URL=https://<gateway> npm run config:runtime`.
+   En PowerShell: `$env:RINDE_API_BASE_URL = "https://<gateway>"; npm run config:runtime`. Sin la variable, o con una URL que no sea https (salvo localhost o 127.0.0.1), el comando termina con error.
+3. Publicar la carpeta `dist/rinde-landing-page/browser` en Azure Static Web Apps.
+
+`config.json` contiene solo `apiBaseUrl`. Se genera en la carpeta de salida, no se versiona (está en `.gitignore`) y no debe tener secretos. `public/staticwebapp.config.json` viaja con la compilación: define el respaldo de rutas, las cabeceras de seguridad y la política `no-store` de `config.json`.
