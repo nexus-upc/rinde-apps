@@ -1,58 +1,57 @@
-// Tokens de Rinde: valores del archivo de Figma (grises slate, azul de marca y Geist), con la
-// estructura y el movimiento de Arcadia. Los componentes solo usan estas variables.
+// Tokens de Rinde según el lienzo de diseño aprobado (estilo Arcadia): grises stone, tinta
+// y DM Sans. Los componentes solo usan estas variables.
 :root {
   --arc-font-brand: var(--arc-font-sans);
-  --arc-font-sans:
-    'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --arc-font-mono: 'Geist Mono Variable', ui-monospace, 'Cascadia Mono', monospace;
+  --arc-font-sans: 'DM Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --arc-font-mono: 'DM Sans Variable', ui-sans-serif, system-ui, sans-serif;
 
-  // Tamaños de título: acceso (28/34) y página (34/38).
-  --arc-entrance-title-size: 28px;
+  // Tamaños de título: acceso (26/34) y página (32/40).
+  --arc-entrance-title-size: 26px;
   --arc-entrance-title-line: 34px;
-  --arc-page-title-size: 34px;
-  --arc-page-title-line: 38px;
+  --arc-page-title-size: 32px;
+  --arc-page-title-line: 40px;
 
   // Superficies y texto (gris/50 a gris/900).
   --arc-bg: #ffffff;
   --arc-card: #ffffff;
-  --arc-surface: #f1f5f9;
-  --arc-surface-soft: #f8fafc;
-  --arc-border: #e2e8f0;
-  --arc-border-strong: #cbd5e1;
-  --arc-ink: #0f172a;
-  --arc-muted: #475569;
-  --arc-subtle: #64748b;
-  --arc-faint: #94a3b8;
-  --arc-shadow: #0f172a;
+  --arc-surface: #f5f5f4;
+  --arc-surface-soft: #fafaf9;
+  --arc-border: #e7e5e4;
+  --arc-border-strong: #d6d3d1;
+  --arc-ink: #1c1917;
+  --arc-muted: #57534e;
+  --arc-subtle: #78716c;
+  --arc-faint: #a8a29e;
+  --arc-shadow: #1c1917;
 
   // Azul de marca (azul/700 y azul/600) y su degradado (indigo/600, azul/700 y celeste/500).
-  --arc-fill: #1d4ed8;
-  --arc-fill-hover: #2563eb;
+  --arc-fill: #1c1917;
+  --arc-fill-hover: #292524;
   --arc-on-fill: #ffffff;
-  --arc-fill-soft: #eff6ff;
-  --arc-band: #1d4ed8;
+  --arc-fill-soft: #f5f5f4;
+  --arc-band: #1c1917;
   --arc-on-band: #ffffff;
-  --arc-on-band-muted: #dbeafe;
-  --arc-brand-start: #4f46e5;
-  --arc-brand-end: #0ea5e9;
-  --arc-brand-gradient: linear-gradient(120deg, #4f46e5, #1d4ed8 45%, #0ea5e9 90%);
-  --arc-disabled-bg: #e2e8f0;
-  --arc-disabled-ink: #94a3b8;
+  --arc-on-band-muted: #d6d3d1;
+  --arc-brand-start: #1c1917;
+  --arc-brand-end: #57534e;
+  --arc-brand-gradient: linear-gradient(120deg, #1c1917, #44403c 60%, #57534e);
+  --arc-disabled-bg: #e7e5e4;
+  --arc-disabled-ink: #a8a29e;
 
   // Foco y estados.
-  --arc-accent: #2563eb;
-  --arc-focus-ring: #dbeafe;
-  --arc-danger: #b91c1c;
-  --arc-danger-bg: #fef2f2;
-  --arc-success: #15803d;
-  --arc-success-bg: #f0fdf4;
-  --arc-wait: #1d4ed8;
-  --arc-wait-bg: #eff6ff;
+  --arc-accent: #c15f3c;
+  --arc-focus-ring: #d6d3d1;
+  --arc-danger: #b42318;
+  --arc-danger-bg: #fdecea;
+  --arc-success: #067647;
+  --arc-success-bg: #e3f4ea;
+  --arc-wait: #8a5a12;
+  --arc-wait-bg: #fbf0dc;
 
   // Radios: campos y botones, filas, tarjetas, bloque del acceso y píldoras.
-  --arc-radius-control: 8px;
-  --arc-radius-row: 12px;
-  --arc-radius-card: 20px;
+  --arc-radius-control: 12px;
+  --arc-radius-row: 16px;
+  --arc-radius-card: 24px;
   --arc-radius-block: 24px;
   --arc-radius-pill: 999px;
 }
