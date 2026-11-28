@@ -1,8 +1,6 @@
-import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { StatePanel } from '@shared/ui/state-panel/state-panel';
 import { fromEvent } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { DashboardMetrics, TripStatus, TripSummary } from '../../models/home.models';
@@ -22,20 +20,24 @@ const longFormat = new Intl.DateTimeFormat('es-PE', {
   day: 'numeric',
   month: 'long',
 });
+const amountFormat = new Intl.NumberFormat('es-PE', {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
-/** Inicio de la empresa: lo que está en ruta, lo que sale y la semana, sobre el tablero de viajes. */
+/** Panel del administrador: viajes en ruta, métricas del período, viajes de hoy y la semana. */
 @Component({
   selector: 'app-home-page',
   providers: [HomeStore],
-  imports: [RouterLink, StatePanel, DecimalPipe],
+  imports: [RouterLink],
   templateUrl: './home-page.html',
   styleUrl: './home-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage {
   protected readonly store = inject(HomeStore);
-  protected readonly greeting = greetingFor(new Date().getHours());
   protected readonly todayLabel = capitalize(longFormat.format(new Date()));
+  protected readonly roadTrips = computed(() => this.store.inRoute().slice(0, 4));
   protected readonly weekPeak = computed(() =>
     Math.max(1, ...this.store.week().map((day) => day.count)),
   );
@@ -87,8 +89,11 @@ export class HomePage {
     return this.store.assignment(trip) ?? 'Sin asignar';
   }
 
-  protected expenseTotals(m: DashboardMetrics): { currency: string; total: number }[] {
-    return Object.entries(m.approvedExpenseTotals).map(([currency, total]) => ({ currency, total }));
+  protected expenseTotals(m: DashboardMetrics): { currency: string; total: string }[] {
+    return Object.entries(m.approvedExpenseTotals).map(([currency, total]) => ({
+      currency,
+      total: amountFormat.format(total),
+    }));
   }
 
   protected onFromChange(event: Event): void {
@@ -105,11 +110,6 @@ export class HomePage {
 function dayLabel(iso: string): string {
   const [year, month, day] = iso.split('-').map(Number);
   return dayFormat.format(new Date(year ?? 0, (month ?? 1) - 1, day ?? 1)).replace('.', '');
-}
-
-function greetingFor(hour: number): string {
-  if (hour < 12) return 'Buenos días';
-  return hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 }
 
 function capitalize(text: string): string {

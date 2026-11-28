@@ -1,7 +1,7 @@
 <div class="home arc-entrance-stage">
   <header class="home__head">
     <div class="home__title">
-      <h1>{{ greeting }}</h1>
+      <h1>Panel</h1>
       <span>{{ todayLabel }}</span>
     </div>
     <a class="home__action arc-tap" routerLink="/trips">
@@ -15,200 +15,226 @@
   @switch (store.state()) {
     @case ('loading') {
       <div class="home__loading" role="status">
-        <span class="home__skeleton home__skeleton--hero"></span>
+        <span class="home__skeleton home__skeleton--tall"></span>
+        <span class="home__skeleton"></span>
         <span class="home__skeleton"></span>
         <span class="visually-hidden">Cargando el inicio</span>
       </div>
     }
     @case ('error') {
-      <app-state-panel
-        title="No pudimos cargar el inicio"
-        [message]="store.error()"
-        actionLabel="Reintentar"
-        [error]="true"
-        (action)="store.load()"
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24">
-          <path d="M12 4 2.5 20h19zM12 10v4M12 17v.01" />
-        </svg>
-      </app-state-panel>
+      <section class="home__state home__state--error" role="alert">
+        <span class="home__disc" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+          </svg>
+        </span>
+        <h2>No pudimos cargar el inicio</h2>
+        @if (store.error()) {
+          <p>{{ store.error() }}</p>
+        }
+        <button type="button" class="home__retry" (click)="store.load()">Reintentar</button>
+      </section>
     }
     @default {
-      <section class="home__hero" aria-labelledby="home-route">
-        <div class="home__hero-main">
-          <span class="home__live"><span aria-hidden="true"></span>En ruta ahora</span>
-          <h2 id="home-route">{{ inRouteLabel() }}</h2>
-          <p>{{ assignmentLabel() }}</p>
-        </div>
-        <span class="home__hero-rule" aria-hidden="true"></span>
-        <div class="home__hero-next">
-          <span>Próxima salida</span>
-          @if (store.nextDeparture(); as next) {
-            <strong>{{ route(next) }}, {{ day(next) }}</strong>
-            <a class="arc-tap" routerLink="/trips">Ver en Viajes</a>
-          } @else {
-            <strong>Sin salidas programadas</strong>
-            <a class="arc-tap" routerLink="/trips">Programar viaje</a>
-          }
-        </div>
-      </section>
-
-      <section class="home__metrics" aria-labelledby="home-metrics">
-        <div class="home__section-head">
-          <h2 id="home-metrics">Métricas del período</h2>
-          <div class="home__period">
-            <label class="home__date-label">
-              <span>Desde</span>
-              <input
-                type="date"
-                class="home__date-input"
-                [value]="store.periodFrom()"
-                (change)="onFromChange($event)"
-              />
-            </label>
-            <label class="home__date-label">
-              <span>Hasta</span>
-              <input
-                type="date"
-                class="home__date-input"
-                [value]="store.periodTo()"
-                (change)="onToChange($event)"
-              />
-            </label>
-          </div>
-        </div>
-        @switch (store.metricsState()) {
-          @case ('loading') {
-            <div class="home__metrics-loading" role="status">
-              <span class="home__skeleton"></span>
-              <span class="visually-hidden">Cargando métricas</span>
+      <div class="home__body">
+        <div class="home__main">
+          <section class="home__road" aria-labelledby="home-route">
+            <div class="home__road-head">
+              <h2 id="home-route">En ruta ahora</h2>
+              <p>{{ inRouteLabel() }}</p>
             </div>
-          }
-          @case ('ready') {
-            @if (store.metrics(); as m) {
-              <div class="home__kpi-grid">
-                <div class="home__kpi-card home__kpi-card--wide">
-                  <span class="home__kpi-label">Viajes del período <span class="home__kpi-total">{{ m.totalTrips }} en total</span></span>
-                  <dl class="home__kpi-trips">
-                    <div>
-                      <dd>{{ m.scheduledTrips }}</dd>
-                      <dt>Programados</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.assignedTrips }}</dd>
-                      <dt>Asignados</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.inRouteTrips }}</dd>
-                      <dt>En ruta</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.finishedTrips }}</dd>
-                      <dt>Finalizados</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.settledTrips }}</dd>
-                      <dt>Liquidados</dt>
-                    </div>
-                  </dl>
-                </div>
-                <a class="home__kpi-card home__kpi-card--link" routerLink="/expenses">
-                  <span class="home__kpi-label">Gastos aprobados</span>
-                  <strong class="home__kpi-value">{{ m.approvedExpenses }}</strong>
-                  @for (entry of expenseTotals(m); track entry.currency) {
-                    <span class="home__kpi-hint">{{ entry.currency }} {{ entry.total | number:'1.2-2' }}</span>
-                  }
-                </a>
-                <div class="home__kpi-card">
-                  <span class="home__kpi-label">Liquidaciones pendientes</span>
-                  <strong class="home__kpi-value">{{ m.pendingSettlements }}</strong>
-                </div>
-                <div class="home__kpi-card" [class.is-partial]="m.incidents.source === 'UNAVAILABLE'">
-                  <span class="home__kpi-label">Incidentes abiertos</span>
-                  <strong class="home__kpi-value">{{ m.incidents.openCount ?? '—' }}</strong>
-                  @if (m.incidents.source === 'UNAVAILABLE') {
-                    <span class="home__kpi-hint">Servicio no disponible</span>
-                  }
-                </div>
-              </div>
+            <p class="home__hint">{{ assignmentLabel() }}</p>
+            @for (trip of roadTrips(); track trip.id) {
+              <a class="home__row" [routerLink]="['/trips', trip.id]">
+                <span class="home__dot" [attr.data-status]="trip.status" aria-hidden="true"></span>
+                <span class="home__route">
+                  <span>{{ route(trip) }}</span>
+                  <span class="home__sub">{{ trip.code }} · {{ unit(trip) }}</span>
+                </span>
+                <span class="home__status">{{ status(trip) }}</span>
+              </a>
             }
-          }
-        }
-      </section>
-
-      <div class="home__grid">
-        <section class="home__agenda" aria-labelledby="home-agenda">
-          <div class="home__section-head">
-            <h2 id="home-agenda">
-              {{ store.agendaIsToday() ? 'Viajes de hoy' : 'Próximas salidas' }}
-              <span>{{ countLabel(store.agenda().length) }}</span>
-            </h2>
-            <a routerLink="/trips">Ver en Viajes</a>
-          </div>
-          @for (trip of store.agenda(); track trip.id) {
-            <a class="home__row" [routerLink]="['/trips', trip.id]">
-              <span class="home__mono">{{ day(trip) }}</span>
-              <span class="home__route">
-                <span>{{ route(trip) }}</span>
-                <span class="home__mono home__code">{{ trip.code }}</span>
-              </span>
-              <span class="home__unit" [class.is-missing]="!trip.vehicleId || !trip.driverId">
-                {{ unit(trip) }}
-              </span>
-              <span class="home__status" [attr.data-status]="trip.status">
-                <span aria-hidden="true"></span>{{ status(trip) }}
-              </span>
-            </a>
-          } @empty {
-            <p class="home__empty">Aún no hay viajes programados para tu empresa.</p>
-          }
-        </section>
-
-        <aside class="home__side">
-          <section aria-labelledby="home-week">
-            <div class="home__section-head">
-              <h2 id="home-week">Esta semana</h2>
-              <span class="home__hint">{{ weekRangeLabel() }}</span>
-            </div>
-            <dl class="home__totals">
-              <div>
-                <dd>{{ store.weekTotals().finished }}</dd>
-                <dt>terminados</dt>
-              </div>
-              <div>
-                <dd>{{ store.weekTotals().pending }}</dd>
-                <dt>por salir</dt>
-              </div>
-              <div>
-                <dd>{{ store.weekTotals().inRoute }}</dd>
-                <dt>en ruta</dt>
-              </div>
-            </dl>
-            <div class="home__bars" aria-hidden="true">
-              @for (day of store.week(); track day.label; let index = $index) {
-                <div class="home__bar" [class.is-today]="day.today" [class.is-future]="day.future">
-                  <span
-                    [style.height.px]="8 + (day.count / weekPeak()) * 48"
-                    [style.animation-delay.ms]="200 + index * 50"
-                  ></span>
-                  <small>{{ day.label }}</small>
-                </div>
+            <div class="home__next">
+              <span class="home__next-label">Próxima salida</span>
+              @if (store.nextDeparture(); as next) {
+                <strong>{{ route(next) }}, {{ day(next) }}</strong>
+                <span class="home__sub">{{ next.code }} · {{ unit(next) }}</span>
+                <a class="home__pill arc-tap" routerLink="/trips">Ver en Viajes</a>
+              } @else {
+                <strong>Sin salidas programadas</strong>
+                <a class="home__pill arc-tap" routerLink="/trips">Programar viaje</a>
               }
             </div>
           </section>
 
-          <section class="home__attention" aria-labelledby="home-attention">
-            <h2 id="home-attention">Requiere atención</h2>
-            @for (trip of store.unassigned().slice(0, 3); track trip.id) {
-              <div class="home__notice">
-                <span aria-hidden="true"></span>
-                <span>
-                  <strong>{{ trip.code }} sin asignar</strong>
-                  <small>{{ route(trip) }}, sale {{ day(trip) }}.</small>
-                </span>
+          <div class="home__pair">
+            <section class="home__card" aria-labelledby="home-week">
+              <div class="home__section-head">
+                <h2 id="home-week">Esta semana</h2>
+                <span class="home__hint">{{ weekRangeLabel() }}</span>
               </div>
+              <dl class="home__totals">
+                <div>
+                  <dd>{{ store.weekTotals().finished }}</dd>
+                  <dt>terminados</dt>
+                </div>
+                <div>
+                  <dd>{{ store.weekTotals().pending }}</dd>
+                  <dt>por salir</dt>
+                </div>
+                <div>
+                  <dd>{{ store.weekTotals().inRoute }}</dd>
+                  <dt>en ruta</dt>
+                </div>
+              </dl>
+              <div class="home__bars" aria-hidden="true">
+                @for (day of store.week(); track day.label; let index = $index) {
+                  <div class="home__bar" [class.is-today]="day.today" [class.is-future]="day.future">
+                    <span
+                      [style.height.px]="8 + (day.count / weekPeak()) * 48"
+                      [style.animation-delay.ms]="200 + index * 50"
+                    ></span>
+                    <small>{{ day.label }}</small>
+                  </div>
+                }
+              </div>
+            </section>
+
+            <section class="home__card" aria-labelledby="home-attention">
+              <h2 id="home-attention" class="home__card-title">Requiere atención</h2>
+              @for (trip of store.unassigned().slice(0, 3); track trip.id) {
+                <div class="home__notice">
+                  <span aria-hidden="true"></span>
+                  <span>
+                    <strong>{{ trip.code }} sin asignar</strong>
+                    <small>{{ route(trip) }}, sale {{ day(trip) }}.</small>
+                  </span>
+                </div>
+              } @empty {
+                <p class="home__hint">Nada pendiente por ahora.</p>
+              }
+            </section>
+          </div>
+        </div>
+
+        <aside class="home__side">
+          <section class="home__metrics" aria-labelledby="home-metrics">
+            <div class="home__section-head">
+              <h2 id="home-metrics">Métricas del período</h2>
+            </div>
+            <div class="home__period">
+              <label class="home__date-label">
+                <span>Desde</span>
+                <input
+                  type="date"
+                  class="home__date-input"
+                  [value]="store.periodFrom()"
+                  (change)="onFromChange($event)"
+                />
+              </label>
+              <label class="home__date-label">
+                <span>Hasta</span>
+                <input
+                  type="date"
+                  class="home__date-input"
+                  [value]="store.periodTo()"
+                  (change)="onToChange($event)"
+                />
+              </label>
+            </div>
+            @switch (store.metricsState()) {
+              @case ('loading') {
+                <div class="home__kpi-grid home__kpi-grid--loading" role="status">
+                  <span class="home__skeleton"></span>
+                  <span class="home__skeleton"></span>
+                  <span class="home__skeleton"></span>
+                  <span class="home__skeleton"></span>
+                  <span class="visually-hidden">Cargando métricas</span>
+                </div>
+              }
+              @case ('error') {
+                <div class="home__state home__state--inline" role="alert">
+                  <span class="home__disc" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">
+                      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+                      <path d="M12 9v4" />
+                      <path d="M12 17h.01" />
+                    </svg>
+                  </span>
+                  <strong>No pudimos cargar las métricas</strong>
+                  <p>Lo demás del inicio sigue disponible.</p>
+                  <button type="button" class="home__retry" (click)="store.refresh()">Reintentar</button>
+                </div>
+              }
+              @case ('ready') {
+                @if (store.metrics(); as m) {
+                  <div class="home__kpi-grid">
+                    <a class="home__kpi" routerLink="/expenses">
+                      <span class="home__kpi-label">Gastos por revisar</span>
+                      <strong class="home__kpi-value">{{ m.pendingExpenses }}</strong>
+                      <span class="home__kpi-hint">{{ m.approvedExpenses }} aprobados</span>
+                      @for (entry of expenseTotals(m); track entry.currency) {
+                        <span class="home__kpi-hint">{{ entry.currency }} {{ entry.total }}</span>
+                      }
+                    </a>
+                    <div class="home__kpi">
+                      <span class="home__kpi-label">Liquidaciones</span>
+                      <strong class="home__kpi-value">{{ m.pendingSettlements }} por cerrar</strong>
+                      <span class="home__kpi-hint">Pendientes del período</span>
+                    </div>
+                    <div class="home__kpi">
+                      <span class="home__kpi-label">Viajes del período</span>
+                      <strong class="home__kpi-value">{{ m.totalTrips }}</strong>
+                      <span class="home__kpi-hint">{{ m.inRouteTrips }} en ruta · {{ m.finishedTrips }} finalizados</span>
+                    </div>
+                    <div
+                      class="home__kpi"
+                      [class.home__kpi--wait]="m.incidents.source === 'AVAILABLE' && (m.incidents.openCount ?? 0) > 0"
+                      [class.is-partial]="m.incidents.source === 'UNAVAILABLE'"
+                    >
+                      <span class="home__kpi-label">Incidencias</span>
+                      <strong class="home__kpi-value">{{ m.incidents.openCount ?? '—' }}</strong>
+                      @if (m.incidents.source === 'UNAVAILABLE') {
+                        <span class="home__kpi-hint">Servicio no disponible</span>
+                      } @else {
+                        <span class="home__kpi-hint">abiertas</span>
+                      }
+                    </div>
+                  </div>
+                }
+              }
+            }
+          </section>
+
+          <section class="home__agenda" aria-labelledby="home-agenda">
+            <div class="home__section-head">
+              <h2 id="home-agenda">
+                {{ store.agendaIsToday() ? 'Viajes de hoy' : 'Próximas salidas' }}
+                <span>{{ countLabel(store.agenda().length) }}</span>
+              </h2>
+              <a routerLink="/trips">Ver todos</a>
+            </div>
+            @for (trip of store.agenda(); track trip.id) {
+              <a class="home__row" [routerLink]="['/trips', trip.id]">
+                <span class="home__dot" [attr.data-status]="trip.status" aria-hidden="true"></span>
+                <span class="home__route">
+                  <span>{{ route(trip) }}</span>
+                  <span class="home__sub">{{ trip.code }} · {{ unit(trip) }}</span>
+                </span>
+                <span class="home__day">{{ day(trip) }}</span>
+              </a>
             } @empty {
-              <p class="home__hint">Nada pendiente por ahora.</p>
+              <div class="home__state">
+                <span class="home__disc" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                    <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+                  </svg>
+                </span>
+                <p>Aún no hay viajes programados para tu empresa.</p>
+              </div>
             }
           </section>
         </aside>

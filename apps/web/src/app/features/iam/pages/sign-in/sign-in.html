@@ -5,7 +5,7 @@
         <div class="access-stage arc-entrance-stage" (animate.leave)="leave($event)">
           <header class="access__header">
             <app-rise-title titleId="sign-in-title" text="Inicia sesión en Rinde" />
-            <p class="access__lead">La operación de tu flota, en cualquier equipo.</p>
+            <p class="access__lead">Entra con la cuenta de tu empresa.</p>
           </header>
           @if (notice(); as message) {
             <p class="form-notice" role="status">{{ message }}</p>
@@ -26,7 +26,7 @@
           </header>
           <form class="access__form" [formGroup]="form" (ngSubmit)="continueWithEmail()" novalidate>
             <div class="field">
-              <label class="field__label" for="email">Correo electrónico</label>
+              <label class="field__label" for="email">Correo</label>
               <input
                 appAutoFocus
                 id="email"
@@ -103,6 +103,7 @@
                 formControlName="password"
                 autocomplete="current-password"
                 maxlength="128"
+                placeholder="Tu contraseña"
                 [class.field__input--invalid]="isInvalid('password')"
                 [attr.aria-invalid]="isInvalid('password') || null"
                 [attr.aria-describedby]="isInvalid('password') ? 'password-error' : null"
@@ -112,7 +113,7 @@
               }
             </div>
             <button uiButton block type="submit" [loading]="loading()" [disabled]="loading()">
-              {{ loading() ? 'Ingresando' : 'Continuar' }}
+              {{ loading() ? 'Ingresando' : 'Iniciar sesión' }}
             </button>
           </form>
         </div>

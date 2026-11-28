@@ -1,17 +1,45 @@
+// Acceso (ingreso y registro) con el diseño aprobado del lienzo. La paleta del lienzo vive bajo
+// .access para no tocar los tokens de la app; el ancho de 360 lo fija AccessLayout.
+.access {
+  --access-ink: #1c1917;
+  --access-surface: #f5f5f4;
+  --access-surface-hover: #ecebea;
+  --access-muted: #57534e;
+  --access-subtle: #78716c;
+  --access-fill: #1c1917;
+  --access-fill-hover: #292524;
+  --access-on-fill: #ffffff;
+  --access-accent: #c15f3c;
+  --access-disabled: #e7e5e4;
+  --access-disabled-ink: #a8a29e;
+
+  color: var(--access-ink);
+}
+
 // Piezas del acceso que viven dentro de cada página proyectada en AccessLayout.
 .access-stage {
   display: grid;
-  gap: 20px;
+  gap: 32px;
 }
 
+// Título y entradilla centrados, como en el lienzo.
 .access__header {
   display: grid;
+  justify-items: center;
   gap: 8px;
+  text-align: center;
+
+  // El título lo pinta app-rise-title; aquí solo se ajusta al tamaño del lienzo (26/34).
+  .access-stage & .rise-title {
+    font-size: 26px;
+    line-height: 34px;
+    color: var(--access-ink);
+  }
 }
 
 .access__lead {
   overflow-wrap: anywhere;
-  color: var(--arc-muted);
+  color: var(--access-muted);
   font-size: 14px;
   line-height: 20px;
 }
@@ -25,9 +53,10 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  justify-content: center;
   gap: 4px 0.35em;
-  margin-top: 12px;
-  color: var(--arc-muted);
+  margin-top: 0;
+  color: var(--access-muted);
   font-size: 14px;
   line-height: 20px;
 
@@ -37,16 +66,12 @@
   }
 }
 
-.access__stack {
-  display: grid;
-  gap: 12px;
-}
-
 // Progreso del registro: segmentos que se llenan.
 .access__steps {
   display: grid;
+  justify-items: center;
   gap: 8px;
-  color: var(--arc-muted);
+  color: var(--access-muted);
   font-size: 12px;
   line-height: 16px;
 }
@@ -55,15 +80,16 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
+  width: 100%;
 
   span {
     height: 4px;
     border-radius: var(--arc-radius-pill);
-    background: var(--arc-surface);
+    background: var(--access-surface);
     transition: background-color var(--arc-dur-base) var(--arc-ease-out);
 
     &.is-done {
-      background: var(--arc-fill);
+      background: var(--access-fill);
     }
   }
 }
@@ -88,4 +114,113 @@
   > * {
     grid-area: 1 / 1;
   }
+}
+
+// Campos: etiqueta de 12, campo de 44 gris sin borde, radio 12 y texto de 14, como en el lienzo.
+.access .field {
+  gap: 8px;
+}
+
+.access .field__label {
+  color: var(--access-muted);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+}
+
+.access .field__input {
+  height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--access-surface);
+  color: var(--access-ink);
+  font-size: 14px;
+  box-shadow: none;
+
+  &::placeholder {
+    color: var(--access-subtle);
+  }
+
+  &:focus {
+    border-color: transparent;
+    box-shadow: none;
+    outline: 2px solid var(--access-accent);
+    outline-offset: 1px;
+  }
+}
+
+.access input[inputmode='numeric'] {
+  font-variant-numeric: tabular-nums;
+}
+
+// Error: anillo fino en lugar del borde, para no mover el campo.
+.access .field__input--invalid {
+  box-shadow: inset 0 0 0 1px var(--arc-danger);
+}
+
+.access .field__error {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+// Botones de píldora de 44 px, como en el lienzo.
+.access .ui-button {
+  min-height: 44px;
+  border-radius: 22px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.access .ui-button--primary {
+  border-color: var(--access-fill);
+  background: var(--access-fill);
+  color: var(--access-on-fill);
+
+  &:hover:not(:disabled) {
+    border-color: var(--access-fill-hover);
+    background: var(--access-fill-hover);
+    box-shadow: none;
+  }
+
+  &:disabled:not(.is-loading) {
+    border-color: var(--access-disabled);
+    background: var(--access-disabled);
+    color: var(--access-disabled-ink);
+  }
+}
+
+.access .ui-button--secondary {
+  border-color: transparent;
+  background: var(--access-surface);
+  color: var(--access-ink);
+
+  &:hover:not(:disabled) {
+    background: var(--access-surface-hover);
+  }
+}
+
+.access .ui-button--ghost {
+  color: var(--access-ink);
+
+  &:hover:not(:disabled) {
+    background: var(--access-surface);
+  }
+}
+
+// Enlaces del pie en tinta; al pasar el cursor, el acento del lienzo.
+.access .text-link {
+  color: var(--access-ink);
+
+  &:hover:not(:disabled) {
+    color: var(--access-accent);
+  }
+
+  &.is-muted {
+    color: var(--access-muted);
+  }
+}
+
+.access .text-link.is-muted:hover:not(:disabled) {
+  color: var(--access-ink);
 }

@@ -8,22 +8,19 @@ const MESSAGES = {
 } as const;
 
 export type WorkspaceLoadingStep = keyof typeof MESSAGES;
-const ORDER: readonly WorkspaceLoadingStep[] = ['screens', 'fonts', 'opening'];
 
-/** Carga de entrada sobre el degradado de marca: logo, avance y el paso que está ocurriendo. */
+/** Carga de entrada: logo, anillo y "Cargando…" sobre blanco; el paso actual se anuncia a lectores de pantalla. */
 @Component({
   selector: 'app-workspace-loading',
   imports: [BrandMark],
   template: `
     <div class="workspace-loading" [class.is-leaving]="leaving()" role="status" aria-live="polite">
-      <app-brand-mark tone="mono" [size]="48" />
-      <span class="workspace-loading__bar" aria-hidden="true">
-        <span [style.width.%]="progress()"></span>
-      </span>
+      <app-brand-mark tone="brand" [size]="40" />
       <span class="workspace-loading__line">
         <span class="workspace-loading__ring" aria-hidden="true"></span>
-        <span>{{ message() }}</span>
+        <span>Cargando…</span>
       </span>
+      <span class="visually-hidden">{{ message() }}</span>
     </div>
   `,
   styleUrl: './workspace-loading.scss',
@@ -34,7 +31,4 @@ export class WorkspaceLoading {
   readonly leaving = input(false);
   readonly step = input<WorkspaceLoadingStep>('screens');
   protected readonly message = computed(() => MESSAGES[this.step()]);
-  protected readonly progress = computed(
-    () => ((ORDER.indexOf(this.step()) + 1) / ORDER.length) * 100,
-  );
 }
