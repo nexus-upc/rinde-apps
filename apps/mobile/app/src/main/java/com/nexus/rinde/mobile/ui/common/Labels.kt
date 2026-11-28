@@ -12,6 +12,7 @@ import com.nexus.rinde.mobile.data.local.QueueItemStatus
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -107,6 +108,17 @@ fun localTime(value: String): String = runCatching {
         .withZone(ZoneId.systemDefault())
         .format(Instant.parse(value))
 }.getOrDefault(value)
+
+fun formatIsoDate(value: String): String = runCatching {
+    LocalDate.parse(value).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+}.getOrDefault(value)
+
+fun roleLabel(role: String): String = when (role) {
+    "DRIVER" -> "Conductor"
+    "OPERATIONS_MANAGER" -> "Operaciones"
+    "ADMINISTRATOR" -> "Administrador"
+    else -> role
+}
 
 fun formatSizeKb(bytes: Long): String {
     if (bytes <= 0L) return "0 KB"

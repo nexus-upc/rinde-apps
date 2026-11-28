@@ -1,10 +1,15 @@
 package com.nexus.rinde.mobile
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -29,6 +34,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
@@ -43,6 +49,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -56,9 +63,15 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nexus.rinde.mobile.data.local.QueueItemType
+import com.nexus.rinde.mobile.data.remote.Trip
+import com.nexus.rinde.mobile.location.LocationPermissionFlow
+import com.nexus.rinde.mobile.push.TripNotificationHelper
 import com.nexus.rinde.mobile.ui.auth.AuthViewModel
 import com.nexus.rinde.mobile.ui.auth.SignInScreen
 import com.nexus.rinde.mobile.ui.common.NoticeText
@@ -66,6 +79,9 @@ import com.nexus.rinde.mobile.ui.expense.ExpenseFormScreen
 import com.nexus.rinde.mobile.ui.expense.ExpenseFormViewModel
 import com.nexus.rinde.mobile.ui.incident.IncidentFormScreen
 import com.nexus.rinde.mobile.ui.incident.IncidentFormViewModel
+import com.nexus.rinde.mobile.ui.profile.ProfileQueueSummary
+import com.nexus.rinde.mobile.ui.profile.ProfileScreen
+import com.nexus.rinde.mobile.ui.profile.ProfileViewModel
 import com.nexus.rinde.mobile.ui.queue.QueueScreen
 import com.nexus.rinde.mobile.ui.queue.QueueViewModel
 import com.nexus.rinde.mobile.ui.theme.RindeTheme
@@ -80,6 +96,7 @@ private enum class MobileTab {
     EXPENSE,
     INCIDENT,
     QUEUE,
+    PROFILE,
 }
 
 private sealed interface PhotoCaptureTarget {
@@ -104,7 +121,16 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun RindeAppRoot() {
     val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     val container = (context.applicationContext as RindeApplication).container
+    val scope = rememberCoroutineScope()
+
+    var locationDisclosureTrip by remember { mutableStateOf<Trip?>(null) }
+    var pendingLocationTrip by remember { mutableStateOf<Trip?>(null) }
+    var locationRetryFromDetail by remember { mutableStateOf(false) }
+    var hasLocationPermission by remember {
+        mutableStateOf(container.tripLocationController.hasLocationPermission())
+    }
 
     val authModel: AuthViewModel = viewModel(
         factory = AuthViewModel.Factory(container.sessionRepository),
@@ -115,6 +141,45 @@ private fun RindeAppRoot() {
             expenseRepository = container.expenseRepository,
             syncEngine = container.syncEngine,
             onSessionExpired = authModel::onSessionExpired,
+            onTripStarted = { startedTrip ->
+                val granted = container.tripLocationController.hasLocationPermission()
+                hasLocationPermission = granted
+                if (granted) {
+                    container.tripLocationController.startTracking(startedTrip.id, startedTrip.code)
+                } else {
+                    locationRetryFromDetail = false
+                    locationDisclosureTrip = startedTrip
+                }
+            },
+            onTripFinished = { finishedTrip ->
+                container.tripLocationController.stopTracking(finishedTrip.id)
+                val userId = authModel.state.value.session?.userId
+                if (userId != null) {
+                    scope.launch {
+                        container.tripLocationRepository.discardPendingForTrip(userId, finishedTrip.id)
+                    }
+                }
+            },
+            onTripsRefreshed = { trips ->
+                val stoppedTripId = container.tripLocationController.reconcileWithTrips(trips)
+                val userId = authModel.state.value.session?.userId
+                if (stoppedTripId != null && userId != null) {
+                    scope.launch {
+                        container.tripLocationRepository.discardPendingForTrip(userId, stoppedTripId)
+                    }
+                }
+                val activeInRoute = trips.firstOrNull { it.status == "IN_ROUTE" }
+                val locState = container.tripLocationController.state.value
+                val granted = container.tripLocationController.hasLocationPermission()
+                hasLocationPermission = granted
+                if (activeInRoute != null &&
+                    granted &&
+                    !locState.isSharing &&
+                    activeInRoute.id !in locState.permissionDeniedForTripIds
+                ) {
+                    container.tripLocationController.startTracking(activeInRoute.id, activeInRoute.code)
+                }
+            },
         ),
     )
     val formModel: ExpenseFormViewModel = viewModel(
@@ -137,15 +202,22 @@ private fun RindeAppRoot() {
             onSyncedCompleted = tripsModel::refreshOpenTripExpenses,
         ),
     )
+    val profileModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModel.Factory(
+            profileRepository = container.profileRepository,
+            onSessionExpired = authModel::onSessionExpired,
+        ),
+    )
 
     val authState by authModel.state.collectAsStateWithLifecycle()
     val tripsState by tripsModel.state.collectAsStateWithLifecycle()
     val formState by formModel.state.collectAsStateWithLifecycle()
     val incidentFormState by incidentFormModel.state.collectAsStateWithLifecycle()
     val queueState by queueModel.state.collectAsStateWithLifecycle()
+    val profileState by profileModel.state.collectAsStateWithLifecycle()
+    val locationState by container.tripLocationController.state.collectAsStateWithLifecycle()
     val isOnline by container.networkMonitor.isOnline.collectAsStateWithLifecycle()
 
-    val scope = rememberCoroutineScope()
     var activeTab by rememberSaveable { mutableStateOf(MobileTab.TRIPS) }
     var confirmAction by remember { mutableStateOf("") }
     var confirmSignOutPending by remember { mutableIntStateOf(-1) }
@@ -160,6 +232,53 @@ private fun RindeAppRoot() {
         contract = ActivityResultContracts.RequestPermission(),
     ) { _ ->
         // El permiso es opcional y no bloquea la operación sin conexión
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        val trip = pendingLocationTrip
+        val fromRetry = locationRetryFromDetail
+        pendingLocationTrip = null
+        locationRetryFromDetail = false
+        hasLocationPermission = granted || container.tripLocationController.hasLocationPermission()
+        if (hasLocationPermission && trip != null) {
+            container.tripLocationController.startTracking(trip.id, trip.code)
+        } else if (trip != null) {
+            container.tripLocationController.markPermissionDenied(trip.id)
+            val activity = context as? Activity
+            val canShowRationale = activity != null &&
+                ActivityCompat.shouldShowRequestPermissionRationale(
+                    activity,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                )
+            if (fromRetry && !canShowRationale) {
+                val appSettings = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                    data = Uri.fromParts("package", context.packageName, null)
+                }
+                runCatching { context.startActivity(appSettings) }
+            }
+        }
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                val granted = container.tripLocationController.hasLocationPermission()
+                hasLocationPermission = granted
+                val currentTrip = tripsState.selectedTrip
+                if (granted &&
+                    currentTrip != null &&
+                    currentTrip.status == "IN_ROUTE" &&
+                    !locationState.isSharing &&
+                    currentTrip.id in locationState.permissionDeniedForTripIds
+                ) {
+                    container.tripLocationController.startTracking(currentTrip.id, currentTrip.code)
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     val handlePickedImage: (android.net.Uri, String?, File?, PhotoCaptureTarget?) -> Unit =
@@ -236,6 +355,7 @@ private fun RindeAppRoot() {
         val session = authState.session
         tripsModel.bindSession(session)
         queueModel.bindSession(session)
+        profileModel.bindSession(session)
         if (session != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(
@@ -253,6 +373,9 @@ private fun RindeAppRoot() {
                 container.pushDeviceRepository.ensurePendingScheduled(session)
             }
         } else {
+            container.tripLocationController.stopTracking()
+            locationDisclosureTrip = null
+            pendingLocationTrip = null
             activeTab = MobileTab.TRIPS
         }
     }
@@ -261,6 +384,9 @@ private fun RindeAppRoot() {
         if (isOnline && authState.session != null) {
             queueModel.triggerSync(manual = false)
             tripsModel.loadTrips()
+            if (profileState.profile == null && !profileState.loading) {
+                profileModel.loadProfile()
+            }
         }
     }
 
@@ -270,12 +396,14 @@ private fun RindeAppRoot() {
         formState.error,
         incidentFormState.error,
         queueState.error,
+        profileState.error,
     ) {
         if (authState.error.isNotBlank() ||
             tripsState.error.isNotBlank() ||
             formState.error.isNotBlank() ||
             incidentFormState.error.isNotBlank() ||
-            queueState.error.isNotBlank()
+            queueState.error.isNotBlank() ||
+            profileState.error.isNotBlank()
         ) {
             scroll.animateScrollTo(0)
         }
@@ -304,6 +432,7 @@ private fun RindeAppRoot() {
                             activeTab == MobileTab.INCIDENT ->
                                 if (incidentFormState.isEditing) "Corregir incidencia" else "Reportar incidencia"
                             activeTab == MobileTab.QUEUE -> "Cola sin conexión"
+                            activeTab == MobileTab.PROFILE -> "Perfil"
                             else -> tripsState.selectedTrip?.code ?: "Mis viajes"
                         },
                     )
@@ -327,26 +456,16 @@ private fun RindeAppRoot() {
                     if (authState.signedIn) {
                         IconButton(
                             onClick = {
-                                tripsModel.loadTrips()
+                                if (activeTab == MobileTab.PROFILE) {
+                                    profileModel.loadProfile()
+                                } else {
+                                    tripsModel.loadTrips()
+                                }
                                 if (isOnline) queueModel.triggerSync(manual = false)
                             },
-                            enabled = !tripsState.busy,
+                            enabled = !tripsState.busy && !profileState.loading,
                         ) {
                             Icon(Icons.Default.Refresh, "Actualizar datos")
-                        }
-                        TextButton(
-                            onClick = {
-                                scope.launch {
-                                    val pending = authModel.pendingCountBeforeSignOut()
-                                    if (pending > 0) {
-                                        confirmSignOutPending = pending
-                                    } else {
-                                        authModel.confirmSignOut()
-                                    }
-                                }
-                            },
-                        ) {
-                            Text("Salir")
                         }
                     }
                 },
@@ -390,6 +509,12 @@ private fun RindeAppRoot() {
                         icon = { Icon(Icons.AutoMirrored.Filled.List, queueTabLabel) },
                         label = { Text(queueTabLabel) },
                     )
+                    NavigationBarItem(
+                        selected = activeTab == MobileTab.PROFILE,
+                        onClick = { activeTab = MobileTab.PROFILE },
+                        icon = { Icon(Icons.Default.Person, "Perfil") },
+                        label = { Text("Perfil") },
+                    )
                 }
             }
         },
@@ -403,7 +528,12 @@ private fun RindeAppRoot() {
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            if (authState.restoring || authState.busy || tripsState.busy || queueState.busy) {
+            if (authState.restoring ||
+                authState.busy ||
+                tripsState.busy ||
+                queueState.busy ||
+                profileState.loading
+            ) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
             if (!isOnline && authState.signedIn && activeTab == MobileTab.TRIPS) {
@@ -452,6 +582,24 @@ private fun RindeAppRoot() {
                                 expenses = tripsState.displayExpenses,
                                 tripIncidents = tripsState.tripIncidents,
                                 activeSyncKeys = tripsState.activeSyncKeys,
+                                locationShareStatus = LocationPermissionFlow.statusForTrip(
+                                    trip = selectedTrip,
+                                    state = locationState,
+                                    hasLocationPermission = hasLocationPermission,
+                                ),
+                                onActivateLocation = {
+                                    val granted = container.tripLocationController.hasLocationPermission()
+                                    hasLocationPermission = granted
+                                    if (granted) {
+                                        container.tripLocationController.startTracking(
+                                            selectedTrip.id,
+                                            selectedTrip.code,
+                                        )
+                                    } else {
+                                        locationRetryFromDetail = true
+                                        locationDisclosureTrip = selectedTrip
+                                    }
+                                },
                                 onRequestStatusChange = { confirmAction = it },
                                 onOpenExpenseForm = {
                                     formModel.prepareNew(selectedTrip)
@@ -557,15 +705,47 @@ private fun RindeAppRoot() {
                             onRetryAll = { queueModel.triggerSync(manual = true) },
                             onRetrySingle = queueModel::retrySingle,
                             onEditRejected = { rejectedItem ->
-                                if (rejectedItem.queueType == QueueItemType.INCIDENT) {
-                                    incidentFormModel.prepareEdit(rejectedItem)
-                                    activeTab = MobileTab.INCIDENT
-                                } else {
-                                    formModel.prepareEdit(rejectedItem)
-                                    activeTab = MobileTab.EXPENSE
+                                when (rejectedItem.queueType) {
+                                    QueueItemType.INCIDENT -> {
+                                        incidentFormModel.prepareEdit(rejectedItem)
+                                        activeTab = MobileTab.INCIDENT
+                                    }
+                                    QueueItemType.EXPENSE -> {
+                                        formModel.prepareEdit(rejectedItem)
+                                        activeTab = MobileTab.EXPENSE
+                                    }
+                                    QueueItemType.LOCATION -> queueModel.discard(rejectedItem.idempotencyKey)
                                 }
                             },
                             onDiscard = queueModel::discard,
+                        )
+                    }
+
+                    MobileTab.PROFILE -> {
+                        val isSyncing = queueState.busy || queueState.activeSyncKeys.isNotEmpty()
+                        ProfileScreen(
+                            profileState = profileState,
+                            queueSummary = ProfileQueueSummary.from(queueState.items, isSyncing),
+                            isOnline = isOnline,
+                            isSyncing = isSyncing,
+                            queueMessage = queueState.message,
+                            queueError = queueState.error,
+                            authBusy = authState.busy,
+                            onRetry = profileModel::loadProfile,
+                            onSendNow = { queueModel.triggerSync(manual = true) },
+                            onOpenNotificationSettings = {
+                                TripNotificationHelper.openChannelSettings(context)
+                            },
+                            onRequestSignOut = {
+                                scope.launch {
+                                    val pending = authModel.pendingCountBeforeSignOut()
+                                    if (pending > 0) {
+                                        confirmSignOutPending = pending
+                                    } else {
+                                        authModel.confirmSignOut()
+                                    }
+                                }
+                            },
                         )
                     }
                 }
@@ -700,6 +880,41 @@ private fun RindeAppRoot() {
             confirmButton = {
                 TextButton(onClick = tripsModel::dismissEvidenceDialog) {
                     Text("Cerrar")
+                }
+            },
+        )
+    }
+
+    val disclosureTrip = locationDisclosureTrip
+    if (disclosureTrip != null) {
+        AlertDialog(
+            onDismissRequest = {
+                locationDisclosureTrip = null
+                locationRetryFromDetail = false
+                container.tripLocationController.markPermissionDenied(disclosureTrip.id)
+            },
+            title = { Text("Ubicación durante el viaje") },
+            text = { Text(LocationPermissionFlow.DISCLOSURE_MESSAGE) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        locationDisclosureTrip = null
+                        pendingLocationTrip = disclosureTrip
+                        locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                    },
+                ) {
+                    Text("Continuar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        locationDisclosureTrip = null
+                        locationRetryFromDetail = false
+                        container.tripLocationController.markPermissionDenied(disclosureTrip.id)
+                    },
+                ) {
+                    Text("Ahora no")
                 }
             },
         )

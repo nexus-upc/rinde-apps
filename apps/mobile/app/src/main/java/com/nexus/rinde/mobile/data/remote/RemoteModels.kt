@@ -344,6 +344,106 @@ data class RegisterDeviceRequest(
         .put("platform", platform)
 }
 
+data class CurrentUserTenant(
+    val id: String,
+    val tradeName: String,
+    val ruc: String = "",
+    val status: String = "",
+) {
+    companion object {
+        fun from(json: JSONObject) = CurrentUserTenant(
+            id = json.text("id"),
+            tradeName = json.text("tradeName"),
+            ruc = json.text("ruc"),
+            status = json.text("status"),
+        )
+    }
+}
+
+data class CurrentUserProfile(
+    val id: String,
+    val fullName: String,
+    val email: String,
+    val role: String,
+    val status: String = "",
+    val tenant: CurrentUserTenant? = null,
+) {
+    companion object {
+        fun from(json: JSONObject): CurrentUserProfile {
+            val tenantJson = if (json.isNull("tenant")) null else json.optJSONObject("tenant")
+            return CurrentUserProfile(
+                id = json.text("id"),
+                fullName = json.text("fullName"),
+                email = json.text("email"),
+                role = json.text("role"),
+                status = json.text("status"),
+                tenant = tenantJson?.let(CurrentUserTenant::from),
+            )
+        }
+    }
+}
+
+data class DriverProfile(
+    val id: String,
+    val userId: String = "",
+    val fullName: String = "",
+    val documentType: String = "",
+    val documentNumber: String = "",
+    val licenseNumber: String = "",
+    val licenseCategory: String = "",
+    val licenseExpirationDate: String = "",
+    val status: String = "",
+) {
+    companion object {
+        fun from(json: JSONObject) = DriverProfile(
+            id = json.text("id"),
+            userId = json.text("userId"),
+            fullName = json.text("fullName"),
+            documentType = json.text("documentType"),
+            documentNumber = json.text("documentNumber"),
+            licenseNumber = json.text("licenseNumber"),
+            licenseCategory = json.text("licenseCategory"),
+            licenseExpirationDate = json.text("licenseExpirationDate"),
+            status = json.text("status"),
+        )
+    }
+}
+
+data class TripLocationPointRequest(
+    val latitude: Double,
+    val longitude: Double,
+    val accuracyMeters: Double?,
+    val recordedAt: String,
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("latitude", latitude)
+        .put("longitude", longitude)
+        .put("accuracyMeters", accuracyMeters?.takeIf { it.isFinite() } ?: JSONObject.NULL)
+        .put("recordedAt", recordedAt)
+}
+
+data class RecordTripLocationsRequest(
+    val points: List<TripLocationPointRequest>,
+) {
+    fun toJson(): JSONObject {
+        val array = JSONArray()
+        points.forEach { array.put(it.toJson()) }
+        return JSONObject().put("points", array)
+    }
+}
+
+data class RecordTripLocationsResponse(
+    val savedCount: Int,
+    val duplicateCount: Int,
+) {
+    companion object {
+        fun from(json: JSONObject) = RecordTripLocationsResponse(
+            savedCount = json.optInt("savedCount", 0),
+            duplicateCount = json.optInt("duplicateCount", 0),
+        )
+    }
+}
+
 internal fun JSONObject.text(key: String): String =
     if (!has(key) || isNull(key)) "" else optString(key)
 

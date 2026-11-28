@@ -64,6 +64,9 @@ class TripsViewModel(
     private val expenseRepository: ExpenseRepository,
     private val syncEngine: OfflineSyncEngine,
     private val onSessionExpired: () -> Unit,
+    private val onTripStarted: (Trip) -> Unit = {},
+    private val onTripFinished: (Trip) -> Unit = {},
+    private val onTripsRefreshed: (List<Trip>) -> Unit = {},
 ) : ViewModel() {
 
     private val mutable = MutableStateFlow(TripsUiState())
@@ -107,6 +110,7 @@ class TripsViewModel(
                         tripsFromCache = result.fromCache,
                     )
                 }
+                onTripsRefreshed(result.trips)
                 if (currentTripId != null) {
                     loadTripDetailInternal(session, currentTripId)
                 }
@@ -219,6 +223,9 @@ class TripsViewModel(
 
     private suspend fun loadTripDetailInternal(session: SessionData, tripId: String) {
         val trip = tripRepository.loadTrip(session, tripId)
+        if (trip.status != "IN_ROUTE") {
+            onTripFinished(trip)
+        }
         mutable.update { it.copy(selectedTrip = trip, expenseError = "", loadingFinancials = true) }
         coroutineScope {
             val vehicleDeferred = async {
@@ -392,7 +399,10 @@ class TripsViewModel(
                         message = if (action == "start") "Viaje iniciado." else "Viaje finalizado.",
                     )
                 }
-                if (action == "finish") {
+                if (action == "start") {
+                    onTripStarted(updated)
+                } else if (action == "finish") {
+                    onTripFinished(updated)
                     runCatching { loadFinancialsOnly(session, updated.id) }
                 }
             } catch (cancelled: CancellationException) {
@@ -553,9 +563,20 @@ class TripsViewModel(
         private val expenseRepository: ExpenseRepository,
         private val syncEngine: OfflineSyncEngine,
         private val onSessionExpired: () -> Unit,
+        private val onTripStarted: (Trip) -> Unit = {},
+        private val onTripFinished: (Trip) -> Unit = {},
+        private val onTripsRefreshed: (List<Trip>) -> Unit = {},
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T =
-            TripsViewModel(tripRepository, expenseRepository, syncEngine, onSessionExpired) as T
+            TripsViewModel(
+                tripRepository = tripRepository,
+                expenseRepository = expenseRepository,
+                syncEngine = syncEngine,
+                onSessionExpired = onSessionExpired,
+                onTripStarted = onTripStarted,
+                onTripFinished = onTripFinished,
+                onTripsRefreshed = onTripsRefreshed,
+            ) as T
     }
 }

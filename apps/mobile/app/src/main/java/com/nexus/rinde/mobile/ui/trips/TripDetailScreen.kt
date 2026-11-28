@@ -5,7 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -14,6 +19,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.nexus.rinde.mobile.data.local.IncidentQueuePayload
@@ -24,6 +30,7 @@ import com.nexus.rinde.mobile.data.remote.TripAdvance
 import com.nexus.rinde.mobile.data.remote.VehicleSummary
 import com.nexus.rinde.mobile.data.repository.TripExpenseDisplayItem
 import com.nexus.rinde.mobile.data.repository.TripFinancialSummary
+import com.nexus.rinde.mobile.location.LocationShareStatus
 import com.nexus.rinde.mobile.ui.common.NoticeText
 import com.nexus.rinde.mobile.ui.common.backendStatusLabel
 import com.nexus.rinde.mobile.ui.common.categoryLabel
@@ -51,6 +58,8 @@ fun TripDetailScreen(
     expenses: List<TripExpenseDisplayItem>,
     tripIncidents: List<QueueItemEntity>,
     activeSyncKeys: Set<String>,
+    locationShareStatus: LocationShareStatus = LocationShareStatus.INACTIVE,
+    onActivateLocation: () -> Unit = {},
     onRequestStatusChange: (String) -> Unit,
     onOpenExpenseForm: () -> Unit,
     onOpenIncidentForm: () -> Unit,
@@ -67,6 +76,52 @@ fun TripDetailScreen(
         "Código ${trip.code} | Salida: ${trip.departureDate}",
         style = MaterialTheme.typography.bodyLarge,
     )
+
+    if (trip.status == "IN_ROUTE") {
+        if (locationShareStatus == LocationShareStatus.SHARING) {
+            Surface(
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                shape = RoundedCornerShape(50),
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Place,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(18.dp),
+                    )
+                    Text(
+                        text = "Compartiendo tu ubicación con la oficina",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+            }
+        } else {
+            OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = "No estás compartiendo tu ubicación",
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    TextButton(onClick = onActivateLocation) {
+                        Text("Activar ubicación")
+                    }
+                }
+            }
+        }
+    }
 
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
         Column(

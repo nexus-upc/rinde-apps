@@ -52,6 +52,12 @@ interface OfflineQueueDao {
 
     @Query(
         "DELETE FROM offline_queue_items WHERE ownerUserId = :userId " +
+            "AND tripId = :tripId AND itemType = :itemType",
+    )
+    suspend fun deleteByTripAndType(userId: String, tripId: String, itemType: String)
+
+    @Query(
+        "DELETE FROM offline_queue_items WHERE ownerUserId = :userId " +
             "AND status = 'SYNCED' AND updatedAtEpochMs < :cutoffEpochMs",
     )
     suspend fun purgeOldSynced(userId: String, cutoffEpochMs: Long)
