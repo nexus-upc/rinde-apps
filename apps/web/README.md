@@ -110,3 +110,12 @@ El backend debe estar levantado con Docker Compose en un proyecto cuyo nombre em
 La prueba lee las credenciales de ese entorno privado sin mostrarlas, crea una empresa de demostración y prepara solo el hash de su token de verificación en la base de prueba. Después ejecuta acceso del dueño, búsqueda, suspensión y restablecimiento, alta de un plan, contratación y pago simulado desde la web de empresa, consulta de registros, auditoría, recuperación de un error inyectado y navegación sin cruce de permisos. Comprueba desbordamiento, controles táctiles y retorno de foco. Los resultados y capturas van a .impeccable/review, ignorado por Git. Las fixtures quedan en ese entorno de revisión.
 
 npm run test:mailbox usa el mismo entorno, con el buzón habilitado en IAM. Recorre registro y verificación, invitación y acceso del conductor y recuperación de contraseña con los enlaces obtenidos del buzón, sin preparar hashes en la base. También comprueba el rechazo a una cuenta de empresa y a una visita anónima, el aislamiento de la pestaña del destinatario y las anchuras móviles de 344, 360 y 390 px.
+
+## Despliegue en Azure Static Web Apps
+
+1. Compilar la aplicación: `npm run build`. La salida queda en `dist/rinde-web/browser`.
+2. Generar la configuración con la URL del gateway: `RINDE_API_BASE_URL=https://<gateway> npm run config:runtime`.
+   En PowerShell: `$env:RINDE_API_BASE_URL = "https://<gateway>"; npm run config:runtime`. Sin la variable, o con una URL que no sea https (salvo localhost o 127.0.0.1), el comando termina con error.
+3. Publicar la carpeta `dist/rinde-web/browser` en Azure Static Web Apps.
+
+`config.json` contiene solo `apiBaseUrl`. Se genera en la carpeta de salida, no se versiona (está en `.gitignore`) y no debe tener secretos. `public/staticwebapp.config.json` viaja con la compilación: define el respaldo de rutas, las cabeceras de seguridad y la política `no-store` de `config.json`.

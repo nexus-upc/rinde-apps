@@ -49,3 +49,6 @@ Thumbs.db
 .env
 .env.*
 !.env.example
+
+# Configuración generada al desplegar: no se versiona
+/public/config.json
