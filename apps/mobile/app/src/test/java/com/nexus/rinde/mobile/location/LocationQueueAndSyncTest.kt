@@ -418,4 +418,70 @@ class LocationQueueAndSyncTest {
         )
         assertNull(LocationQueuePayload.fromJson("""{"latitude":-12.0,"longitude":-77.0,"accuracyMeters":null,"recordedAt":"2026-11-28T14:30:00Z"}""").accuracyMeters)
     }
+
+    @Test
+    fun `resuelve hora de lectura con location time, recorte futuro y descarte de lastLocation antiguo`() {
+        val now = Instant.parse("2026-11-28T14:30:00Z")
+        val nowMs = now.toEpochMilli()
+
+        // Lectura reciente (2 minutos antes): conserva location.time truncado a segundos
+        val recentMs = now.minusSeconds(120).toEpochMilli() + 450L
+        assertEquals(
+            now.minusSeconds(120),
+            LocationSampleTimeResolver.resolveRecordedAt(recentMs, nowMs, isFromLastLocation = false),
+        )
+        assertEquals(
+            now.minusSeconds(120),
+            LocationSampleTimeResolver.resolveRecordedAt(recentMs, nowMs, isFromLastLocation = true),
+        )
+
+        // Lectura futura (+3 minutos): usa la hora actual del teléfono
+        val futureMs = now.plusSeconds(180).toEpochMilli()
+        assertEquals(
+            now,
+            LocationSampleTimeResolver.resolveRecordedAt(futureMs, nowMs, isFromLastLocation = false),
+        )
+        assertEquals(
+            now,
+            LocationSampleTimeResolver.resolveRecordedAt(futureMs, nowMs, isFromLastLocation = true),
+        )
+
+        // lastLocation con 10 minutos exactos de antigüedad: se acepta
+        val exactLimitMs = nowMs - LocationSampleTimeResolver.MAX_LAST_LOCATION_AGE_MS
+        assertEquals(
+            now.minusSeconds(600),
+            LocationSampleTimeResolver.resolveRecordedAt(exactLimitMs, nowMs, isFromLastLocation = true),
+        )
+
+        // lastLocation con más de 10 minutos de antigüedad: se descarta
+        assertNull(
+            LocationSampleTimeResolver.resolveRecordedAt(exactLimitMs - 1L, nowMs, isFromLastLocation = true),
+        )
+        assertNull(
+            LocationSampleTimeResolver.resolveRecordedAt(
+                now.minusSeconds(900).toEpochMilli(),
+                nowMs,
+                isFromLastLocation = true,
+            ),
+        )
+
+        // Lectura normal (no lastLocation) de más de 10 minutos: conserva su propia hora
+        assertEquals(
+            now.minusSeconds(900),
+            LocationSampleTimeResolver.resolveRecordedAt(
+                now.minusSeconds(900).toEpochMilli(),
+                nowMs,
+                isFromLastLocation = false,
+            ),
+        )
+
+        // Sin marca de tiempo: lastLocation se descarta y lectura normal usa la hora actual
+        assertNull(
+            LocationSampleTimeResolver.resolveRecordedAt(0L, nowMs, isFromLastLocation = true),
+        )
+        assertEquals(
+            now,
+            LocationSampleTimeResolver.resolveRecordedAt(0L, nowMs, isFromLastLocation = false),
+        )
+    }
 }

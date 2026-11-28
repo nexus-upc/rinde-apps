@@ -24,8 +24,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 
 class TripLocationForegroundService : Service() {
 
@@ -37,7 +35,7 @@ class TripLocationForegroundService : Service() {
 
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
-            result.lastLocation?.let(::handleLocationSample)
+            result.lastLocation?.let { handleLocationSample(it, isFromLastLocation = false) }
         }
     }
 
@@ -81,26 +79,26 @@ class TripLocationForegroundService : Service() {
     private fun startLocationUpdates() {
         if (updatesRegistered || !hasLocationPermission()) return
         val request = LocationRequest.Builder(
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+            Priority.PRIORITY_HIGH_ACCURACY,
             UPDATE_INTERVAL_MS,
         )
             .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL_MS)
             .build()
         updatesRegistered = true
         fusedClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
-        fusedClient.getCurrentLocation(Priority.PRIORITY_BALANCED_POWER_ACCURACY, null)
+        fusedClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
             .addOnSuccessListener { current ->
                 if (current != null) {
-                    handleLocationSample(current)
+                    handleLocationSample(current, isFromLastLocation = false)
                 } else {
                     fusedClient.lastLocation.addOnSuccessListener { last ->
-                        if (last != null) handleLocationSample(last)
+                        if (last != null) handleLocationSample(last, isFromLastLocation = true)
                     }
                 }
             }
     }
 
-    private fun handleLocationSample(location: Location) {
+    private fun handleLocationSample(location: Location, isFromLastLocation: Boolean = false) {
         val tripId = activeTripId ?: return
         val tripCode = activeTripCode
         val app = applicationContext as? RindeApplication ?: return
@@ -111,7 +109,11 @@ class TripLocationForegroundService : Service() {
             return
         }
 
-        val recordedAt = Instant.now().truncatedTo(ChronoUnit.SECONDS)
+        val recordedAt = LocationSampleTimeResolver.resolveRecordedAt(
+            locationTimeEpochMs = location.time,
+            nowEpochMs = System.currentTimeMillis(),
+            isFromLastLocation = isFromLastLocation,
+        ) ?: return
         val accuracy = if (location.hasAccuracy()) location.accuracy.toDouble() else null
         serviceScope.launch {
             container.tripLocationRepository.enqueueLocation(
