@@ -11,37 +11,38 @@
   gap: 8px;
 }
 
+// Etiqueta de 12 px en gris, como en el lienzo.
 .field__label {
+  color: var(--arc-muted);
   font-size: 12px;
   font-weight: 500;
   line-height: 16px;
 }
 
+// Campo de 44 px sobre gris radio 12; al enfocarse pasa a blanco con anillo visible.
 .field__input,
 .field__select {
   box-sizing: border-box;
   width: 100%;
   height: 44px;
-  padding: 0 12px;
-  border: 1px solid var(--arc-border-strong);
+  padding: 0 14px;
+  border: 1px solid transparent;
   border-radius: var(--arc-radius-control);
-  background: var(--arc-bg);
+  background: var(--arc-surface);
   color: var(--arc-ink);
-  font-size: 15px;
-  transition:
-    border-color var(--arc-dur-fast) var(--arc-ease-out),
-    box-shadow var(--arc-dur-fast) var(--arc-ease-out);
+  font-size: 14px;
 
   &::placeholder {
     color: var(--arc-subtle);
   }
 
   &:hover:not(:disabled) {
-    border-color: var(--arc-faint);
+    background: color-mix(in srgb, var(--arc-surface) 94%, var(--arc-ink));
   }
 
   &:focus {
-    border-color: var(--arc-accent);
+    border-color: var(--arc-ink);
+    background: var(--arc-bg);
     box-shadow: 0 0 0 3px var(--arc-focus-ring);
     outline: 0;
   }
@@ -49,6 +50,29 @@
   &--invalid {
     border-color: var(--arc-danger);
   }
+}
+
+// Selector con forma de píldora (.pick del lienzo): 40 px, gris y sin borde.
+// Dentro de la barra de filtros, los selectores de campo toman esa misma forma.
+.pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 20px;
+  background: var(--arc-surface);
+  color: var(--arc-ink);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filter-bar .field__select {
+  height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 20px;
 }
 
 .field__hint {

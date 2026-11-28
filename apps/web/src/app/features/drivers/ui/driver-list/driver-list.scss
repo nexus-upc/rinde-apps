@@ -81,13 +81,13 @@
   text-transform: uppercase;
 
   &--linked {
-    background: var(--arc-fill-soft, #eff6ff);
-    color: var(--arc-fill, #1d4ed8);
+    background: var(--arc-fill-soft);
+    color: var(--arc-fill);
   }
 
   &--none {
-    background: var(--arc-disabled-bg, #f1f5f9);
-    color: var(--arc-muted, #64748b);
+    background: var(--arc-disabled-bg);
+    color: var(--arc-muted);
   }
 }
 
@@ -107,13 +107,13 @@
   color: var(--arc-muted);
 
   &.status-enabled {
-    background: var(--arc-success-bg, #f0fdf4);
-    color: var(--arc-success, #15803d);
+    background: var(--arc-success-bg);
+    color: var(--arc-success);
   }
 
   &.status-disabled {
-    background: var(--arc-danger-bg, #fef2f2);
-    color: var(--arc-danger, #b91c1c);
+    background: var(--arc-danger-bg);
+    color: var(--arc-danger);
   }
 }
 

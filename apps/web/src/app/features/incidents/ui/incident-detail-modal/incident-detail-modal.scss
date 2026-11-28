@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(15, 23, 42, 0.45);
+  background: color-mix(in srgb, var(--arc-shadow) 45%, transparent);
   backdrop-filter: blur(4px);
 }
 
@@ -18,7 +18,7 @@
   max-height: 90vh;
   border-radius: var(--arc-radius-card);
   background: var(--arc-card);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--arc-shadow) 16%, transparent);
   overflow: hidden;
 }
 
@@ -162,7 +162,7 @@
   flex-direction: column;
   gap: 12px;
   padding: 16px;
-  border: 1px solid #bbf7d0;
+  border: 1px solid var(--arc-success-bg);
   border-radius: var(--arc-radius-row);
   background: var(--arc-success-bg);
 
@@ -185,8 +185,8 @@
   letter-spacing: 0.04em;
 
   &--open {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
   }
 
   &--progress {

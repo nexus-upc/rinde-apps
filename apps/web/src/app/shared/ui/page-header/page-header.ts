@@ -46,6 +46,8 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     }
     .page-header__count {
       color: var(--arc-muted);
+      font-size: 14px;
+      line-height: 20px;
       font-variant-numeric: tabular-nums;
     }
   `,

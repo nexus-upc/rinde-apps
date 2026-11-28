@@ -30,11 +30,9 @@ import { UiButton } from '../ui-button/ui-button';
     .filter-bar {
       display: flex;
       flex-wrap: wrap;
-      align-items: end;
-      gap: 12px 16px;
-      padding: 16px;
-      border-radius: var(--arc-radius-row);
-      background: var(--arc-surface);
+      align-items: center;
+      gap: 8px 12px;
+      padding: 0;
     }
 
     .filter-bar__fields {

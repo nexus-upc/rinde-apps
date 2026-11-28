@@ -15,13 +15,13 @@ export interface ChartDatum {
   readonly tone?: ChartTone;
 }
 
+// Series sin tono explícito: tinta y grises del lienzo, de la más oscura a la más clara.
 const SERIES_TOKEN_ORDER: readonly string[] = [
   'var(--arc-fill)',
-  'var(--arc-brand-end)',
-  'var(--arc-brand-start)',
-  'var(--arc-success)',
   'var(--arc-muted)',
   'var(--arc-subtle)',
+  'var(--arc-faint)',
+  'var(--arc-border-strong)',
 ];
 
 const TONE_TOKENS: Readonly<Record<ChartTone, string>> = {

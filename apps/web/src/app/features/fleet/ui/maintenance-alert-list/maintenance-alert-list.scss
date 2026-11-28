@@ -4,8 +4,8 @@
   gap: 8px;
   padding: 12px 16px;
   border-radius: var(--arc-radius-row);
-  background: #fef9c3;
-  color: #854d0e;
+  background: var(--arc-wait-bg);
+  color: var(--arc-wait);
   font-size: 13px;
   line-height: 18px;
   margin-bottom: 8px;
@@ -35,7 +35,7 @@
   }
 
   &--danger {
-    border-left: 4px solid var(--arc-danger, #b91c1c);
+    border-left: 4px solid var(--arc-danger);
   }
 }
 
@@ -91,13 +91,13 @@
   font-weight: 600;
 
   &.health-warn {
-    background: #fef9c3;
-    color: #854d0e;
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
   }
 
   &.health-danger {
-    background: var(--arc-danger-bg, #fef2f2);
-    color: var(--arc-danger, #b91c1c);
+    background: var(--arc-danger-bg);
+    color: var(--arc-danger);
   }
 }
 
@@ -123,8 +123,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: var(--arc-success-bg, #f0fdf4);
-  color: var(--arc-success, #15803d);
+  background: var(--arc-success-bg);
+  color: var(--arc-success);
   font-size: 20px;
   font-weight: 700;
 }

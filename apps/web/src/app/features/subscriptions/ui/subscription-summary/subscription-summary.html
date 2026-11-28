@@ -1,24 +1,52 @@
 <section class="subscription__current" aria-label="Tu suscripción actual">
   <div class="subscription__current-title">
-    <h2>{{ subscription().plan.name }}</h2>
+    <div class="subscription__current-name">
+      <span class="subscription__eyebrow">Plan actual</span>
+      <h2>{{ subscription().plan.name }}</h2>
+    </div>
     <span class="subscription__status" [class.is-active]="subscription().status === 'ACTIVE'">{{
       labels[subscription().status]
     }}</span>
   </div>
+
   <dl class="subscription__details">
     <div>
       <dt>Importe mensual</dt>
       <dd>{{ money(subscription().plan.monthlyPrice) }}</dd>
     </div>
     <div>
+      <dt>Vencimiento</dt>
+      <dd>{{ date(subscription().expiresAt) }}</dd>
+    </div>
+    <div>
       <dt>Unidades incluidas</dt>
       <dd>Hasta {{ subscription().plan.unitLimit }} vehículos</dd>
     </div>
     <div>
-      <dt>Vencimiento</dt>
-      <dd>{{ date(subscription().expiresAt) }}</dd>
+      <dt>Último pago</dt>
+      <dd>{{ paymentLabel() }}</dd>
     </div>
   </dl>
+
+  @if (vigencia(); as term) {
+    <div class="subscription__term">
+      <div class="subscription__term-head">
+        <span>Vigencia</span>
+        <span class="tnum">{{ term.days }} días restantes</span>
+      </div>
+      <div
+        class="subscription__bar"
+        role="progressbar"
+        aria-label="Días restantes de la vigencia"
+        aria-valuemin="0"
+        [attr.aria-valuemax]="term.total"
+        [attr.aria-valuenow]="term.days"
+      >
+        <span [style.width.%]="term.percent"></span>
+      </div>
+    </div>
+  }
+
   @if (subscription().renewalNotice) {
     <p class="subscription__notice">
       Tu suscripción está por vencer. Puedes renovarla para mantener el acceso.

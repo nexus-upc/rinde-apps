@@ -1,7 +1,7 @@
 <div class="home arc-entrance-stage">
   <header class="home__head">
     <div class="home__title">
-      <h1>{{ greeting }}</h1>
+      <h1>Panel</h1>
       <span>{{ todayLabel }}</span>
     </div>
     <a class="home__action arc-tap" routerLink="/trips">
@@ -34,138 +34,165 @@
       </app-state-panel>
     }
     @default {
-      <section class="home__hero" aria-labelledby="home-route">
-        <div class="home__hero-main">
-          <span class="home__live"><span aria-hidden="true"></span>En ruta ahora</span>
-          <h2 id="home-route">{{ inRouteLabel() }}</h2>
-          <p>{{ assignmentLabel() }}</p>
-        </div>
-        <span class="home__hero-rule" aria-hidden="true"></span>
-        <div class="home__hero-next">
-          <span>Próxima salida</span>
-          @if (store.nextDeparture(); as next) {
-            <strong>{{ route(next) }}, {{ day(next) }}</strong>
-            <a class="arc-tap" routerLink="/trips">Ver en Viajes</a>
-          } @else {
-            <strong>Sin salidas programadas</strong>
-            <a class="arc-tap" routerLink="/trips">Programar viaje</a>
-          }
-        </div>
-      </section>
-
-      <section class="home__metrics" aria-labelledby="home-metrics">
-        <div class="home__section-head">
-          <h2 id="home-metrics">Métricas del período</h2>
-          <div class="home__period">
-            <label class="home__date-label">
-              <span>Desde</span>
-              <input
-                type="date"
-                class="home__date-input"
-                [value]="store.periodFrom()"
-                (change)="onFromChange($event)"
-              />
-            </label>
-            <label class="home__date-label">
-              <span>Hasta</span>
-              <input
-                type="date"
-                class="home__date-input"
-                [value]="store.periodTo()"
-                (change)="onToChange($event)"
-              />
-            </label>
-          </div>
-        </div>
-        @switch (store.metricsState()) {
-          @case ('loading') {
-            <div class="home__metrics-loading" role="status">
-              <span class="home__skeleton"></span>
-              <span class="visually-hidden">Cargando métricas</span>
+      <div class="home__body">
+        <div class="home__main">
+          <section class="home__hero" aria-labelledby="home-route">
+            <div class="home__hero-main">
+              <span class="home__live"><span aria-hidden="true"></span>En ruta ahora</span>
+              <h2 id="home-route">{{ inRouteLabel() }}</h2>
+              <p>{{ assignmentLabel() }}</p>
             </div>
-          }
-          @case ('ready') {
-            @if (store.metrics(); as m) {
-              <div class="home__kpi-grid">
-                <div class="home__kpi-card home__kpi-card--wide">
-                  <span class="home__kpi-label">Viajes del período <span class="home__kpi-total">{{ m.totalTrips }} en total</span></span>
-                  <dl class="home__kpi-trips">
-                    <div>
-                      <dd>{{ m.scheduledTrips }}</dd>
-                      <dt>Programados</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.assignedTrips }}</dd>
-                      <dt>Asignados</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.inRouteTrips }}</dd>
-                      <dt>En ruta</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.finishedTrips }}</dd>
-                      <dt>Finalizados</dt>
-                    </div>
-                    <div>
-                      <dd>{{ m.settledTrips }}</dd>
-                      <dt>Liquidados</dt>
-                    </div>
-                  </dl>
-                </div>
-                <a class="home__kpi-card home__kpi-card--link" routerLink="/expenses">
-                  <span class="home__kpi-label">Gastos aprobados</span>
-                  <strong class="home__kpi-value">{{ m.approvedExpenses }}</strong>
-                  @for (entry of expenseTotals(m); track entry.currency) {
-                    <span class="home__kpi-hint">{{ entry.currency }} {{ entry.total | number:'1.2-2' }}</span>
-                  }
-                </a>
-                <div class="home__kpi-card">
-                  <span class="home__kpi-label">Liquidaciones pendientes</span>
-                  <strong class="home__kpi-value">{{ m.pendingSettlements }}</strong>
-                </div>
-                <div class="home__kpi-card" [class.is-partial]="m.incidents.source === 'UNAVAILABLE'">
-                  <span class="home__kpi-label">Incidentes abiertos</span>
-                  <strong class="home__kpi-value">{{ m.incidents.openCount ?? '—' }}</strong>
-                  @if (m.incidents.source === 'UNAVAILABLE') {
-                    <span class="home__kpi-hint">Servicio no disponible</span>
-                  }
-                </div>
+            <div class="home__hero-next">
+              <span>Próxima salida</span>
+              @if (store.nextDeparture(); as next) {
+                <strong>{{ route(next) }}, {{ day(next) }}</strong>
+                <a class="home__link arc-tap" routerLink="/trips">Ver en Viajes</a>
+              } @else {
+                <strong>Sin salidas programadas</strong>
+                <a class="home__link arc-tap" routerLink="/trips">Programar viaje</a>
+              }
+            </div>
+          </section>
+
+          <section class="home__agenda" aria-labelledby="home-agenda">
+            <div class="home__section-head">
+              <h2 id="home-agenda">
+                {{ store.agendaIsToday() ? 'Viajes de hoy' : 'Próximas salidas' }}
+                <span>{{ countLabel(store.agenda().length) }}</span>
+              </h2>
+              <a routerLink="/trips">Ver todos</a>
+            </div>
+            @for (trip of store.agenda(); track trip.id) {
+              <a class="home__row" [routerLink]="['/trips', trip.id]">
+                <span class="home__dot" [attr.data-status]="trip.status" aria-hidden="true"></span>
+                <span class="home__route">
+                  <span>{{ route(trip) }}</span>
+                  <span class="home__mono">{{ trip.code }} · {{ unit(trip) }}</span>
+                </span>
+                <span class="home__when">
+                  <span>{{ day(trip) }}</span>
+                  <span>{{ status(trip) }}</span>
+                </span>
+              </a>
+            } @empty {
+              <div class="home__empty">
+                <span class="home__disc" aria-hidden="true">
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.75"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <polyline points="22 12 16 12 14 15 10 15 8 12 2 12" />
+                    <path
+                      d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"
+                    />
+                  </svg>
+                </span>
+                <p>Aún no hay viajes programados para tu empresa.</p>
               </div>
             }
-          }
-        }
-      </section>
-
-      <div class="home__grid">
-        <section class="home__agenda" aria-labelledby="home-agenda">
-          <div class="home__section-head">
-            <h2 id="home-agenda">
-              {{ store.agendaIsToday() ? 'Viajes de hoy' : 'Próximas salidas' }}
-              <span>{{ countLabel(store.agenda().length) }}</span>
-            </h2>
-            <a routerLink="/trips">Ver en Viajes</a>
-          </div>
-          @for (trip of store.agenda(); track trip.id) {
-            <a class="home__row" [routerLink]="['/trips', trip.id]">
-              <span class="home__mono">{{ day(trip) }}</span>
-              <span class="home__route">
-                <span>{{ route(trip) }}</span>
-                <span class="home__mono home__code">{{ trip.code }}</span>
-              </span>
-              <span class="home__unit" [class.is-missing]="!trip.vehicleId || !trip.driverId">
-                {{ unit(trip) }}
-              </span>
-              <span class="home__status" [attr.data-status]="trip.status">
-                <span aria-hidden="true"></span>{{ status(trip) }}
-              </span>
-            </a>
-          } @empty {
-            <p class="home__empty">Aún no hay viajes programados para tu empresa.</p>
-          }
-        </section>
+          </section>
+        </div>
 
         <aside class="home__side">
-          <section aria-labelledby="home-week">
+          <section class="home__card" aria-labelledby="home-metrics">
+            <div class="home__section-head">
+              <h2 id="home-metrics">Métricas del período</h2>
+            </div>
+            <div class="home__period">
+              <label class="home__date-label">
+                <span>Desde</span>
+                <input
+                  type="date"
+                  class="home__date-input"
+                  [value]="store.periodFrom()"
+                  (change)="onFromChange($event)"
+                />
+              </label>
+              <label class="home__date-label">
+                <span>Hasta</span>
+                <input
+                  type="date"
+                  class="home__date-input"
+                  [value]="store.periodTo()"
+                  (change)="onToChange($event)"
+                />
+              </label>
+            </div>
+            @switch (store.metricsState()) {
+              @case ('loading') {
+                <div class="home__metrics-loading" role="status">
+                  <span class="home__skeleton"></span>
+                  <span class="visually-hidden">Cargando métricas</span>
+                </div>
+              }
+              @case ('ready') {
+                @if (store.metrics(); as m) {
+                  <div class="home__kpis">
+                    <div class="home__tile home__tile--wide">
+                      <span class="home__tile-label">
+                        Viajes del período
+                        <span class="home__tile-total">{{ m.totalTrips }} en total</span>
+                      </span>
+                      <dl class="home__trips-count">
+                        <div>
+                          <dd>{{ m.scheduledTrips }}</dd>
+                          <dt>Programados</dt>
+                        </div>
+                        <div>
+                          <dd>{{ m.assignedTrips }}</dd>
+                          <dt>Asignados</dt>
+                        </div>
+                        <div>
+                          <dd>{{ m.inRouteTrips }}</dd>
+                          <dt>En ruta</dt>
+                        </div>
+                        <div>
+                          <dd>{{ m.finishedTrips }}</dd>
+                          <dt>Finalizados</dt>
+                        </div>
+                        <div>
+                          <dd>{{ m.settledTrips }}</dd>
+                          <dt>Liquidados</dt>
+                        </div>
+                      </dl>
+                    </div>
+                    <a class="home__tile home__tile--link" routerLink="/expenses">
+                      <span class="home__tile-label">Gastos aprobados</span>
+                      <strong class="home__tile-value">{{ m.approvedExpenses }}</strong>
+                      @for (entry of expenseTotals(m); track entry.currency) {
+                        <span class="home__tile-hint"
+                          >{{ entry.currency }} {{ entry.total | number: '1.2-2' }}</span
+                        >
+                      }
+                    </a>
+                    <div class="home__tile">
+                      <span class="home__tile-label">Liquidaciones pendientes</span>
+                      <strong class="home__tile-value">{{ m.pendingSettlements }}</strong>
+                    </div>
+                    <div
+                      class="home__tile"
+                      [class.home__tile--warn]="(m.incidents.openCount ?? 0) > 0"
+                      [class.is-partial]="m.incidents.source === 'UNAVAILABLE'"
+                    >
+                      <span class="home__tile-label">Incidentes abiertos</span>
+                      <strong class="home__tile-value">{{ m.incidents.openCount ?? '—' }}</strong>
+                      @if (m.incidents.source === 'UNAVAILABLE') {
+                        <span class="home__tile-hint">Servicio no disponible</span>
+                      }
+                    </div>
+                  </div>
+                }
+              }
+            }
+          </section>
+
+          <section class="home__card" aria-labelledby="home-week">
             <div class="home__section-head">
               <h2 id="home-week">Esta semana</h2>
               <span class="home__hint">{{ weekRangeLabel() }}</span>
@@ -197,8 +224,10 @@
             </div>
           </section>
 
-          <section class="home__attention" aria-labelledby="home-attention">
-            <h2 id="home-attention">Requiere atención</h2>
+          <section class="home__card" aria-labelledby="home-attention">
+            <div class="home__section-head">
+              <h2 id="home-attention">Requiere atención</h2>
+            </div>
             @for (trip of store.unassigned().slice(0, 3); track trip.id) {
               <div class="home__notice">
                 <span aria-hidden="true"></span>

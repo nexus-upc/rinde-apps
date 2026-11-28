@@ -23,7 +23,7 @@ const longFormat = new Intl.DateTimeFormat('es-PE', {
   month: 'long',
 });
 
-/** Inicio de la empresa: lo que está en ruta, lo que sale y la semana, sobre el tablero de viajes. */
+/** Panel del administrador: lo que está en ruta, lo que sale hoy y las métricas del período. */
 @Component({
   selector: 'app-home-page',
   providers: [HomeStore],
@@ -34,7 +34,6 @@ const longFormat = new Intl.DateTimeFormat('es-PE', {
 })
 export class HomePage {
   protected readonly store = inject(HomeStore);
-  protected readonly greeting = greetingFor(new Date().getHours());
   protected readonly todayLabel = capitalize(longFormat.format(new Date()));
   protected readonly weekPeak = computed(() =>
     Math.max(1, ...this.store.week().map((day) => day.count)),
@@ -88,7 +87,10 @@ export class HomePage {
   }
 
   protected expenseTotals(m: DashboardMetrics): { currency: string; total: number }[] {
-    return Object.entries(m.approvedExpenseTotals).map(([currency, total]) => ({ currency, total }));
+    return Object.entries(m.approvedExpenseTotals).map(([currency, total]) => ({
+      currency,
+      total,
+    }));
   }
 
   protected onFromChange(event: Event): void {
@@ -105,11 +107,6 @@ export class HomePage {
 function dayLabel(iso: string): string {
   const [year, month, day] = iso.split('-').map(Number);
   return dayFormat.format(new Date(year ?? 0, (month ?? 1) - 1, day ?? 1)).replace('.', '');
-}
-
-function greetingFor(hour: number): string {
-  if (hour < 12) return 'Buenos días';
-  return hour < 19 ? 'Buenas tardes' : 'Buenas noches';
 }
 
 function capitalize(text: string): string {
