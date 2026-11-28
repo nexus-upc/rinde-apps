@@ -16,6 +16,7 @@ interface QueueStore {
     suspend fun upsert(item: QueueItemEntity)
     suspend fun upsertAll(items: List<QueueItemEntity>)
     suspend fun deleteByKey(key: String)
+    suspend fun deleteByTripAndType(userId: String, tripId: String, type: QueueItemType)
     suspend fun purgeOldSynced(userId: String, cutoffEpochMs: Long)
 }
 
@@ -43,6 +44,9 @@ class RoomQueueStore(
     override suspend fun upsertAll(items: List<QueueItemEntity>) = dao.upsertAll(items)
 
     override suspend fun deleteByKey(key: String) = dao.deleteByKey(key)
+
+    override suspend fun deleteByTripAndType(userId: String, tripId: String, type: QueueItemType) =
+        dao.deleteByTripAndType(userId, tripId, type.name)
 
     override suspend fun purgeOldSynced(userId: String, cutoffEpochMs: Long) =
         dao.purgeOldSynced(userId, cutoffEpochMs)

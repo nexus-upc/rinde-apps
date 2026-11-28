@@ -9,6 +9,7 @@ import java.math.BigDecimal
 enum class QueueItemType {
     EXPENSE,
     INCIDENT,
+    LOCATION,
 }
 
 enum class QueueItemStatus {
@@ -93,6 +94,37 @@ data class IncidentQueuePayload(
             return IncidentQueuePayload(
                 type = obj.getString("type"),
                 description = obj.getString("description"),
+            )
+        }
+    }
+}
+
+data class LocationQueuePayload(
+    val latitude: Double,
+    val longitude: Double,
+    val accuracyMeters: Double? = null,
+    val recordedAt: String,
+) {
+    fun toJson(): String = JSONObject()
+        .put("latitude", latitude)
+        .put("longitude", longitude)
+        .put("accuracyMeters", accuracyMeters?.takeIf { it.isFinite() } ?: JSONObject.NULL)
+        .put("recordedAt", recordedAt)
+        .toString()
+
+    companion object {
+        fun fromJson(raw: String): LocationQueuePayload {
+            val obj = JSONObject(raw)
+            val accuracy = if (obj.has("accuracyMeters") && !obj.isNull("accuracyMeters")) {
+                obj.optDouble("accuracyMeters").takeIf { it.isFinite() }
+            } else {
+                null
+            }
+            return LocationQueuePayload(
+                latitude = obj.getDouble("latitude"),
+                longitude = obj.getDouble("longitude"),
+                accuracyMeters = accuracy,
+                recordedAt = obj.getString("recordedAt"),
             )
         }
     }

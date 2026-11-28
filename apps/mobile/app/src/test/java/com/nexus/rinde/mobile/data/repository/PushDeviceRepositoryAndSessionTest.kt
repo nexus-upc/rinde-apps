@@ -78,6 +78,12 @@ class PushDeviceRepositoryAndSessionTest {
         override suspend fun upsertAll(items: List<QueueItemEntity>) = Unit
         override suspend fun deleteByKey(key: String) = Unit
         override suspend fun purgeOldSynced(userId: String, cutoffEpochMs: Long) = Unit
+
+        override suspend fun deleteByTripAndType(
+            userId: String,
+            tripId: String,
+            type: com.nexus.rinde.mobile.data.local.QueueItemType,
+        ) = Unit
     }
 
     private class RecordingSyncScheduler : SyncScheduler {
@@ -141,6 +147,11 @@ class PushDeviceRepositoryAndSessionTest {
 
         override suspend fun currentDriver(): com.nexus.rinde.mobile.data.remote.DriverProfile =
             error("unused")
+
+        override suspend fun recordTripLocations(
+            tripId: String,
+            request: com.nexus.rinde.mobile.data.remote.RecordTripLocationsRequest,
+        ): com.nexus.rinde.mobile.data.remote.RecordTripLocationsResponse = error("unused")
     }
 
     private fun buildJwt(userId: String, role: String = "DRIVER", exp: Long = 9_999_999_999L): String {

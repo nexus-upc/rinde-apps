@@ -41,6 +41,7 @@ dependencies {
     ksp("androidx.room:room-compiler:2.8.1")
     implementation("androidx.work:work-runtime-ktx:2.10.5")
     implementation("androidx.exifinterface:exifinterface:1.4.1")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation(platform("com.google.firebase:firebase-bom:33.12.0"))
     implementation("com.google.firebase:firebase-messaging")
     debugImplementation("androidx.compose.ui:ui-tooling")

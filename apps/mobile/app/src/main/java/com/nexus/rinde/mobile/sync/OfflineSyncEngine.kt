@@ -2,6 +2,7 @@ package com.nexus.rinde.mobile.sync
 
 import com.nexus.rinde.mobile.data.local.ExpenseQueuePayload
 import com.nexus.rinde.mobile.data.local.IncidentQueuePayload
+import com.nexus.rinde.mobile.data.local.LocationQueuePayload
 import com.nexus.rinde.mobile.data.local.QueueItemEntity
 import com.nexus.rinde.mobile.data.local.QueueItemStatus
 import com.nexus.rinde.mobile.data.local.QueueItemType
@@ -9,11 +10,14 @@ import com.nexus.rinde.mobile.data.local.QueueStore
 import com.nexus.rinde.mobile.data.local.SessionData
 import com.nexus.rinde.mobile.data.local.SessionStore
 import com.nexus.rinde.mobile.data.remote.ApiException
+import com.nexus.rinde.mobile.data.remote.RecordTripLocationsRequest
 import com.nexus.rinde.mobile.data.remote.ReportIncidentRequest
 import com.nexus.rinde.mobile.data.remote.RindeRemoteClient
 import com.nexus.rinde.mobile.data.remote.SyncExpenseRequest
+import com.nexus.rinde.mobile.data.remote.TripLocationPointRequest
 import com.nexus.rinde.mobile.data.repository.PushDeviceRepository
 import com.nexus.rinde.mobile.data.repository.PushSyncOutcome
+import com.nexus.rinde.mobile.data.repository.TripLocationRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +61,7 @@ class OfflineSyncEngine(
     private val deletePhoto: (String?) -> Unit,
     private val pushDeviceRepository: PushDeviceRepository? = null,
     private val clock: () -> Long = { System.currentTimeMillis() },
+    private val onTripLocationFinishedRemotely: (String) -> Unit = {},
 ) {
     private val mutex = Mutex()
     private val mutableActiveKeys = MutableStateFlow<Set<String>>(emptySet())
@@ -87,7 +92,10 @@ class OfflineSyncEngine(
             val incidentPhotoStep = syncPendingIncidentPhotos(remote, session.userId, manual)
             if (incidentPhotoStep.sessionExpired) return@withLock SyncResult.SessionExpired
 
-            val totals = expenseStep + expensePhotoStep + incidentStep + incidentPhotoStep
+            val locationStep = syncPendingLocations(remote, session.userId, manual)
+            if (locationStep.sessionExpired) return@withLock SyncResult.SessionExpired
+
+            val totals = expenseStep + expensePhotoStep + incidentStep + incidentPhotoStep + locationStep
 
             // Conservar solo historial reciente ya confirmado para evitar crecimiento indefinido
             queueStore.purgeOldSynced(session.userId, clock() - SYNCED_RETENTION_MS)
@@ -528,6 +536,72 @@ class OfflineSyncEngine(
         return StepCounters(
             syncedCount = syncedCount,
             rejectedCount = rejectedCount,
+            retryPendingCount = retryPendingCount,
+        )
+    }
+
+    private suspend fun syncPendingLocations(
+        remote: RindeRemoteClient,
+        userId: String,
+        manual: Boolean,
+    ): StepCounters {
+        val nowMs = clock()
+        val pendingByTrip = queueStore
+            .findByTypeAndStatus(userId, QueueItemType.LOCATION, QueueItemStatus.PENDING)
+            .filter { manual || it.nextRetryAtEpochMs <= nowMs }
+            .groupBy { it.tripId }
+
+        if (pendingByTrip.isEmpty()) return StepCounters()
+
+        var syncedCount = 0
+        var retryPendingCount = 0
+
+        for ((tripId, tripItems) in pendingByTrip) {
+            val ordered = tripItems.sortedBy { it.createdAtEpochMs }
+            for (batch in ordered.chunked(TripLocationRepository.MAX_BATCH_SIZE)) {
+                mutableActiveKeys.value = batch.map { it.idempotencyKey }.toSet()
+                val points = batch.map { item ->
+                    val payload = LocationQueuePayload.fromJson(item.payloadJson)
+                    TripLocationPointRequest(
+                        latitude = payload.latitude,
+                        longitude = payload.longitude,
+                        accuracyMeters = payload.accuracyMeters,
+                        recordedAt = payload.recordedAt,
+                    )
+                }
+                try {
+                    remote.recordTripLocations(tripId, RecordTripLocationsRequest(points))
+                    batch.forEach { queueStore.deleteByKey(it.idempotencyKey) }
+                    syncedCount += batch.size
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (e: ApiException) {
+                    if (e.status == 401) return StepCounters(sessionExpired = true)
+                    if (e.status == 409 || e.status == 404) {
+                        // El viaje terminó o fue cancelado en el servidor: detener seguimiento y vaciar cola del viaje
+                        queueStore.deleteByTripAndType(userId, tripId, QueueItemType.LOCATION)
+                        onTripLocationFinishedRemotely(tripId)
+                        break
+                    }
+                    if (e.status == 400) {
+                        batch.forEach { queueStore.deleteByKey(it.idempotencyKey) }
+                    } else {
+                        val updated = markPendingBatchError(batch, e, clock())
+                        retryPendingCount += updated.size
+                        queueStore.upsertAll(updated)
+                        break
+                    }
+                } catch (e: Exception) {
+                    val updated = markPendingBatchError(batch, e, clock())
+                    retryPendingCount += updated.size
+                    queueStore.upsertAll(updated)
+                    break
+                }
+            }
+        }
+
+        return StepCounters(
+            syncedCount = syncedCount,
             retryPendingCount = retryPendingCount,
         )
     }

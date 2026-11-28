@@ -205,6 +205,14 @@ class RindeApi(
     override suspend fun currentDriver(): DriverProfile =
         DriverProfile.from(JSONObject(request("GET", "/api/v1/drivers/me")))
 
+    override suspend fun recordTripLocations(
+        tripId: String,
+        request: RecordTripLocationsRequest,
+    ): RecordTripLocationsResponse =
+        RecordTripLocationsResponse.from(
+            JSONObject(request("POST", "/api/v1/trips/$tripId/locations", request.toJson().toString())),
+        )
+
     private fun encodePathSegment(segment: String): String =
         URLEncoder.encode(segment, StandardCharsets.UTF_8.name()).replace("+", "%20")
 

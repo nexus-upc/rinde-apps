@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.nexus.rinde.mobile.data.local.ExpenseQueuePayload
 import com.nexus.rinde.mobile.data.local.IncidentQueuePayload
+import com.nexus.rinde.mobile.data.local.LocationQueuePayload
 import com.nexus.rinde.mobile.data.local.QueueItemEntity
 import com.nexus.rinde.mobile.data.local.QueueItemStatus
 import com.nexus.rinde.mobile.data.local.QueueItemType
@@ -29,12 +30,15 @@ import com.nexus.rinde.mobile.ui.common.NoticeText
 import com.nexus.rinde.mobile.ui.common.categoryLabel
 import com.nexus.rinde.mobile.ui.common.formatSizeKb
 import com.nexus.rinde.mobile.ui.common.incidentTypeLabel
+import com.nexus.rinde.mobile.ui.common.localTime
 import com.nexus.rinde.mobile.ui.common.queueStatusLabel
+import java.util.Locale
 
 private enum class QueueFilter {
     ALL,
     EXPENSES,
     INCIDENTS,
+    LOCATIONS,
 }
 
 @Composable
@@ -105,6 +109,7 @@ fun QueueScreen(
     } else {
         val expenseItems = state.items.filter { it.queueType == QueueItemType.EXPENSE }
         val incidentItems = state.items.filter { it.queueType == QueueItemType.INCIDENT }
+        val locationItems = state.items.filter { it.queueType == QueueItemType.LOCATION }
 
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -125,12 +130,20 @@ fun QueueScreen(
                 onClick = { selectedFilter = QueueFilter.INCIDENTS },
                 label = { Text("Incidencias (${incidentItems.size})") },
             )
+            if (locationItems.isNotEmpty()) {
+                FilterChip(
+                    selected = selectedFilter == QueueFilter.LOCATIONS,
+                    onClick = { selectedFilter = QueueFilter.LOCATIONS },
+                    label = { Text("Ubicaciones (${locationItems.size})") },
+                )
+            }
         }
 
         val visibleItems = when (selectedFilter) {
             QueueFilter.ALL -> state.items
             QueueFilter.EXPENSES -> expenseItems
             QueueFilter.INCIDENTS -> incidentItems
+            QueueFilter.LOCATIONS -> locationItems
         }
 
         if (visibleItems.isEmpty()) {
@@ -177,17 +190,33 @@ private fun QueueItemCard(
     val badgeText = queueStatusLabel(item.queueStatus, isOnline, syncing)
     val tripLabel = item.tripCode.ifBlank { item.tripId.take(8) }
     val isIncident = item.queueType == QueueItemType.INCIDENT
+    val isLocation = item.queueType == QueueItemType.LOCATION
 
     val cardTitle: String
     val cardDetail: String
-    if (isIncident) {
-        val payload = IncidentQueuePayload.fromJson(item.payloadJson)
-        cardTitle = "Incidencia: ${incidentTypeLabel(payload.type)}"
-        cardDetail = "Viaje $tripLabel | ${payload.description}"
-    } else {
-        val payload = ExpenseQueuePayload.fromJson(item.payloadJson)
-        cardTitle = "Gasto: ${categoryLabel(payload.category)}"
-        cardDetail = "Viaje $tripLabel | ${payload.currency} ${payload.amount.toPlainString()} | ${payload.expenseDate}"
+    when (item.queueType) {
+        QueueItemType.INCIDENT -> {
+            val payload = IncidentQueuePayload.fromJson(item.payloadJson)
+            cardTitle = "Incidencia: ${incidentTypeLabel(payload.type)}"
+            cardDetail = "Viaje $tripLabel | ${payload.description}"
+        }
+        QueueItemType.LOCATION -> {
+            val payload = LocationQueuePayload.fromJson(item.payloadJson)
+            cardTitle = "Ubicación en ruta"
+            cardDetail = String.format(
+                Locale.US,
+                "Viaje %s | %s | %.5f, %.5f",
+                tripLabel,
+                localTime(payload.recordedAt),
+                payload.latitude,
+                payload.longitude,
+            )
+        }
+        QueueItemType.EXPENSE -> {
+            val payload = ExpenseQueuePayload.fromJson(item.payloadJson)
+            cardTitle = "Gasto: ${categoryLabel(payload.category)}"
+            cardDetail = "Viaje $tripLabel | ${payload.currency} ${payload.amount.toPlainString()} | ${payload.expenseDate}"
+        }
     }
 
     OutlinedCard(modifier = Modifier.fillMaxWidth()) {
@@ -219,22 +248,24 @@ private fun QueueItemCard(
                 style = MaterialTheme.typography.bodyMedium,
             )
 
-            if (!item.photoPath.isNullOrBlank()) {
-                val sizePart = if (item.photoSizeBytes > 0L) {
-                    " (${formatSizeKb(item.photoSizeBytes)})"
+            if (!isLocation) {
+                if (!item.photoPath.isNullOrBlank()) {
+                    val sizePart = if (item.photoSizeBytes > 0L) {
+                        " (${formatSizeKb(item.photoSizeBytes)})"
+                    } else {
+                        ""
+                    }
+                    val defaultName = if (isIncident) "incidencia.jpg" else "comprobante.jpg"
+                    Text(
+                        "Foto ${item.photoFileName ?: defaultName}$sizePart guardada en dispositivo",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 } else {
-                    ""
+                    Text(
+                        if (isIncident) "Sin foto adjunta" else "Sin comprobante adjunto",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
                 }
-                val defaultName = if (isIncident) "incidencia.jpg" else "comprobante.jpg"
-                Text(
-                    "Foto ${item.photoFileName ?: defaultName}$sizePart guardada en dispositivo",
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            } else {
-                Text(
-                    if (isIncident) "Sin foto adjunta" else "Sin comprobante adjunto",
-                    style = MaterialTheme.typography.bodySmall,
-                )
             }
 
             if (item.queueStatus == QueueItemStatus.PHOTO_PENDING) {
