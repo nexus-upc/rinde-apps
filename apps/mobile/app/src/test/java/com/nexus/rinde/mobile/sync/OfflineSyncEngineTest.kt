@@ -208,6 +208,11 @@ class OfflineSyncEngineTest {
         override suspend fun downloadEvidenceBytes(contentUrl: String): ByteArray = ByteArray(0)
         override suspend fun registerDevice(request: RegisterDeviceRequest) = Unit
         override suspend fun removeDevice(token: String) = Unit
+        override suspend fun currentUser(): com.nexus.rinde.mobile.data.remote.CurrentUserProfile =
+            error("unused")
+
+        override suspend fun currentDriver(): com.nexus.rinde.mobile.data.remote.DriverProfile =
+            error("unused")
     }
 
     private var currentEpochMs = 1_000_000_000_000L

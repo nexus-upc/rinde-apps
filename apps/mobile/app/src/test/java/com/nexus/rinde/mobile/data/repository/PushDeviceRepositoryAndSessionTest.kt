@@ -135,6 +135,12 @@ class PushDeviceRepositoryAndSessionTest {
             removeFailure?.let { throw it }
             removedTokens.add(token)
         }
+
+        override suspend fun currentUser(): com.nexus.rinde.mobile.data.remote.CurrentUserProfile =
+            error("unused")
+
+        override suspend fun currentDriver(): com.nexus.rinde.mobile.data.remote.DriverProfile =
+            error("unused")
     }
 
     private fun buildJwt(userId: String, role: String = "DRIVER", exp: Long = 9_999_999_999L): String {

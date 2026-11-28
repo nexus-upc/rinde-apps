@@ -4,10 +4,12 @@ import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.nexus.rinde.mobile.MainActivity
@@ -68,6 +70,22 @@ object TripNotificationHelper {
 
         context.getSystemService(NotificationManager::class.java)
             ?.notify(payload.notificationId, notification)
+    }
+
+    fun openChannelSettings(context: Context) {
+        ensureChannel(context)
+        val channelIntent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            putExtra(Settings.EXTRA_CHANNEL_ID, CHANNEL_ID)
+        }
+        try {
+            context.startActivity(channelIntent)
+        } catch (_: ActivityNotFoundException) {
+            val appIntent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            }
+            runCatching { context.startActivity(appIntent) }
+        }
     }
 
     const val EXTRA_TRIP_ID = "tripId"

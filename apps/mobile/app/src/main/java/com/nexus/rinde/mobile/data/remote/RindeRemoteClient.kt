@@ -29,4 +29,6 @@ interface RindeRemoteClient {
     suspend fun downloadEvidenceBytes(contentUrl: String): ByteArray
     suspend fun registerDevice(request: RegisterDeviceRequest)
     suspend fun removeDevice(token: String)
+    suspend fun currentUser(): CurrentUserProfile
+    suspend fun currentDriver(): DriverProfile
 }
