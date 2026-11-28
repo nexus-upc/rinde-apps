@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   ElementRef,
   computed,
   inject,
@@ -13,6 +14,7 @@ import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@core/feedback/toast.service';
 import { SessionProfileStore } from '@features/iam/state/session-profile.store';
 import { NotificationBell } from '@features/notifications/ui/notification-bell/notification-bell';
+import { NotificationCenterStore } from '@features/notifications/state/notification-center.store';
 import { BrandMark } from '@shared/brand/brand-mark/brand-mark';
 import { AccountSettings } from './account-settings/account-settings';
 import { SHELL_ICONS, ShellIcon, initialsOf } from './shell-icons';
@@ -42,7 +44,14 @@ const OPERATION: NavGroup = {
 /** Composición del espacio de trabajo: menú lateral, cuenta y pantallas de cada funcionalidad. */
 @Component({
   selector: 'app-shell-layout',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BrandMark, AccountSettings, NotificationBell],
+  imports: [
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    BrandMark,
+    AccountSettings,
+    NotificationBell,
+  ],
   templateUrl: './shell-layout.html',
   styleUrl: './shell-layout.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,6 +61,8 @@ export class ShellLayout {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly toasts = inject(ToastService);
+  private readonly notifications = inject(NotificationCenterStore);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly accountButton = viewChild<ElementRef<HTMLButtonElement>>('accountButton');
   protected readonly icons = SHELL_ICONS;
   protected readonly user = this.auth.user;
@@ -60,6 +71,7 @@ export class ShellLayout {
   protected readonly showNotifications = computed(() =>
     OPERATION_ROLES.includes(this.user()?.role ?? ''),
   );
+  protected readonly unreadCount = this.notifications.unreadCount;
   protected readonly isAdmin = computed(() => this.user()?.role === 'ADMINISTRATOR');
   protected readonly menuOpen = signal(false);
   protected readonly settingsOpen = signal(false);
@@ -93,6 +105,11 @@ export class ShellLayout {
       },
     ];
   });
+
+  constructor() {
+    // El contador solo se consulta a los roles que ven la campana.
+    if (this.showNotifications()) this.notifications.watchUnreadCount(this.destroyRef);
+  }
 
   protected toggleMenu(): void {
     this.menuOpen.update((open) => !open);

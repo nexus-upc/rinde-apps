@@ -1,0 +1,162 @@
+.notifications-page {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+  max-width: 1120px;
+}
+
+.notifications-page__actions {
+  display: flex;
+  flex: none;
+  max-width: 100%;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--arc-border);
+  border-radius: var(--arc-radius-pill);
+  background: var(--arc-card);
+  color: var(--arc-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--arc-dur-fast) ease,
+    color var(--arc-dur-fast) ease;
+
+  &:hover {
+    background: var(--arc-surface);
+    color: var(--arc-ink);
+  }
+
+  &[aria-pressed='true'] {
+    border-color: var(--arc-fill);
+    background: var(--arc-fill-soft);
+    color: var(--arc-fill);
+    font-weight: 600;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--arc-fill);
+    outline-offset: 2px;
+  }
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  color: var(--arc-muted);
+  font-size: 14px;
+  cursor: pointer;
+
+  input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--arc-fill);
+  }
+}
+
+.notif-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.notif-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-radius: var(--arc-radius-row);
+  background: var(--arc-fill-soft);
+
+  &.is-read {
+    background: var(--arc-surface-soft);
+  }
+}
+
+.notif-row__body {
+  display: grid;
+  gap: 4px;
+  flex: 1 1 280px;
+  min-width: 0;
+
+  p {
+    margin: 0;
+    color: var(--arc-muted);
+    overflow-wrap: anywhere;
+  }
+}
+
+.notif-row__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.notif-row__title {
+  overflow-wrap: anywhere;
+}
+
+.notif-row__date {
+  color: var(--arc-subtle);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.notif-row__open {
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  // El encabezado compartido no baja de línea: el botón se angosta y parte su texto.
+  .notifications-page__actions {
+    flex: 0 1 auto;
+    min-width: 0;
+  }
+
+  .notifications-page__actions > button {
+    min-width: 0;
+    white-space: normal;
+    text-align: center;
+  }
+
+  // En pantallas angostas basta "Marcar todas"; el nombre completo queda en aria-label.
+  .label-tail {
+    display: none;
+  }
+
+  .notif-row {
+    padding: 14px;
+  }
+}

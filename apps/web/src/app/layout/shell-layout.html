@@ -44,7 +44,7 @@
 
     <div class="shell__footer">
       @if (showNotifications()) {
-        <app-notification-bell />
+        <app-notification-bell [unreadCount]="unreadCount()" />
       }
 
       <div class="shell__account">
