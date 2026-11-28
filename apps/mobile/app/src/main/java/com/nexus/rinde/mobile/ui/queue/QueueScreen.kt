@@ -2,6 +2,8 @@ package com.nexus.rinde.mobile.ui.queue
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -41,6 +43,7 @@ private enum class QueueFilter {
     LOCATIONS,
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun QueueScreen(
     state: QueueUiState,
@@ -51,6 +54,9 @@ fun QueueScreen(
     onDiscard: (String) -> Unit,
 ) {
     var selectedFilter by rememberSaveable { mutableStateOf(QueueFilter.ALL) }
+    val expenseItems = state.items.filter { it.queueType == QueueItemType.EXPENSE }
+    val incidentItems = state.items.filter { it.queueType == QueueItemType.INCIDENT }
+    val locationItems = state.items.filter { it.queueType == QueueItemType.LOCATION }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -90,9 +96,16 @@ fun QueueScreen(
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier.fillMaxWidth(),
     ) {
+        val helpText = if (locationItems.isNotEmpty()) {
+            "Los gastos e incidencias se conservan tras cerrar o reiniciar el teléfono y se envían con " +
+                "clave única sin duplicarse.\n" +
+                "Las ubicaciones del viaje se envían en cuanto vuelve la señal."
+        } else {
+            "Los gastos e incidencias se conservan tras cerrar o reiniciar el teléfono y se envían con " +
+                "clave única sin duplicarse."
+        }
         Text(
-            text = "Los gastos e incidencias se conservan tras cerrar o reiniciar el teléfono y se envían con " +
-                "clave única sin duplicarse.",
+            text = helpText,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(14.dp),
         )
@@ -107,34 +120,31 @@ fun QueueScreen(
             style = MaterialTheme.typography.bodyMedium,
         )
     } else {
-        val expenseItems = state.items.filter { it.queueType == QueueItemType.EXPENSE }
-        val incidentItems = state.items.filter { it.queueType == QueueItemType.INCIDENT }
-        val locationItems = state.items.filter { it.queueType == QueueItemType.LOCATION }
-
-        Row(
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth(),
         ) {
             FilterChip(
                 selected = selectedFilter == QueueFilter.ALL,
                 onClick = { selectedFilter = QueueFilter.ALL },
-                label = { Text("Todos (${state.items.size})") },
+                label = { Text("Todos (${state.items.size})", maxLines = 1) },
             )
             FilterChip(
                 selected = selectedFilter == QueueFilter.EXPENSES,
                 onClick = { selectedFilter = QueueFilter.EXPENSES },
-                label = { Text("Gastos (${expenseItems.size})") },
+                label = { Text("Gastos (${expenseItems.size})", maxLines = 1) },
             )
             FilterChip(
                 selected = selectedFilter == QueueFilter.INCIDENTS,
                 onClick = { selectedFilter = QueueFilter.INCIDENTS },
-                label = { Text("Incidencias (${incidentItems.size})") },
+                label = { Text("Incidencias (${incidentItems.size})", maxLines = 1) },
             )
             if (locationItems.isNotEmpty()) {
                 FilterChip(
                     selected = selectedFilter == QueueFilter.LOCATIONS,
                     onClick = { selectedFilter = QueueFilter.LOCATIONS },
-                    label = { Text("Ubicaciones (${locationItems.size})") },
+                    label = { Text("Ubicaciones (${locationItems.size})", maxLines = 1) },
                 )
             }
         }
