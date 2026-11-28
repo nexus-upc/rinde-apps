@@ -1,0 +1,102 @@
+<section class="notifications-page">
+  <app-page-header
+    title="Notificaciones"
+    description="Avisos operativos de la empresa. El estado leído es individual para tu usuario."
+    [count]="unreadLabel()"
+  >
+    <div class="notifications-page__actions">
+      <button
+        uiButton
+        variant="primary"
+        type="button"
+        [disabled]="!store.hasUnread() || store.markingAll()"
+        [loading]="store.markingAll()"
+        aria-label="Marcar todas como leídas"
+        (click)="store.markAllAsRead()"
+      >
+        <span>Marcar todas<span class="label-tail"> como leídas</span></span>
+      </button>
+    </div>
+  </app-page-header>
+
+  <section class="filters" aria-label="Filtros de notificaciones">
+    <div class="chips" role="group" aria-label="Tipo de aviso">
+      @for (option of typeOptions; track option.label) {
+        <button
+          type="button"
+          class="chip"
+          [attr.aria-pressed]="store.typeFilter() === option.value"
+          (click)="store.setTypeFilter(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      }
+    </div>
+    <label class="toggle">
+      <input type="checkbox" [checked]="store.unreadOnly()" (change)="onUnreadToggle($event)" />
+      <span>Solo no leídas</span>
+    </label>
+  </section>
+
+  @if (store.state() === 'error') {
+    <app-state-panel
+      [error]="true"
+      title="No pudimos cargar tus avisos"
+      [message]="store.error()"
+      actionLabel="Reintentar"
+      (action)="store.retry()"
+    />
+  } @else if (store.state() === 'idle' || store.state() === 'loading') {
+    <app-state-panel
+      title="Cargando notificaciones"
+      message="Obteniendo los avisos recientes de la empresa."
+    />
+  } @else if (store.items().length === 0) {
+    <app-state-panel [title]="emptyTitle()" [message]="emptyMessage()" />
+  } @else {
+    <ul class="notif-list" aria-label="Notificaciones de la empresa">
+      @for (item of store.items(); track item.id) {
+        <li class="notif-row" [class.is-read]="item.readAt !== null">
+          <div class="notif-row__body">
+            <div class="notif-row__meta">
+              <strong class="notif-row__title">{{ item.title }}</strong>
+              <app-status-badge tone="neutral" [label]="typeLabels[item.type]" />
+              @if (item.readAt === null) {
+                <app-status-badge tone="wait" label="Sin leer" />
+              } @else {
+                <app-status-badge tone="neutral" label="Leída" />
+              }
+              <time class="notif-row__date" [attr.datetime]="item.createdAt">{{
+                formatDate(item.createdAt)
+              }}</time>
+            </div>
+            <p>{{ item.message }}</p>
+            <button type="button" class="text-link notif-row__open" (click)="open(item)">
+              {{ actionLabels[item.type] }}
+            </button>
+          </div>
+          @if (item.readAt === null) {
+            <button
+              uiButton
+              variant="secondary"
+              type="button"
+              [disabled]="store.isMarking(item.id)"
+              (click)="store.markAsRead(item)"
+            >
+              Marcar leída
+            </button>
+          }
+        </li>
+      }
+    </ul>
+
+    <app-pagination
+      ariaLabel="Paginación de notificaciones"
+      [page]="store.page()"
+      [size]="store.pageSize"
+      [totalItems]="store.totalItems()"
+      [disabled]="store.state() === 'loading'"
+      (pageChange)="store.goToPage($event)"
+    />
+  }
+</section>

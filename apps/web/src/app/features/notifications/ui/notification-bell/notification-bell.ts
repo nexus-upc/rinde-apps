@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
-/** Acceso al centro de notificaciones desde el marco lateral de la empresa. */
+/** Acceso al centro de notificaciones desde el marco lateral; el contador llega desde el marco. */
 @Component({
   selector: 'app-notification-bell',
   imports: [RouterLink, RouterLinkActive],
@@ -10,12 +10,15 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
     routerLink="/notifications"
     routerLinkActive="is-active"
     ariaCurrentWhenActive="page"
-    aria-label="Centro de notificaciones"
+    [attr.aria-label]="accessibleName()"
   >
     <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
       <path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 20a2 2 0 0 0 4 0" />
     </svg>
     <span class="notification-bell__label">Avisos</span>
+    @if (badge(); as text) {
+      <span class="notification-bell__count" aria-hidden="true">{{ text }}</span>
+    }
   </a>`,
   styles: `
     :host {
@@ -68,6 +71,21 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
       text-align: left;
     }
 
+    .notification-bell__count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: var(--arc-radius-pill);
+      background: var(--arc-fill);
+      color: var(--arc-on-fill);
+      font-size: 11px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
     @media (pointer: coarse) {
       .notification-bell {
         min-height: 44px;
@@ -76,4 +94,19 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NotificationBell {}
+export class NotificationBell {
+  /** Avisos sin leer del usuario; el marco los obtiene del estado del centro. */
+  readonly unreadCount = input(0);
+
+  /** Oculto si no hay avisos sin leer; "99+" a partir de 100. */
+  protected readonly badge = computed(() => {
+    const count = this.unreadCount();
+    if (count <= 0) return '';
+    return count > 99 ? '99+' : String(count);
+  });
+
+  protected readonly accessibleName = computed(() => {
+    const count = this.unreadCount();
+    return count > 0 ? `Centro de notificaciones, ${count} sin leer` : 'Centro de notificaciones';
+  });
+}

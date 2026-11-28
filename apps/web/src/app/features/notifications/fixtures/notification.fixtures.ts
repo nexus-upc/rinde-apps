@@ -20,11 +20,28 @@ export const NOTIFICATION_PAGE_FIXTURE: NotificationPage = {
       createdAt: '2026-11-24T18:10:00Z',
       readAt: '2026-11-24T19:00:00Z',
     },
+    {
+      id: 'c3d4e5f6-3333-4444-8555-666677778888',
+      type: 'INCIDENT_REPORTED',
+      title: 'Incidencia reportada en ruta',
+      message: 'Se reportó demora en peaje Ancón en la unidad ABC-123.',
+      link: '/incidents/9d1e2f3a-4b5c-4d6e-8f70-112233445566',
+      createdAt: '2026-11-25T13:20:00Z',
+      readAt: null,
+    },
   ],
   page: 0,
   size: 20,
-  totalItems: 2,
+  totalItems: 3,
   totalPages: 1,
+};
+
+export const NOTIFICATION_EMPTY_PAGE_FIXTURE: NotificationPage = {
+  items: [],
+  page: 0,
+  size: 20,
+  totalItems: 0,
+  totalPages: 0,
 };
 
 export const UNREAD_NOTIFICATION_COUNT_FIXTURE: UnreadNotificationCount = {
