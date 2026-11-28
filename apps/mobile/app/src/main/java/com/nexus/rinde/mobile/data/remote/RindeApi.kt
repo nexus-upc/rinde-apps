@@ -199,6 +199,12 @@ class RindeApi(
         request("DELETE", "/api/v1/notifications/devices/${encodePathSegment(token)}")
     }
 
+    override suspend fun currentUser(): CurrentUserProfile =
+        CurrentUserProfile.from(JSONObject(request("GET", "/api/v1/users/me")))
+
+    override suspend fun currentDriver(): DriverProfile =
+        DriverProfile.from(JSONObject(request("GET", "/api/v1/drivers/me")))
+
     private fun encodePathSegment(segment: String): String =
         URLEncoder.encode(segment, StandardCharsets.UTF_8.name()).replace("+", "%20")
 

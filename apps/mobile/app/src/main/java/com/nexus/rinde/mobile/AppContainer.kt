@@ -15,6 +15,7 @@ import com.nexus.rinde.mobile.data.local.SessionStore
 import com.nexus.rinde.mobile.data.remote.RindeApi
 import com.nexus.rinde.mobile.data.repository.ExpenseRepository
 import com.nexus.rinde.mobile.data.repository.IncidentRepository
+import com.nexus.rinde.mobile.data.repository.ProfileRepository
 import com.nexus.rinde.mobile.data.repository.PushDeviceRepository
 import com.nexus.rinde.mobile.data.repository.PushTokenProvider
 import com.nexus.rinde.mobile.data.repository.SessionRepository
@@ -93,6 +94,10 @@ class AppContainer(context: Context) {
         queueStore = queueStore,
         syncScheduler = syncScheduler,
         deletePhotoFile = photoStore::deletePhoto,
+    )
+
+    val profileRepository = ProfileRepository(
+        remoteFactory = { session -> RindeApi(session.serverUrl, session.token) },
     )
 }
 

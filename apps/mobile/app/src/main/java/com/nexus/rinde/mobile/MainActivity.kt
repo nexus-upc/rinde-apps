@@ -29,6 +29,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
@@ -59,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.nexus.rinde.mobile.data.local.QueueItemType
+import com.nexus.rinde.mobile.push.TripNotificationHelper
 import com.nexus.rinde.mobile.ui.auth.AuthViewModel
 import com.nexus.rinde.mobile.ui.auth.SignInScreen
 import com.nexus.rinde.mobile.ui.common.NoticeText
@@ -66,6 +68,9 @@ import com.nexus.rinde.mobile.ui.expense.ExpenseFormScreen
 import com.nexus.rinde.mobile.ui.expense.ExpenseFormViewModel
 import com.nexus.rinde.mobile.ui.incident.IncidentFormScreen
 import com.nexus.rinde.mobile.ui.incident.IncidentFormViewModel
+import com.nexus.rinde.mobile.ui.profile.ProfileQueueSummary
+import com.nexus.rinde.mobile.ui.profile.ProfileScreen
+import com.nexus.rinde.mobile.ui.profile.ProfileViewModel
 import com.nexus.rinde.mobile.ui.queue.QueueScreen
 import com.nexus.rinde.mobile.ui.queue.QueueViewModel
 import com.nexus.rinde.mobile.ui.theme.RindeTheme
@@ -80,6 +85,7 @@ private enum class MobileTab {
     EXPENSE,
     INCIDENT,
     QUEUE,
+    PROFILE,
 }
 
 private sealed interface PhotoCaptureTarget {
@@ -137,12 +143,19 @@ private fun RindeAppRoot() {
             onSyncedCompleted = tripsModel::refreshOpenTripExpenses,
         ),
     )
+    val profileModel: ProfileViewModel = viewModel(
+        factory = ProfileViewModel.Factory(
+            profileRepository = container.profileRepository,
+            onSessionExpired = authModel::onSessionExpired,
+        ),
+    )
 
     val authState by authModel.state.collectAsStateWithLifecycle()
     val tripsState by tripsModel.state.collectAsStateWithLifecycle()
     val formState by formModel.state.collectAsStateWithLifecycle()
     val incidentFormState by incidentFormModel.state.collectAsStateWithLifecycle()
     val queueState by queueModel.state.collectAsStateWithLifecycle()
+    val profileState by profileModel.state.collectAsStateWithLifecycle()
     val isOnline by container.networkMonitor.isOnline.collectAsStateWithLifecycle()
 
     val scope = rememberCoroutineScope()
@@ -236,6 +249,7 @@ private fun RindeAppRoot() {
         val session = authState.session
         tripsModel.bindSession(session)
         queueModel.bindSession(session)
+        profileModel.bindSession(session)
         if (session != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                 ContextCompat.checkSelfPermission(
@@ -261,6 +275,9 @@ private fun RindeAppRoot() {
         if (isOnline && authState.session != null) {
             queueModel.triggerSync(manual = false)
             tripsModel.loadTrips()
+            if (profileState.profile == null && !profileState.loading) {
+                profileModel.loadProfile()
+            }
         }
     }
 
@@ -270,12 +287,14 @@ private fun RindeAppRoot() {
         formState.error,
         incidentFormState.error,
         queueState.error,
+        profileState.error,
     ) {
         if (authState.error.isNotBlank() ||
             tripsState.error.isNotBlank() ||
             formState.error.isNotBlank() ||
             incidentFormState.error.isNotBlank() ||
-            queueState.error.isNotBlank()
+            queueState.error.isNotBlank() ||
+            profileState.error.isNotBlank()
         ) {
             scroll.animateScrollTo(0)
         }
@@ -304,6 +323,7 @@ private fun RindeAppRoot() {
                             activeTab == MobileTab.INCIDENT ->
                                 if (incidentFormState.isEditing) "Corregir incidencia" else "Reportar incidencia"
                             activeTab == MobileTab.QUEUE -> "Cola sin conexión"
+                            activeTab == MobileTab.PROFILE -> "Perfil"
                             else -> tripsState.selectedTrip?.code ?: "Mis viajes"
                         },
                     )
@@ -327,26 +347,16 @@ private fun RindeAppRoot() {
                     if (authState.signedIn) {
                         IconButton(
                             onClick = {
-                                tripsModel.loadTrips()
+                                if (activeTab == MobileTab.PROFILE) {
+                                    profileModel.loadProfile()
+                                } else {
+                                    tripsModel.loadTrips()
+                                }
                                 if (isOnline) queueModel.triggerSync(manual = false)
                             },
-                            enabled = !tripsState.busy,
+                            enabled = !tripsState.busy && !profileState.loading,
                         ) {
                             Icon(Icons.Default.Refresh, "Actualizar datos")
-                        }
-                        TextButton(
-                            onClick = {
-                                scope.launch {
-                                    val pending = authModel.pendingCountBeforeSignOut()
-                                    if (pending > 0) {
-                                        confirmSignOutPending = pending
-                                    } else {
-                                        authModel.confirmSignOut()
-                                    }
-                                }
-                            },
-                        ) {
-                            Text("Salir")
                         }
                     }
                 },
@@ -390,6 +400,12 @@ private fun RindeAppRoot() {
                         icon = { Icon(Icons.AutoMirrored.Filled.List, queueTabLabel) },
                         label = { Text(queueTabLabel) },
                     )
+                    NavigationBarItem(
+                        selected = activeTab == MobileTab.PROFILE,
+                        onClick = { activeTab = MobileTab.PROFILE },
+                        icon = { Icon(Icons.Default.Person, "Perfil") },
+                        label = { Text("Perfil") },
+                    )
                 }
             }
         },
@@ -403,7 +419,12 @@ private fun RindeAppRoot() {
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            if (authState.restoring || authState.busy || tripsState.busy || queueState.busy) {
+            if (authState.restoring ||
+                authState.busy ||
+                tripsState.busy ||
+                queueState.busy ||
+                profileState.loading
+            ) {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
             }
             if (!isOnline && authState.signedIn && activeTab == MobileTab.TRIPS) {
@@ -566,6 +587,34 @@ private fun RindeAppRoot() {
                                 }
                             },
                             onDiscard = queueModel::discard,
+                        )
+                    }
+
+                    MobileTab.PROFILE -> {
+                        val isSyncing = queueState.busy || queueState.activeSyncKeys.isNotEmpty()
+                        ProfileScreen(
+                            profileState = profileState,
+                            queueSummary = ProfileQueueSummary.from(queueState.items, isSyncing),
+                            isOnline = isOnline,
+                            isSyncing = isSyncing,
+                            queueMessage = queueState.message,
+                            queueError = queueState.error,
+                            authBusy = authState.busy,
+                            onRetry = profileModel::loadProfile,
+                            onSendNow = { queueModel.triggerSync(manual = true) },
+                            onOpenNotificationSettings = {
+                                TripNotificationHelper.openChannelSettings(context)
+                            },
+                            onRequestSignOut = {
+                                scope.launch {
+                                    val pending = authModel.pendingCountBeforeSignOut()
+                                    if (pending > 0) {
+                                        confirmSignOutPending = pending
+                                    } else {
+                                        authModel.confirmSignOut()
+                                    }
+                                }
+                            },
                         )
                     }
                 }
