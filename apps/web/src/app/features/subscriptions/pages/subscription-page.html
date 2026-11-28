@@ -7,16 +7,7 @@
     title="Suscripción"
     titleId="subscription-title"
     description="El plan y la vigencia de tu empresa."
-  >
-    <button
-      class="text-link subscription__link"
-      type="button"
-      (click)="store.load()"
-      [disabled]="store.state() === 'loading' || store.busy()"
-    >
-      Actualizar
-    </button>
-  </app-page-header>
+  />
   @switch (store.state()) {
     @case ('loading') {
       <div class="subscription__loading" role="status">
@@ -48,65 +39,113 @@
       </app-state-panel>
     }
     @case ('ready') {
-      @if (store.subscription(); as current) {
-        <app-subscription-summary [subscription]="current" />
-      } @else {
-        <div class="subscription__intro">
-          <h2>Elige un plan para empezar</h2>
-          <p>
-            Selecciona la capacidad que necesita tu flota. Podrás revisar el importe antes de
-            confirmar.
-          </p>
+      <div class="subscription__layout">
+        <div class="subscription__list">
+          @if (store.review(); as review) {
+            <app-checkout-review
+              [payment]="review.payment"
+              [plan]="review.plan"
+              [busy]="store.busy()"
+              [error]="store.actionError()"
+              (decision)="store.simulate($event)"
+              (back)="store.closeCheckout()"
+            />
+          } @else {
+            @if (store.plans().length > 0) {
+              <app-plan-selector
+                [plans]="store.plans()"
+                [selectedId]="store.selected()?.planId ?? null"
+                [currentId]="activePlanId()"
+                [busy]="store.busy()"
+                [pending]="store.pending()"
+                (planSelected)="store.select($event)"
+              />
+            } @else if (!store.subscription()) {
+              <app-state-panel
+                title="No hay planes disponibles"
+                message="Vuelve a consultar más tarde para elegir tu suscripción."
+              />
+            }
+            @if (store.selected()) {
+              <p class="subscription__notice">
+                <svg
+                  class="subscription__icon"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v4" />
+                  <path d="M12 16h.01" />
+                </svg>
+                <span>
+                  {{
+                    store.pending()
+                      ? 'La selección está guardada. Continúa con el pago pendiente.'
+                      : 'Puedes revisar el pago antes de confirmarlo.'
+                  }}
+                </span>
+              </p>
+            }
+          }
         </div>
-      }
-      @if (store.review(); as review) {
-        <app-checkout-review
-          [payment]="review.payment"
-          [plan]="review.plan"
-          [busy]="store.busy()"
-          [error]="store.actionError()"
-          (decision)="store.simulate($event)"
-          (back)="store.closeCheckout()"
-        />
-      } @else {
-        @if (store.plans().length > 0) {
-          <app-plan-selector
-            [plans]="store.plans()"
-            [selectedId]="store.selected()?.planId ?? null"
-            [busy]="store.busy()"
-            [pending]="store.pending()"
-            (planSelected)="store.select($event)"
-          />
-        } @else if (!store.subscription()) {
-          <app-state-panel
-            title="No hay planes disponibles"
-            message="Vuelve a consultar más tarde para elegir tu suscripción."
-          />
-        }
-        @if (store.selected()) {
-          <div class="subscription__footer">
-            <p>
-              {{
-                store.pending()
-                  ? 'La selección está guardada. Continúa con el pago pendiente.'
-                  : 'Puedes revisar el pago antes de confirmarlo.'
-              }}
-            </p>
-            @if (store.actionError()) {
+
+        <aside class="subscription__panel" aria-label="Resumen de la suscripción">
+          @if (store.subscription(); as current) {
+            <app-subscription-summary [subscription]="current" />
+          } @else {
+            <div class="subscription__intro">
+              <h2>Elige un plan para empezar</h2>
+              <p>
+                Selecciona la capacidad que necesita tu flota. Podrás revisar el importe antes de
+                confirmar.
+              </p>
+            </div>
+          }
+
+          <div class="subscription__controls">
+            @if (store.actionError() && !store.review()) {
               <p class="subscription__error" role="alert">{{ store.actionError() }}</p>
             }
-            <button
-              uiButton
-              type="button"
-              (click)="store.preparePayment()"
-              [disabled]="store.busy()"
-              [loading]="store.busy()"
-            >
-              {{ store.actionLabel() }}
-            </button>
+            @if (store.selected() && !store.review()) {
+              <p class="subscription__fine">
+                No se harán cobros reales ni se pedirán datos de tarjeta.
+              </p>
+            }
+            <div class="subscription__actions">
+              <button
+                uiButton
+                variant="secondary"
+                type="button"
+                (click)="store.load()"
+                [disabled]="store.state() === 'loading' || store.busy()"
+              >
+                <svg class="subscription__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                  <path d="M21 12a9 9 0 1 1-3-6.7L21 8" />
+                  <path d="M21 3v5h-5" />
+                </svg>
+                Actualizar
+              </button>
+              @if (store.selected() && !store.review()) {
+                <button
+                  uiButton
+                  type="button"
+                  (click)="store.preparePayment()"
+                  [disabled]="store.busy()"
+                  [loading]="store.busy()"
+                >
+                  <svg class="subscription__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+                    <rect width="20" height="14" x="2" y="5" rx="2" />
+                    <path d="M2 10h20" />
+                  </svg>
+                  {{ store.actionLabel() }}
+                </button>
+              }
+            </div>
           </div>
-        }
-      }
+        </aside>
+      </div>
     }
   }
 </section>

@@ -36,11 +36,11 @@
   }
 
   &--registered &__value {
-    color: #b45309;
+    color: var(--arc-wait);
   }
 
   &--pending-support &__value {
-    color: #1d4ed8;
+    color: var(--arc-ink);
   }
 
   &--approved &__value {

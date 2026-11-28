@@ -9,11 +9,18 @@
         [checked]="selectedId() === plan.planId"
         (change)="planSelected.emit(plan.planId)"
       />
-      <span class="subscription__plan-info"
-        ><span class="subscription__plan-name">{{ plan.name }}</span
-        ><span>Hasta {{ plan.unitLimit }} vehículos</span></span
-      >
-      <span class="subscription__price">{{ money(plan.monthlyPrice) }}<span>por mes</span></span>
+      <span class="subscription__plan-info">
+        <span class="subscription__plan-name">{{ plan.name }}</span>
+        <span class="subscription__plan-detail"
+          >Hasta {{ plan.unitLimit }} vehículos{{
+            currentId() === plan.planId ? ' · tu plan actual' : ''
+          }}</span
+        >
+      </span>
+      <span class="subscription__price">
+        <span class="subscription__amount">{{ money(plan.monthlyPrice) }}</span>
+        <span>por mes</span>
+      </span>
     </label>
   }
 </fieldset>

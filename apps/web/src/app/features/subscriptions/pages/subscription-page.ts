@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
@@ -17,6 +17,11 @@ import { SubscriptionSummary } from '../ui/subscription-summary/subscription-sum
 })
 export class SubscriptionPage {
   protected readonly store = inject(SubscriptionStore);
+  /** Plan vigente (no pendiente de pago) para marcarlo en la lista. */
+  protected readonly activePlanId = computed(() => {
+    const current = this.store.subscription();
+    return current && current.status !== 'PENDING_PAYMENT' ? current.plan.planId : null;
+  });
   constructor() {
     this.store.load();
   }

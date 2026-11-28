@@ -17,8 +17,8 @@
   margin: 0;
   padding: 12px;
   border-radius: 8px;
-  background: color-mix(in srgb, var(--arc-danger, #d00) 10%, transparent);
-  color: var(--arc-danger, #d00);
+  background: color-mix(in srgb, var(--arc-danger) 10%, transparent);
+  color: var(--arc-danger);
   font-size: 14px;
 }
 

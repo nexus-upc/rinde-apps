@@ -4,9 +4,12 @@
   gap: 20px;
 }
 
+// Como en el lienzo: título y subtítulo centrados sobre la columna de 360.
 .access__header {
   display: grid;
   gap: 8px;
+  justify-items: center;
+  text-align: center;
 }
 
 .access__lead {
@@ -14,6 +17,23 @@
   color: var(--arc-muted);
   font-size: 14px;
   line-height: 20px;
+}
+
+// Enlace de la cabecera (Crear cuenta / Iniciar sesión): píldora de 40 px a la derecha.
+.access__action {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: var(--arc-radius-pill);
+  color: var(--arc-ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+
+  &:hover {
+    background: var(--arc-surface);
+  }
 }
 
 .access__form {
@@ -25,15 +45,51 @@
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
+  justify-content: center;
   gap: 4px 0.35em;
   margin-top: 12px;
   color: var(--arc-muted);
   font-size: 14px;
   line-height: 20px;
+  text-align: center;
 
   // Dos acciones en el pie quedan en los extremos, como en Arcadia.
   &:has(> :nth-child(2)) {
     justify-content: space-between;
+  }
+}
+
+// Controles del lienzo dentro del acceso: campos grises de 44 px con radio 12 y botones píldora de 44 px.
+.access {
+  .field__label {
+    color: var(--arc-muted);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 16px;
+  }
+
+  .field__input {
+    height: 44px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: var(--arc-radius-control);
+    background: var(--arc-surface);
+    font-size: 14px;
+  }
+
+  .field__input:focus {
+    box-shadow: none;
+    outline: 2px solid var(--arc-accent);
+    outline-offset: 1px;
+  }
+
+  .field__input--invalid {
+    box-shadow: inset 0 0 0 1px var(--arc-danger);
+  }
+
+  .ui-button {
+    min-height: 44px;
+    border-radius: var(--arc-radius-pill);
   }
 }
 
@@ -46,6 +102,8 @@
 .access__steps {
   display: grid;
   gap: 8px;
+  justify-items: center;
+  text-align: center;
   color: var(--arc-muted);
   font-size: 12px;
   line-height: 16px;

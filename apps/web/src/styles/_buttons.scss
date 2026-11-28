@@ -1,13 +1,13 @@
-// Botones: rectángulos de radio 8 del Figma y enlaces de texto. Un solo botón principal por pantalla.
+// Botones píldora de 44 px del lienzo y enlaces de texto. Un solo botón principal por pantalla.
 .ui-button {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 16px;
-  border: 1px solid transparent;
-  border-radius: var(--arc-radius-control);
+  min-height: 44px;
+  padding: 0 20px;
+  border: 0;
+  border-radius: var(--arc-radius-pill);
   font-size: 14px;
   font-weight: 500;
   line-height: 1;
@@ -64,7 +64,6 @@
 }
 
 .ui-button--primary {
-  border-color: var(--arc-fill);
   background: var(--arc-fill);
   color: var(--arc-on-fill);
 
@@ -73,7 +72,6 @@
   }
 
   &:disabled:not(.is-loading) {
-    border-color: var(--arc-disabled-bg);
     background: var(--arc-disabled-bg);
     color: var(--arc-disabled-ink);
   }
@@ -94,6 +92,36 @@
 
   &:active:not(:disabled) {
     background: var(--arc-surface);
+  }
+}
+
+// Segmentado en píldora (Gastos, Viajes): la opción activa es blanca y sobre el gris.
+// Las opciones van como botones con role="radio" o similar; el contenedor lleva la clase.
+.segmented {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 20px;
+  background: var(--arc-surface);
+
+  > button {
+    height: 32px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 16px;
+    background: transparent;
+    color: var(--arc-muted);
+    font-size: 13px;
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  > button[aria-checked='true'],
+  > button[aria-pressed='true'] {
+    background: var(--arc-bg);
+    color: var(--arc-ink);
+    font-weight: 500;
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--arc-shadow) 12%, transparent);
   }
 }
 

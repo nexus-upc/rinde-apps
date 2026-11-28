@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background: rgba(15, 23, 42, 0.52);
+  background: color-mix(in srgb, var(--arc-shadow) 52%, transparent);
   backdrop-filter: blur(4px);
 }
 
@@ -17,7 +17,7 @@
   max-width: 540px;
   border-radius: var(--arc-radius-card);
   background: var(--arc-card);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.2);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--arc-shadow) 20%, transparent);
   overflow: hidden;
 }
 

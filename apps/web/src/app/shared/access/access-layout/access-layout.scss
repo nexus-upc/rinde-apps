@@ -1,5 +1,5 @@
-// Una sola columna de 360 en el centro de la página, en ambos ejes. Al cambiar de paso,
-// GlideOnResize desliza el bloque hasta su nuevo centro en lugar de saltar.
+// Como en el lienzo: cabecera de 88 px con el logo a la izquierda y el enlace del acceso a la derecha;
+// columna de 360 centrada en ambos ejes; pie con el copyright. GlideOnResize desliza el bloque al cambiar de paso.
 .access {
   position: relative;
   box-sizing: border-box;
@@ -9,15 +9,27 @@
   justify-content: center;
   min-height: 100vh;
   min-height: 100dvh;
-  padding: 96px 16px;
+  padding: 112px 16px 104px;
   background: var(--arc-bg);
   color: var(--arc-ink);
 }
 
-.access__brand {
+.access__top {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  top: 0;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 88px;
+  padding: 24px 16px;
+}
+
+.access__brand {
+  flex: none;
 }
 
 .access__column {
@@ -42,13 +54,12 @@
 }
 
 @media (min-width: 768px) {
-  .access__brand {
-    top: 24px;
-    left: 24px;
+  .access__top {
+    padding: 24px 40px;
   }
 
   .access__copyright {
     bottom: 24px;
-    left: 24px;
+    left: 40px;
   }
 }

@@ -37,44 +37,63 @@ $sidebar-width: 232px;
   display: flex;
   flex-direction: column;
   width: $sidebar-width;
-  padding: 24px 14px 16px;
+  padding: 20px 12px 16px;
   background: var(--arc-bg);
 }
 
+// Cabecera: logo a la izquierda y campana a la derecha, en una fila de 40 px.
+.shell__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 40px;
+  margin-bottom: 8px;
+  padding: 0 4px 0 12px;
+}
+
 .shell__brand {
-  align-self: flex-start;
-  margin: 0 10px 20px;
+  display: flex;
+  min-width: 0;
 }
 
 .shell__company,
 .shell__user {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 10px;
+  padding: 8px;
   border-radius: var(--arc-radius-row);
 }
 
-.shell__company-disc,
-.shell__avatar {
+// Empresa: avatar cuadrado de 40 px con las iniciales de la razón social.
+.shell__company-avatar {
   flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-}
-
-.shell__company-disc {
-  background: linear-gradient(135deg, var(--arc-brand-start), var(--arc-brand-end));
-}
-
-.shell__avatar {
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--arc-surface);
+  color: var(--arc-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+// Usuario: disco de tinta de 36 px con las iniciales de la persona.
+.shell__avatar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   background: var(--arc-fill);
   color: var(--arc-on-fill);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
 }
 
 .shell__stack {
@@ -124,13 +143,16 @@ $sidebar-width: 232px;
   gap: 2px;
 }
 
+// Títulos pequeños de sección ("Hoy", "Empresa") en gris de 12 px.
 .shell__group-label {
   padding: 0 12px 4px;
-  color: var(--arc-faint);
+  color: var(--arc-subtle);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
+  line-height: 16px;
 }
 
+// Ítems de 36 px con radio 18; el activo va sobre la superficie gris y en peso 500.
 .shell__link,
 .shell__option {
   display: flex;
@@ -138,10 +160,10 @@ $sidebar-width: 232px;
   gap: 12px;
   min-height: 36px;
   padding: 0 12px;
-  border-radius: 10px;
+  border-radius: 18px;
   color: var(--arc-ink);
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   text-decoration: none;
   transition:
     background-color var(--arc-dur-fast) ease,
@@ -150,30 +172,23 @@ $sidebar-width: 232px;
   svg {
     flex: none;
     fill: none;
-    stroke: var(--arc-subtle);
-    stroke-width: 1.8;
+    stroke: currentColor;
+    stroke-width: 1.75;
     stroke-linecap: round;
     stroke-linejoin: round;
   }
 }
 
 .shell__link {
-  color: var(--arc-muted);
-
   &:hover {
     background: var(--arc-surface);
-    color: var(--arc-ink);
   }
 
   &--active,
   &--active:hover {
-    background: var(--arc-fill-soft);
-    color: var(--arc-fill);
-    font-weight: 600;
-
-    svg {
-      stroke: var(--arc-fill);
-    }
+    background: var(--arc-surface);
+    color: var(--arc-ink);
+    font-weight: 500;
   }
 
   &--soon,
@@ -335,8 +350,8 @@ $sidebar-width: 232px;
     padding-bottom: 12px;
   }
 
-  .shell__brand {
-    margin-bottom: 12px;
+  .shell__header {
+    margin-bottom: 4px;
   }
 
   .shell__company,
@@ -400,8 +415,8 @@ $sidebar-width: 232px;
     padding: 16px;
   }
 
-  .shell__brand {
-    margin: 0 12px 16px;
+  .shell__header {
+    margin-bottom: 16px;
   }
 
   .shell__nav {

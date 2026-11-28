@@ -6,7 +6,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
-  background-color: rgba(15, 23, 42, 0.45);
+  background-color: color-mix(in srgb, var(--arc-shadow) 45%, transparent);
   backdrop-filter: blur(4px);
 }
 
@@ -18,7 +18,7 @@
   max-height: 90vh;
   border-radius: var(--arc-radius-card);
   background: var(--arc-card);
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
+  box-shadow: 0 20px 40px color-mix(in srgb, var(--arc-shadow) 16%, transparent);
   overflow: hidden;
 }
 
@@ -133,18 +133,18 @@
   font-weight: 600;
 
   &.status-available {
-    background: var(--arc-success-bg, #f0fdf4);
-    color: var(--arc-success, #15803d);
+    background: var(--arc-success-bg);
+    color: var(--arc-success);
   }
 
   &.status-trip {
-    background: var(--arc-wait-bg, #eff6ff);
-    color: var(--arc-wait, #1d4ed8);
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
   }
 
   &.status-maintenance {
-    background: #fef9c3;
-    color: #854d0e;
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
   }
 }
 
@@ -157,18 +157,18 @@
   font-weight: 600;
 
   &.health-ok {
-    background: var(--arc-success-bg, #f0fdf4);
-    color: var(--arc-success, #15803d);
+    background: var(--arc-success-bg);
+    color: var(--arc-success);
   }
 
   &.health-warn {
-    background: #fef9c3;
-    color: #854d0e;
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
   }
 
   &.health-danger {
-    background: var(--arc-danger-bg, #fef2f2);
-    color: var(--arc-danger, #b91c1c);
+    background: var(--arc-danger-bg);
+    color: var(--arc-danger);
   }
 }
 

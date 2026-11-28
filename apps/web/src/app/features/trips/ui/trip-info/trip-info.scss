@@ -11,7 +11,7 @@
   flex-wrap: wrap;
   gap: 16px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--arc-border, #e2e8f0);
+  border-bottom: 1px solid var(--arc-border);
 }
 
 .trip-info__route {
@@ -26,7 +26,7 @@
   display: inline-block;
   margin-top: 4px;
   font-size: 13px;
-  color: var(--arc-muted, #64748b);
+  color: var(--arc-muted);
   font-family: var(--arc-font-mono, monospace);
 }
 
@@ -38,32 +38,32 @@
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
-  background: var(--arc-surface, #f1f5f9);
-  color: var(--arc-foreground, #0f172a);
+  background: var(--arc-surface);
+  color: var(--arc-ink);
 
   &.status-scheduled {
-    background: #e0f2fe;
-    color: #0369a1;
+    background: var(--arc-surface);
+    color: var(--arc-ink);
   }
 
   &.status-assigned {
-    background: #fef3c7;
-    color: #b45309;
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
   }
 
   &.status-in_route {
-    background: #dbeafe;
-    color: #1d4ed8;
+    background: var(--arc-surface);
+    color: var(--arc-ink);
   }
 
   &.status-finished {
-    background: #dcfce7;
-    color: #15803d;
+    background: var(--arc-success-bg);
+    color: var(--arc-success);
   }
 
   &.status-settled {
-    background: #f3e8ff;
-    color: #7e22ce;
+    background: var(--arc-surface);
+    color: var(--arc-ink);
   }
 }
 
@@ -75,9 +75,9 @@
 
 .info-card {
   padding: 16px;
-  border: 1px solid var(--arc-border, #e2e8f0);
+  border: 1px solid var(--arc-border);
   border-radius: 8px;
-  background: var(--arc-card-bg, #ffffff);
+  background: var(--arc-card);
 
   h3 {
     margin: 0 0 12px;
@@ -95,31 +95,31 @@
 
   dt {
     font-weight: 500;
-    color: var(--arc-muted, #64748b);
+    color: var(--arc-muted);
   }
 
   dd {
     margin: 0;
-    color: var(--arc-foreground, #0f172a);
+    color: var(--arc-ink);
   }
 
   .empty-notice {
     margin: 0;
     font-size: 13px;
-    color: var(--arc-muted, #64748b);
+    color: var(--arc-muted);
     font-style: italic;
   }
 
   .alert-label,
   .alert-value {
-    color: #b91c1c;
+    color: var(--arc-danger);
     font-weight: 600;
   }
 }
 
 .trip-info__history {
   padding: 16px;
-  border: 1px solid var(--arc-border, #e2e8f0);
+  border: 1px solid var(--arc-border);
   border-radius: 8px;
 
   h3 {
@@ -147,16 +147,16 @@
   .history-item__badge {
     padding: 2px 8px;
     border-radius: 4px;
-    background: var(--arc-surface, #f1f5f9);
+    background: var(--arc-surface);
     font-weight: 600;
     font-size: 11px;
   }
 
   .history-item__date {
-    color: var(--arc-muted, #64748b);
+    color: var(--arc-muted);
   }
 
   .history-item__reason {
-    color: var(--arc-foreground, #0f172a);
+    color: var(--arc-ink);
   }
 }

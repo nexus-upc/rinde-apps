@@ -26,6 +26,13 @@
     background: var(--arc-surface);
   }
 
+  // Al pasar el cursor la fila se oscurece un paso (gris del lienzo, #ecebea).
+  @media (hover: hover) {
+    tbody tr:hover {
+      background: color-mix(in srgb, var(--arc-surface) 92%, var(--arc-ink));
+    }
+  }
+
   tbody td {
     padding: 14px 16px;
     border: 0;

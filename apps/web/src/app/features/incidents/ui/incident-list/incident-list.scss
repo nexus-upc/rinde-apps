@@ -125,8 +125,8 @@
   white-space: nowrap;
 
   &--open {
-    background: #fef3c7;
-    color: #92400e;
+    background: var(--arc-wait-bg);
+    color: var(--arc-wait);
   }
 
   &--progress {

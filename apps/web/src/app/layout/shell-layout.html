@@ -1,14 +1,22 @@
 <div class="shell">
   <a class="shell__skip" href="#workspace-content">Saltar al contenido</a>
   <aside class="shell__sidebar">
-    <app-brand-mark class="shell__brand" />
+    <div class="shell__header">
+      <app-brand-mark class="shell__brand" />
+      @if (showNotifications()) {
+        <app-notification-bell [unreadCount]="unreadCount()" />
+      }
+    </div>
 
     <div class="shell__company">
-      <span class="shell__company-disc" aria-hidden="true"></span>
+      <span class="shell__company-avatar" aria-hidden="true">{{ companyInitials() }}</span>
       <span class="shell__stack">
         <span class="shell__strong">{{ profile()?.tenant?.tradeName ?? 'Tu empresa' }}</span>
         <span class="shell__soft">{{ roleLabel() }}</span>
       </span>
+      <svg class="shell__chevron" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+        <path [attr.d]="icons.chevronsUpDown" />
+      </svg>
     </div>
 
     <nav class="shell__nav" aria-label="Principal">
@@ -43,10 +51,6 @@
     </nav>
 
     <div class="shell__footer">
-      @if (showNotifications()) {
-        <app-notification-bell [unreadCount]="unreadCount()" />
-      }
-
       <div class="shell__account">
         @if (menuOpen()) {
           <button

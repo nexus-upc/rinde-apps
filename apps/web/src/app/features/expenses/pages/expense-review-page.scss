@@ -16,15 +16,15 @@
   align-items: center;
   gap: 16px;
   padding: 16px 20px;
-  border: 1px solid var(--arc-border, #e2e8f0);
+  border: 1px solid var(--arc-border);
   border-radius: 8px;
-  background: var(--arc-card-bg, #ffffff);
+  background: var(--arc-card);
 }
 
 .search-label {
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
+  color: var(--arc-ink);
   white-space: nowrap;
 }
 
@@ -39,15 +39,15 @@
 .search-input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid var(--arc-border, #cbd5e1);
+  border: 1px solid var(--arc-border);
   border-radius: 6px;
   font-size: 14px;
   font-family: var(--arc-font-mono, monospace);
   outline: none;
 
   &:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    border-color: var(--arc-ink);
+    box-shadow: 0 0 0 2px var(--arc-focus-ring);
   }
 }
 
@@ -59,9 +59,9 @@
 
 .metric-card {
   padding: 16px;
-  border: 1px solid var(--arc-border, #e2e8f0);
+  border: 1px solid var(--arc-border);
   border-radius: 8px;
-  background: var(--arc-card-bg, #ffffff);
+  background: var(--arc-card);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -70,30 +70,30 @@
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
-    color: var(--arc-muted, #64748b);
+    color: var(--arc-muted);
     letter-spacing: 0.04em;
   }
 
   .metric-value {
     font-size: 24px;
     font-weight: 700;
-    color: var(--arc-foreground, #0f172a);
+    color: var(--arc-ink);
   }
 
   &--pending .metric-value {
-    color: #d97706;
+    color: var(--arc-wait);
   }
 
   &--approved .metric-value {
-    color: #16a34a;
+    color: var(--arc-success);
   }
 
   &--observed .metric-value {
-    color: #dc2626;
+    color: var(--arc-danger);
   }
 
   &--total .metric-value {
-    color: #0284c7;
+    color: var(--arc-ink);
   }
 }
 
@@ -105,9 +105,9 @@
 .idle-placeholder {
   padding: 60px 20px;
   text-align: center;
-  border: 2px dashed var(--arc-border, #cbd5e1);
+  border: 2px dashed var(--arc-border);
   border-radius: 8px;
-  color: var(--arc-muted, #64748b);
+  color: var(--arc-muted);
   font-size: 15px;
 
   p {

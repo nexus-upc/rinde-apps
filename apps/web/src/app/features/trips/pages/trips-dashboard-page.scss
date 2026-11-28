@@ -33,7 +33,7 @@
 .filter-chip {
   padding: 6px 14px;
   border-radius: 20px;
-  border: 1px solid var(--arc-border, #e0e0e0);
+  border: 1px solid var(--arc-border);
   background: transparent;
   font: inherit;
   font-size: 13px;
@@ -46,8 +46,8 @@
   }
 
   &.filter-chip--active {
-    background: var(--arc-accent, #1a1a2e);
-    border-color: var(--arc-accent, #1a1a2e);
-    color: #fff;
+    background: var(--arc-accent);
+    border-color: var(--arc-accent);
+    color: var(--arc-on-fill);
   }
 }

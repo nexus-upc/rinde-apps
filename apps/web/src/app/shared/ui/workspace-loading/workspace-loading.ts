@@ -10,19 +10,19 @@ const MESSAGES = {
 export type WorkspaceLoadingStep = keyof typeof MESSAGES;
 const ORDER: readonly WorkspaceLoadingStep[] = ['screens', 'fonts', 'opening'];
 
-/** Carga de entrada sobre el degradado de marca: logo, avance y el paso que está ocurriendo. */
+/** Carga de entrada sobre fondo blanco, como el lienzo: logo, anillo y el paso que está ocurriendo. */
 @Component({
   selector: 'app-workspace-loading',
   imports: [BrandMark],
   template: `
     <div class="workspace-loading" [class.is-leaving]="leaving()" role="status" aria-live="polite">
-      <app-brand-mark tone="mono" [size]="48" />
-      <span class="workspace-loading__bar" aria-hidden="true">
-        <span [style.width.%]="progress()"></span>
-      </span>
+      <app-brand-mark [size]="40" />
       <span class="workspace-loading__line">
         <span class="workspace-loading__ring" aria-hidden="true"></span>
         <span>{{ message() }}</span>
+      </span>
+      <span class="workspace-loading__bar" aria-hidden="true">
+        <span [style.width.%]="progress()"></span>
       </span>
     </div>
   `,

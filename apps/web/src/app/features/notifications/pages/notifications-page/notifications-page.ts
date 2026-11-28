@@ -3,7 +3,6 @@ import { Router } from '@angular/router';
 import { Pagination } from '@shared/ui/pagination/pagination';
 import { PageHeader } from '@shared/ui/page-header/page-header';
 import { StatePanel } from '@shared/ui/state-panel/state-panel';
-import { StatusBadge } from '@shared/ui/status-badge/status-badge';
 import { UiButton } from '@shared/ui/ui-button/ui-button';
 import {
   NOTIFICATION_ACTION_LABELS,
@@ -28,7 +27,7 @@ function isInternalLink(link: string): boolean {
 /** Centro de notificaciones de la empresa: lista, filtros, paginación y marcado de avisos (C6). */
 @Component({
   selector: 'app-notifications-page',
-  imports: [PageHeader, StatePanel, StatusBadge, UiButton, Pagination],
+  imports: [PageHeader, StatePanel, UiButton, Pagination],
   templateUrl: './notifications-page.html',
   styleUrl: './notifications-page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

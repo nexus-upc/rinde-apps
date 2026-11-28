@@ -49,6 +49,11 @@ p {
   margin: 0;
 }
 
+// Enlaces en tinta, como el lienzo; los componentes con clase conservan su propio color.
+a {
+  color: var(--arc-ink);
+}
+
 // Los títulos pesan 600; todo lo demás, como mucho 500.
 h1 {
   font-weight: 600;

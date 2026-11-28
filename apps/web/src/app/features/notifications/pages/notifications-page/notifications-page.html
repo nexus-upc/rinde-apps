@@ -57,35 +57,73 @@
     <ul class="notif-list" aria-label="Notificaciones de la empresa">
       @for (item of store.items(); track item.id) {
         <li class="notif-row" [class.is-read]="item.readAt !== null">
-          <div class="notif-row__body">
-            <div class="notif-row__meta">
-              <strong class="notif-row__title">{{ item.title }}</strong>
-              <app-status-badge tone="neutral" [label]="typeLabels[item.type]" />
-              @if (item.readAt === null) {
-                <app-status-badge tone="wait" label="Sin leer" />
-              } @else {
-                <app-status-badge tone="neutral" label="Leída" />
+          <span class="notif-row__icon" aria-hidden="true">
+            @switch (item.type) {
+              @case ('INCIDENT_REPORTED') {
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path
+                    d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"
+                  />
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                </svg>
               }
+              @case ('EXPENSE_PENDING_REVIEW') {
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path
+                    d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"
+                  />
+                  <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8" />
+                  <path d="M12 17.5v-11" />
+                </svg>
+              }
+              @case ('MAINTENANCE_DUE') {
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <path
+                    d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"
+                  />
+                </svg>
+              }
+              @default {
+                <svg viewBox="0 0 24 24" width="16" height="16">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="m9 12 2 2 4-4" />
+                </svg>
+              }
+            }
+          </span>
+
+          <div class="notif-row__body">
+            <strong class="notif-row__title">{{ item.title }}</strong>
+            <p class="notif-row__message">{{ item.message }}</p>
+            <div class="notif-row__meta">
+              <span>{{ typeLabels[item.type] }}</span>
               <time class="notif-row__date" [attr.datetime]="item.createdAt">{{
                 formatDate(item.createdAt)
               }}</time>
+              <button type="button" class="text-link notif-row__open" (click)="open(item)">
+                {{ actionLabels[item.type] }}
+              </button>
             </div>
-            <p>{{ item.message }}</p>
-            <button type="button" class="text-link notif-row__open" (click)="open(item)">
-              {{ actionLabels[item.type] }}
-            </button>
           </div>
-          @if (item.readAt === null) {
-            <button
-              uiButton
-              variant="secondary"
-              type="button"
-              [disabled]="store.isMarking(item.id)"
-              (click)="store.markAsRead(item)"
-            >
-              Marcar leída
-            </button>
-          }
+
+          <div class="notif-row__actions">
+            @if (item.readAt === null) {
+              <span class="notif-row__dot" aria-hidden="true"></span>
+              <span class="visually-hidden">Sin leer</span>
+              <button
+                uiButton
+                variant="secondary"
+                type="button"
+                [disabled]="store.isMarking(item.id)"
+                (click)="store.markAsRead(item)"
+              >
+                Marcar leída
+              </button>
+            } @else {
+              <span class="notif-row__state">Leída</span>
+            }
+          </div>
         </li>
       }
     </ul>

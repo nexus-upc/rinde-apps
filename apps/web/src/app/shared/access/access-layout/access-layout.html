@@ -1,5 +1,8 @@
 <main class="access">
-  <app-brand-mark class="access__brand" />
+  <header class="access__top">
+    <app-brand-mark class="access__brand" [size]="26" />
+    <ng-content select=".access__action" />
+  </header>
 
   <section class="access__column" appGlideOnResize>
     <div class="access__panel">

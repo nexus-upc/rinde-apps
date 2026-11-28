@@ -1,4 +1,5 @@
 <app-access-layout>
+  <a class="access__action" routerLink="/register">Crear cuenta</a>
   <div class="access-steps">
     @switch (step()) {
       @case ('start') {
@@ -13,9 +14,6 @@
           <button uiButton block type="button" (click)="goToEmail()">
             <app-mail-icon /><span>Continuar con correo</span>
           </button>
-          <p class="access__footer">
-            ¿Aún no tienes cuenta? <a class="text-link" routerLink="/register">Crear cuenta</a>
-          </p>
         </div>
       }
       @case ('email') {
@@ -52,7 +50,6 @@
             <button class="text-link" type="button" (click)="backToStart()">
               Otra forma de entrar
             </button>
-            <a class="text-link" routerLink="/register">Crear cuenta</a>
           </p>
         </div>
       }

@@ -1,4 +1,5 @@
 <app-access-layout>
+  <a class="access__action" routerLink="/sign-in">Iniciar sesión</a>
   @if (step(); as current) {
     <div class="access-stage arc-entrance-stage">
       @if (current === 'sent') {
@@ -182,12 +183,6 @@
             </button>
           </div>
         </form>
-
-        @if (current === 1) {
-          <p class="access__footer">
-            ¿Ya tienes cuenta? <a class="text-link" routerLink="/sign-in">Iniciar sesión</a>
-          </p>
-        }
       }
     </div>
   }

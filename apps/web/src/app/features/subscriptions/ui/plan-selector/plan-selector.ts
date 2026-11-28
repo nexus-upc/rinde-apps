@@ -10,6 +10,8 @@ import { formatMoney } from '../subscription-formatters';
 export class PlanSelector {
   readonly plans = input<readonly Plan[]>([]);
   readonly selectedId = input<string | null>(null);
+  /** Plan vigente de la empresa, para marcarlo en la lista. */
+  readonly currentId = input<string | null>(null);
   readonly busy = input(false);
   readonly pending = input(false);
   readonly planSelected = output<string>();

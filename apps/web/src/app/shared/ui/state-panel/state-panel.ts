@@ -37,6 +37,7 @@ import { UiButton } from '../ui-button/ui-button';
       height: 48px;
       border-radius: 50%;
       background: var(--arc-surface);
+      color: var(--arc-muted);
     }
     .state-panel__disc:empty {
       display: none;

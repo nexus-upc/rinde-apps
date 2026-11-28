@@ -18,7 +18,7 @@ export type StatusBadgeTone = 'neutral' | 'success' | 'wait' | 'danger';
       align-items: center;
       min-height: 24px;
       padding: 2px 10px;
-      border-radius: var(--arc-radius-pill);
+      border-radius: var(--arc-radius-control);
       font-size: 12px;
       font-weight: 500;
       line-height: 16px;

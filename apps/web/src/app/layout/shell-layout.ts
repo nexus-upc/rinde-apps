@@ -81,6 +81,9 @@ export class ShellLayout {
   protected readonly initials = computed(() =>
     initialsOf(this.profile()?.fullName, this.user()?.email),
   );
+  protected readonly companyInitials = computed(() =>
+    initialsOf(this.profile()?.tenant?.tradeName ?? 'Tu empresa', undefined),
+  );
   protected readonly groups = computed<readonly NavGroup[]>(() => {
     const today: NavGroup = {
       label: 'Hoy',
