@@ -19,7 +19,10 @@ import com.nexus.rinde.mobile.data.repository.ProfileRepository
 import com.nexus.rinde.mobile.data.repository.PushDeviceRepository
 import com.nexus.rinde.mobile.data.repository.PushTokenProvider
 import com.nexus.rinde.mobile.data.repository.SessionRepository
+import com.nexus.rinde.mobile.data.repository.TripLocationRepository
 import com.nexus.rinde.mobile.data.repository.TripRepository
+import com.nexus.rinde.mobile.location.TripLocationController
+import com.nexus.rinde.mobile.location.TripLocationNotificationHelper
 import com.nexus.rinde.mobile.push.FirebasePushTokenProvider
 import com.nexus.rinde.mobile.push.TripNotificationHelper
 import com.nexus.rinde.mobile.sync.NetworkMonitor
@@ -62,12 +65,22 @@ class AppContainer(context: Context) {
         syncScheduler = syncScheduler,
     )
 
+    val tripLocationController = TripLocationController(appContext)
+
     val syncEngine = OfflineSyncEngine(
         sessionStore = sessionStore,
         queueStore = queueStore,
         remoteFactory = { session -> RindeApi(session.serverUrl, session.token) },
         deletePhoto = photoStore::deletePhoto,
         pushDeviceRepository = pushDeviceRepository,
+        onTripLocationFinishedRemotely = { tripId ->
+            tripLocationController.stopTracking(tripId)
+        },
+    )
+
+    val tripLocationRepository = TripLocationRepository(
+        queueStore = queueStore,
+        syncScheduler = syncScheduler,
     )
 
     val sessionRepository = SessionRepository(
@@ -107,5 +120,6 @@ class RindeApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         TripNotificationHelper.ensureChannel(this)
+        TripLocationNotificationHelper.ensureChannel(this)
     }
 }

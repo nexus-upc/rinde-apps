@@ -132,6 +132,11 @@ class TripDetailLoadAndFinancialsTest {
 
         override suspend fun currentDriver(): com.nexus.rinde.mobile.data.remote.DriverProfile =
             error("unused")
+
+        override suspend fun recordTripLocations(
+            tripId: String,
+            request: com.nexus.rinde.mobile.data.remote.RecordTripLocationsRequest,
+        ): com.nexus.rinde.mobile.data.remote.RecordTripLocationsResponse = error("unused")
     }
 
     private val session = SessionData(

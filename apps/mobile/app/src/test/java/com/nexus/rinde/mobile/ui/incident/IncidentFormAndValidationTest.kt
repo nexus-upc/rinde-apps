@@ -90,6 +90,15 @@ class IncidentFormAndValidationTest {
         }
 
         override suspend fun purgeOldSynced(userId: String, cutoffEpochMs: Long) = Unit
+
+        override suspend fun deleteByTripAndType(
+            userId: String,
+            tripId: String,
+            type: QueueItemType,
+        ) {
+            items.entries.removeIf { it.value.ownerUserId == userId && it.value.tripId == tripId && it.value.queueType == type }
+            stream.value = items.values.toList()
+        }
     }
 
     private class FakeSyncScheduler : SyncScheduler {

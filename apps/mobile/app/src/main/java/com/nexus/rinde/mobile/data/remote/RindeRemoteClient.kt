@@ -31,4 +31,8 @@ interface RindeRemoteClient {
     suspend fun removeDevice(token: String)
     suspend fun currentUser(): CurrentUserProfile
     suspend fun currentDriver(): DriverProfile
+    suspend fun recordTripLocations(
+        tripId: String,
+        request: RecordTripLocationsRequest,
+    ): RecordTripLocationsResponse
 }

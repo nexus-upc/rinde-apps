@@ -409,6 +409,41 @@ data class DriverProfile(
     }
 }
 
+data class TripLocationPointRequest(
+    val latitude: Double,
+    val longitude: Double,
+    val accuracyMeters: Double?,
+    val recordedAt: String,
+) {
+    fun toJson(): JSONObject = JSONObject()
+        .put("latitude", latitude)
+        .put("longitude", longitude)
+        .put("accuracyMeters", accuracyMeters?.takeIf { it.isFinite() } ?: JSONObject.NULL)
+        .put("recordedAt", recordedAt)
+}
+
+data class RecordTripLocationsRequest(
+    val points: List<TripLocationPointRequest>,
+) {
+    fun toJson(): JSONObject {
+        val array = JSONArray()
+        points.forEach { array.put(it.toJson()) }
+        return JSONObject().put("points", array)
+    }
+}
+
+data class RecordTripLocationsResponse(
+    val savedCount: Int,
+    val duplicateCount: Int,
+) {
+    companion object {
+        fun from(json: JSONObject) = RecordTripLocationsResponse(
+            savedCount = json.optInt("savedCount", 0),
+            duplicateCount = json.optInt("duplicateCount", 0),
+        )
+    }
+}
+
 internal fun JSONObject.text(key: String): String =
     if (!has(key) || isNull(key)) "" else optString(key)
 
